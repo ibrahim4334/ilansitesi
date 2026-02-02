@@ -1,0 +1,94 @@
+# Translation of Plugins - HivePress Messages - Stable (latest release) in Turkish
+# This file is distributed under the same license as the Plugins - HivePress Messages - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2020-05-08 12:25:36+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/4.0.1\n"
+"Language: tr\n"
+"Project-Id-Version: Plugins - HivePress Messages - Stable (latest release)\n"
+
+#: includes/controllers/class-message.php:199
+msgid "New message from %s"
+msgstr "%s kullanıcısından yeni mesaj"
+
+#: includes/controllers/class-message.php:197
+msgid "New reply to \"%s\""
+msgstr "\"%s\" kullanıcısına yeni cevap"
+
+#: includes/configs/settings.php:83
+msgid "Store messages in the database"
+msgstr "Mesajları veritabanında depola"
+
+#: includes/configs/settings.php:84
+msgid "Check this option to store messages in the database, rather than sending them via email."
+msgstr "E-posta ile göndermek yerine mesajları veri tabanında depolamak için bu seçeneği seçin."
+
+#: includes/emails/class-message-send.php:31
+msgid "This email is sent to users when a new message is received."
+msgstr "Bu e-posta kullanıcılara yeni bir mesaj alındığında gönderilir."
+
+#: includes/configs/settings.php:99
+msgid "Set the number of days after which a message is deleted."
+msgstr "Kaç gün sonra bir mesajın silineceğini seçin."
+
+#: includes/configs/strings.php:14
+msgid "Messages"
+msgstr "Mesajlar"
+
+#. Description of the plugin
+#: hivepress-messages.php
+msgid "Allow users to send private messages."
+msgstr "Kullanıcıların özel mesaj göndermelerine izin verin."
+
+#: includes/configs/strings.php:16
+msgid "Reply to Listing"
+msgstr "Listelemeye Cevap  Ver"
+
+#. translators: %s: sender name.
+#: includes/controllers/class-message.php:528
+msgid "Messages from %s"
+msgstr "%s kullanıcısından mesajlar"
+
+#: includes/controllers/class-message.php:135
+msgid "You can't send messages to yourself."
+msgstr "Kendinize mesaj gönderemezsiniz."
+
+#: includes/models/class-message.php:32
+msgid "Message"
+msgstr "Mesaj"
+
+#: includes/emails/class-message-send.php:30
+#: includes/emails/class-message-send.php:49
+msgid "Message Received"
+msgstr "Mesaj Alındı"
+
+#: includes/configs/strings.php:15
+msgid "Send Message"
+msgstr "Mesaj Gönder"
+
+#: includes/emails/class-message-send.php:50
+msgid "Hi, %user_name%! You've received a new message, click on the following link to view it: %message_url%"
+msgstr "Selam, %user_name%! Yeni bir mesajınız var, görüntülemek için lütfen şu linke tıklayın: %message_url%"
+
+#. Author URI of the plugin
+#: hivepress-messages.php
+msgid "https://hivepress.io/"
+msgstr "https://hivepress.io/"
+
+#. Author of the plugin
+#: hivepress-messages.php
+msgid "HivePress"
+msgstr "HivePress"
+
+#: includes/forms/class-message-send.php:48
+msgid "Your message has been sent."
+msgstr "Mesajınız gönderildi."
+
+#. Plugin Name of the plugin
+#: hivepress-messages.php
+msgid "HivePress Messages"
+msgstr "HivePress Messages"

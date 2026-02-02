@@ -1,0 +1,6 @@
+wp-config.php
+*.sql
+*.zip
+wp-content/uploads/
+wp-content/upgrade/
+wp-content/cache/

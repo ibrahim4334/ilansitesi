@@ -1,0 +1,1963 @@
+# Translation of Plugins - HivePress &#8211; Business Directory &amp; Classified Ads Plugin - Stable (latest release) in Turkish
+# This file is distributed under the same license as the Plugins - HivePress &#8211; Business Directory &amp; Classified Ads Plugin - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2022-11-01 22:05:48+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/4.0.1\n"
+"Language: tr\n"
+"Project-Id-Version: Plugins - HivePress &#8211; Business Directory &amp; Classified Ads Plugin - Stable (latest release)\n"
+
+#: includes/fields/class-phone.php:62
+msgid "Select the country calling code displayed by default."
+msgstr "Varsayılan olarak görüntülenecek ülke arama kodunu seçin."
+
+#: includes/fields/class-phone.php:61
+msgid "Default Country"
+msgstr "Varsayılan ülke"
+
+#: includes/configs/settings.php:309
+msgid "First Letter of First Name and Last Name"
+msgstr "Adın ilk harfi ve soyad"
+
+#: includes/configs/settings.php:307
+msgid "First Name and First Letter of Last Name"
+msgstr "Ad ve soyadın ilk harfi"
+
+#. translators: %s: terms URL.
+#: includes/components/class-admin.php:1817
+msgid "Share Usage Data"
+msgstr "Kullanım verilerini paylaş"
+
+#. translators: %s: terms URL.
+#: includes/components/class-admin.php:1817
+msgid "Help us make HivePress better by sharing <a href=\"%s\" target=\"_blank\">non-sensitive usage data</a> or dismiss this notice to opt out."
+msgstr "<a href=\"%s\" target=\"_blank\">Hassas olmayan kullanım verilerini</a> paylaşarak HivePress'i daha iyi hale getirmemize yardımcı olun veya devre dışı bırakmak için bu bildirimi kapatın."
+
+#: includes/fields/class-phone.php:53
+msgid "Select countries to restrict the available calling codes."
+msgstr "Kullanılabilir arama kodlarını kısıtlamak için ülkeleri seçin."
+
+#: includes/fields/class-phone.php:52
+msgid "Countries"
+msgstr "Ülkeler"
+
+#: includes/fields/class-phone.php:42
+msgid "Phone"
+msgstr "Telefon"
+
+#. translators: %s: terms URL.
+#: includes/configs/settings.php:429
+msgid "Check this option to allow tracking <a href=\"%s\" target=\"_blank\">non-sensitive usage data</a> and help us make HivePress better."
+msgstr "<a href=\"%s\" target=\"_blank\">Hassas olmayan kullanım verilerinin</a> izlenmesine izin vermek için bu seçeneği işaretleyin ve HivePress'i daha iyi hale getirmemize yardımcı olun."
+
+#: includes/configs/settings.php:427
+msgid "Allow usage tracking"
+msgstr "Kullanımın izlenmesine izin ver"
+
+#: includes/configs/settings.php:426
+msgid "Usage Tracking"
+msgstr "Kullanım izlemesi"
+
+#: includes/configs/strings.php:66
+msgid "Something went wrong."
+msgstr "Bir sorun oldu."
+
+#: includes/fields/class-attachment-upload.php:356
+#: includes/fields/class-attachment-upload.php:358
+msgid "Download"
+msgstr "İndir"
+
+#: includes/components/class-attribute.php:983
+msgid "Set the field name used for storing the attribute values."
+msgstr "Özel alan değerlerini depolamak için kullanılan alan adını ayarlayın."
+
+#: includes/forms/class-plugin-deactivate.php:62
+msgid "Submit & Deactivate"
+msgstr "Gönder & devre dışı bırak"
+
+#: includes/forms/class-plugin-deactivate.php:49
+msgid "Extra details, e.g. conflicting themes, plugins, missing features or docs."
+msgstr "Çakışan temalar, eklentiler, eksik özellikler veya dokümanlar gibi ekstra ayrıntılar."
+
+#: includes/forms/class-plugin-deactivate.php:43
+msgid "Other"
+msgstr "Diğer"
+
+#: includes/forms/class-plugin-deactivate.php:42
+msgid "The docs are not helpful"
+msgstr "Dokümanlar yararlı değil"
+
+#: includes/forms/class-plugin-deactivate.php:41
+msgid "It conflicts with other plugins"
+msgstr "Diğer eklentilerle çakışıyor"
+
+#: includes/forms/class-plugin-deactivate.php:40
+msgid "Poor integration with page builders"
+msgstr "Sayfa oluşturucularla zayıf entegrasyon"
+
+#: includes/forms/class-plugin-deactivate.php:39
+msgid "The layout is too basic or broken"
+msgstr "Düzen çok basit veya bozuk"
+
+#: includes/forms/class-plugin-deactivate.php:38
+msgid "It lacks the required features"
+msgstr "Gerekli özelliklerden yoksun"
+
+#: includes/forms/class-plugin-deactivate.php:28
+msgid "Please help us improve by sharing the deactivation reason. Select \"Other\" to proceed without sharing."
+msgstr "Lütfen devre dışı bırakma nedenini paylaşarak gelişmemize yardımcı olun. Paylaşmadan devam etmek için \"Diğer\" i seçin."
+
+#: includes/emails/class-user-register.php:48
+msgid "Hi, %user_name%! Thank you for registering, now you can access website areas that require an account."
+msgstr "Merhaba %user_name%! Kayıt olduğunuz için teşekkür ederiz, artık üye hesabı gerektiren web sitesi alanlarına erişebilirsiniz."
+
+#: includes/configs/strings.php:120
+msgid "Listing Category"
+msgstr "İlan kategorisi"
+
+#: includes/configs/settings.php:436
+msgid "Please enter the license keys for purchased themes and extensions, each key on a new line."
+msgstr "Lütfen satın alınan temalar ve uzantılar için lisans anahtarlarını, her satıra bir anahtar olacak şekilde girin."
+
+#: includes/configs/settings.php:435
+msgid "License Keys"
+msgstr "Lisans anahtarları"
+
+#: includes/configs/settings.php:421
+msgid "HivePress Store"
+msgstr "HivePress Mağaza"
+
+#. translators: %s: plugin name.
+#: includes/components/class-admin.php:1974
+msgid "Deactivate %s"
+msgstr "%s eklentisini etkisizleştir"
+
+#: includes/templates/class-page-narrow.php:68
+#: includes/templates/class-page-sidebar-left.php:79
+#: includes/templates/class-page-wide.php:59
+msgid "Page Description"
+msgstr "Sayfa açıklaması"
+
+#: includes/templates/class-user-view-page.php:59
+#: includes/templates/class-vendor-view-page.php:59
+msgid "Summary"
+msgstr "Özet"
+
+#: includes/templates/class-page-narrow.php:61
+#: includes/templates/class-page-sidebar-left.php:72
+#: includes/templates/class-page-wide.php:52
+msgid "Page Title"
+msgstr "Sayfa başlığı"
+
+#: includes/configs/strings.php:77
+msgctxt "plural"
+msgid "Related"
+msgstr "İlgili"
+
+#: includes/configs/strings.php:75
+msgctxt "plural"
+msgid "Secondary"
+msgstr "İkincil"
+
+#: includes/configs/strings.php:74
+msgctxt "plural"
+msgid "Primary"
+msgstr "Birincil"
+
+#: includes/configs/strings.php:73
+msgid "Widgets"
+msgstr "Bileşenler"
+
+#: includes/configs/strings.php:72
+msgid "Actions"
+msgstr "Eylemler"
+
+#: includes/configs/strings.php:52
+msgid "Pagination"
+msgstr "Sayfalandırma"
+
+#: includes/configs/strings.php:51
+msgid "Profile"
+msgstr "Profil"
+
+#: includes/configs/strings.php:50
+msgid "Completed"
+msgstr "Tamamlandı"
+
+#: includes/configs/strings.php:49
+msgid "Message"
+msgstr "Mesaj"
+
+#: includes/configs/strings.php:48
+msgid "Menu"
+msgstr "Menü"
+
+#: includes/configs/strings.php:47
+msgid "Toolbar"
+msgstr "Araç çubuğu"
+
+#: includes/configs/strings.php:46
+msgid "Result Count"
+msgstr "Sonuç sayısı"
+
+#: includes/configs/strings.php:45
+msgid "Sort Form"
+msgstr "Sıralama Formu"
+
+#: includes/configs/strings.php:44
+msgid "Filter Form"
+msgstr "Filtreleme Form"
+
+#: includes/configs/strings.php:43
+msgid "Form"
+msgstr "Form"
+
+#: includes/components/class-attribute.php:965
+msgid "Create a page for each attribute option"
+msgstr "Her özel alan seçeneği için bir sayfa oluştur"
+
+#: includes/components/class-attribute.php:964
+msgid "Pages"
+msgstr "Sayfalar"
+
+#: includes/components/class-attribute.php:983
+msgid "Use lowercase letters, numbers, and underscores only."
+msgstr "Yalnızca küçük harfler, sayılar ve alt çizgiler kullanın."
+
+#: includes/components/class-attribute.php:982
+msgid "Field Name"
+msgstr "Alan adı"
+
+#: includes/configs/meta-boxes.php:182
+msgid "Mark this user as verified"
+msgstr "Bu kullanıcıyı doğrulanmış olarak işaretle"
+
+#: includes/components/class-user.php:362
+msgctxt "user"
+msgid "Unverified"
+msgstr "Doğrulanmamış"
+
+#. translators: %s: Discount percentage.
+#: templates/admin/extensions.php:61
+msgid "Save %s"
+msgstr "%s kaydet"
+
+#: includes/configs/settings.php:359
+msgid "Restrict access to the WordPress back-end"
+msgstr "WordPress yönetim paneline erişimi kısıtlayın"
+
+#: includes/configs/settings.php:358
+msgid "Check this option to block the WordPress back-end access for regular users."
+msgstr "Normal kullanıcıların WordPress yönetim paneline erişimini engellemek için bu seçeneği işaretleyin."
+
+#: includes/configs/settings.php:357
+msgid "Security"
+msgstr "Güvenlik"
+
+#: includes/fields/class-repeater.php:175
+msgid "Add Item"
+msgstr "Öğe ekle"
+
+#: includes/fields/class-repeater.php:165
+msgid "Remove"
+msgstr "Kaldır"
+
+#: includes/configs/settings.php:35
+msgid "Display categories instead of listings"
+msgstr "İlanlar yerine kategorileri görüntüle"
+
+#: includes/configs/meta-boxes.php:142
+msgid "Display subcategories instead of listings"
+msgstr "İlanlar yerine alt kategorileri görüntüle"
+
+#: includes/fields/class-date.php:390 includes/fields/class-time.php:124
+msgid "Clear"
+msgstr "Temizle"
+
+#. translators: %s: link URL.
+#: includes/components/class-admin.php:1803
+msgid "Great start with HivePress! Check out our <a href=\"%1$s\">premium themes</a> and <a href=\"%2$s\">extensions</a> for more tailored design and functionality."
+msgstr "HivePress ile harika bir başlangıç yaptıız! Daha özel tasarım ve işlevsellik için <a href=\"%1$s\">premium temalarımıza</a> ve <a href=\"%2$s\">uzantılarımıza</a> göz atın."
+
+#: includes/fields/class-attachment-upload.php:84
+msgid "Protect files from direct access"
+msgstr "Dosyaları doğrudan erişime karşı koruyun"
+
+#: includes/fields/class-attachment-upload.php:83
+msgctxt "attachment"
+msgid "Protected"
+msgstr "Korumalı"
+
+#: includes/configs/strings.php:210
+msgid "Allowed File Types"
+msgstr "İzin verilen dosya türleri"
+
+#: includes/configs/strings.php:209
+msgid "Allow file attachments"
+msgstr "Dosya eklerine izin ver"
+
+#: includes/configs/strings.php:208
+msgid "Attachments"
+msgstr "Dosya ekleri"
+
+#. translators: %s: link URL.
+#: includes/components/class-admin.php:1788
+msgid "It's been more than 2 weeks since you installed HivePress, that's awesome! If you find it useful, please leave a review on <a href=\"%s\" target=\"_blank\">WordPress.org</a> to help us spread the word."
+msgstr "HivePress'i kurduğunuzdan bu yana 2 haftadan fazla zaman geçti, bu harika! Yararlı bulduysanız, daha fazla kişiye duyurmamıza yardımcı olmak için lütfen <a href=\"%s\" target=\"_blank\">WordPress.org</a> üzerinde bir inceleme bırakın."
+
+#: includes/components/class-email.php:103
+msgid "Recipient"
+msgstr "Alıcı"
+
+#: includes/components/class-email.php:101
+msgid "Subject"
+msgstr "Konu"
+
+#: includes/blocks/class-user-login-form.php:28
+msgid "User Login Form"
+msgstr "Kullanıcı giriş formu"
+
+#: includes/configs/strings.php:67
+msgid "User"
+msgstr "Kullanıcı"
+
+#: includes/components/class-email.php:102 includes/configs/meta-boxes.php:37
+msgid "Event"
+msgstr "Etkinlik"
+
+#: includes/configs/post-types.php:50 includes/configs/post-types.php:51
+msgid "No templates found."
+msgstr "Şablon bulunamadı."
+
+#: includes/configs/post-types.php:49
+msgid "Search Templates"
+msgstr "Şablon ara"
+
+#: includes/configs/post-types.php:46
+msgid "Edit Template"
+msgstr "Şablon düzenle"
+
+#: includes/configs/post-types.php:45 includes/configs/post-types.php:47
+msgid "Add Template"
+msgstr "Şablon ekle"
+
+#: includes/configs/post-types.php:44
+msgctxt "template"
+msgid "Add New"
+msgstr "Yeni ekle"
+
+#: includes/components/class-editor.php:232
+#: includes/components/class-template.php:200
+#: includes/configs/meta-boxes.php:21 includes/configs/post-types.php:43
+msgid "Template"
+msgstr "Şablon"
+
+#: includes/configs/post-types.php:42 includes/configs/post-types.php:48
+msgid "Templates"
+msgstr "Şablonlar"
+
+#: includes/configs/post-types.php:29 includes/configs/post-types.php:30
+msgid "No emails found."
+msgstr "Eposta bulunamadı."
+
+#: includes/configs/post-types.php:28
+msgid "Search Emails"
+msgstr "E-postaları ara"
+
+#: includes/configs/post-types.php:25
+msgid "Edit Email"
+msgstr "E-postayı düzenle"
+
+#: includes/configs/post-types.php:24 includes/configs/post-types.php:26
+msgid "Add Email"
+msgstr "Eposta Ekle"
+
+#: includes/configs/post-types.php:23
+msgctxt "email"
+msgid "Add New"
+msgstr "Yeni ekle"
+
+#: includes/configs/strings.php:164
+msgid "Set the title display format to generate titles based on attributes."
+msgstr "Özel alanlara dayalı başlıklar oluşturmak için başlık görüntüleme biçimini ayarlayın."
+
+#: includes/emails/class-vendor-register.php:29
+msgid "A new vendor profile has been registered, click on the following link to view it: %vendor_url%"
+msgstr "Yeni bir ilan veren profili oluşturuldu, görüntülemek için şu bağlantıya tıklayın: %vendor_url%"
+
+#: includes/configs/strings.php:176
+msgid "Vendor Registered"
+msgstr "İlan veren kaydı oluşturuldu"
+
+#: includes/configs/strings.php:69
+msgid "Registered Users"
+msgstr "Kayıtlı kullanıcılar"
+
+#: includes/configs/strings.php:68
+msgid "All Users"
+msgstr "Tüm kullanıcılar"
+
+#: includes/configs/settings.php:264
+msgid "Allow direct registration"
+msgstr "İlan vermeden kayıt olmaya izin ver"
+
+#: includes/components/class-attribute.php:1751
+msgid "Include in keyword search"
+msgstr "Anahtar kelime aramasına dahil et"
+
+#: includes/components/class-attribute.php:1750
+msgctxt "attribute"
+msgid "Indexable"
+msgstr "Indekslenebilir"
+
+#: includes/components/class-attribute.php:1743
+msgctxt "attribute"
+msgid "Filterable"
+msgstr "Filtrelenebilir"
+
+#: includes/controllers/class-listing.php:184
+#: includes/controllers/class-vendor.php:70
+msgctxt "imperative"
+msgid "Complete Profile"
+msgstr "Profil tamamla"
+
+#: includes/fields/class-date.php:139
+msgid "Set the number of days after today to define the minimum date."
+msgstr "Minimum tarihi tanımlamak için bugünden sonraki gün sayısını ayarlayın."
+
+#: includes/fields/class-date.php:138
+msgid "Date Offset"
+msgstr "Tarih düzeltmesi"
+
+#: includes/fields/class-image-size.php:106
+msgid "Bottom"
+msgstr "Alt"
+
+#: includes/fields/class-image-size.php:104
+msgid "Top"
+msgstr "Üst"
+
+#: includes/fields/class-image-size.php:93
+msgid "Right"
+msgstr "Sağ"
+
+#: includes/fields/class-image-size.php:92
+#: includes/fields/class-image-size.php:105
+msgid "Center"
+msgstr "Merkez"
+
+#: includes/fields/class-image-size.php:91
+msgid "Left"
+msgstr "Sol"
+
+#: includes/fields/class-image-size.php:87
+#: includes/fields/class-image-size.php:100
+msgid "Crop Position"
+msgstr "Kırpma pozisyonu"
+
+#: includes/fields/class-image-size.php:79
+msgid "Height"
+msgstr "Yükseklik"
+
+#: includes/fields/class-image-size.php:69
+msgid "Width"
+msgstr "Genişlik"
+
+#: includes/configs/strings.php:41
+msgid "Price"
+msgstr "Fiyat"
+
+#: includes/configs/image-sizes.php:29
+msgctxt "size"
+msgid "large"
+msgstr "büyük"
+
+#: includes/configs/image-sizes.php:22 includes/configs/image-sizes.php:29
+msgid "Landscape size"
+msgstr "Yatay boyutlu"
+
+#: includes/configs/image-sizes.php:15 includes/configs/image-sizes.php:22
+msgctxt "size"
+msgid "small"
+msgstr "küçük"
+
+#: includes/configs/image-sizes.php:15
+msgid "Square size"
+msgstr "Kare boyutlu"
+
+#: includes/configs/strings.php:39
+msgid "Default Fields"
+msgstr "Varsayılan alanlar"
+
+#: includes/configs/settings.php:83
+msgid "Enable image zoom"
+msgstr "Görüntü yakınlaştırmayı etkinleştir"
+
+#. translators: %s: themes URL.
+#: includes/components/class-admin.php:1775
+msgid "The current theme doesn't declare HivePress support, if you notice any styling issues please consider using one of the <a href=\"%s\">official themes</a> instead."
+msgstr "Mevcut tema HivePress desteği içermiyor, herhangi bir stil sorunu fark ederseniz lütfen bunun yerine <a href=\"%s\">resmi temalardan</a> birini kullanmayı düşünün."
+
+#: includes/configs/settings.php:149
+msgid "Reporting"
+msgstr "Raporlama"
+
+#: includes/configs/strings.php:181
+msgid "Display only verified vendors"
+msgstr "Yalnızca doğrulanmış ilan verenleri görüntüle"
+
+#: includes/configs/strings.php:156
+msgid "Allow reporting listings"
+msgstr "İlanların şikayet edilmesine izin ver"
+
+#: includes/configs/strings.php:152
+msgid "Display only verified listings"
+msgstr "Yalnızca doğrulanmış ilanları görüntüle"
+
+#: includes/configs/settings.php:333
+msgid "Allow user registration"
+msgstr "Kullanıcı kaydına izin ver"
+
+#: includes/configs/meta-boxes.php:166
+msgctxt "vendor"
+msgid "Verified"
+msgstr "Doğrulanmış"
+
+#: includes/components/class-admin.php:144 templates/admin/themes.php:6
+msgid "Themes"
+msgstr "Temalar"
+
+#: templates/admin/themes.php:20
+msgid "Preview"
+msgstr "Ön izleme"
+
+#: includes/configs/strings.php:182
+msgid "Mark this vendor as verified"
+msgstr "Bu ilan vereni doğrulanmış olarak işaretle"
+
+#. translators: %s: field label.
+#: includes/configs/strings.php:99
+msgid "\"%s\" field contains too many values."
+msgstr "\"%s\" alanı çok fazla değer içeriyor."
+
+#: includes/fields/class-select.php:97
+msgid "Maximum Selection"
+msgstr "En fazla seçim"
+
+#: templates/admin/themes.php:34
+msgctxt "theme"
+msgid "Active"
+msgstr "Etkin"
+
+#: templates/admin/themes.php:15
+msgid "Theme Details"
+msgstr "Tema detayları"
+
+#: templates/user/register/user-email-verify-message.php:5
+msgid "Thank you! Your email address has been verified and you can start using your account."
+msgstr "Teşekkürler! E-posta adresiniz doğrulandı ve hesabınızı kullanmaya başlayabilirsiniz."
+
+#: includes/controllers/class-user.php:206
+#: includes/templates/class-user-email-verify-page.php:28
+msgid "Email Verified"
+msgstr "E-posta doğrulandı"
+
+#: includes/emails/class-user-email-verify.php:48
+msgid "Hi, %user_name%! Please click on the following link to verify your email address: %email_verify_url%"
+msgstr "Merhaba %user_name%! E-posta adresinizi doğrulamak için lütfen aşağıdaki bağlantıya tıklayın: %email_verify_url%"
+
+#: includes/emails/class-user-email-verify.php:29
+msgid "This email is sent to users when email verification is required."
+msgstr "Eposta doğrulaması gerektiğinde kullanıcılara gönderilen epostadır."
+
+#: includes/emails/class-user-email-verify.php:28
+#: includes/emails/class-user-email-verify.php:47
+msgid "Email Verification"
+msgstr "Eposta doğrulama"
+
+#: includes/configs/settings.php:350
+msgid "Require email address verification"
+msgstr "Eposta doğrulamasını zorunlu kıl"
+
+#: includes/components/class-attribute.php:1795
+msgid "Icon"
+msgstr "Simge"
+
+#: includes/fields/class-attachment-upload.php:75
+msgid "File Types"
+msgstr "Dosya türleri"
+
+#: includes/fields/class-date.php:147
+msgid "Allow setting time"
+msgstr "Saat ayarlamaya izin ver"
+
+#: includes/fields/class-date.php:146 includes/fields/class-time.php:35
+msgid "Time"
+msgstr "Zaman"
+
+#: includes/fields/class-select.php:117
+msgid "Search any of the selected options"
+msgstr "Seçili seçeneklerden herhangi birini arayın"
+
+#: includes/components/class-user.php:155
+#: includes/components/class-user.php:228
+#: includes/controllers/class-user.php:459
+#: includes/controllers/class-user.php:530
+msgid "Please check your email to activate your account."
+msgstr "Hesabınızı etkinleştirmek için lütfen epostanızı kontrol edin."
+
+#: includes/configs/strings.php:207
+#: includes/fields/class-attachment-upload.php:64
+msgid "Attachment"
+msgstr "Ek dosya"
+
+#: includes/configs/settings.php:341
+msgid "Generate username from the email address"
+msgstr "E-posta adresinden kullanıcı adı oluştur"
+
+#: includes/blocks/class-listing-hide-toggle.php:31
+msgid "Hide"
+msgstr "Gizle"
+
+#: includes/blocks/class-listing-hide-toggle.php:35
+msgid "Unhide"
+msgstr "Göster"
+
+#: includes/configs/strings.php:174
+msgid "Vendor Attributes"
+msgstr "İlan veren özel alanları"
+
+#: includes/configs/strings.php:119
+msgid "Listing Attributes"
+msgstr "İlan özel alanları"
+
+#: includes/components/class-attribute.php:1886
+msgid "Manually approve changes"
+msgstr "Değişiklikleri manuel olarak onayla"
+
+#: includes/components/class-attribute.php:1885
+msgctxt "attribute"
+msgid "Moderated"
+msgstr "Denetlenen"
+
+#: templates/admin/extensions.php:67
+msgctxt "noun"
+msgid "Support"
+msgstr "Destek"
+
+#: templates/admin/extensions.php:65
+msgid "Docs"
+msgstr "Belgeler"
+
+#: templates/admin/extensions.php:49
+msgctxt "extension"
+msgid "Active"
+msgstr "Etkin"
+
+#: templates/admin/extensions.php:40 templates/admin/themes.php:27
+msgid "Install"
+msgstr "Yükle"
+
+#: includes/configs/strings.php:61
+msgid "Authorization"
+msgstr "Yetkilendirme"
+
+#: includes/fields/class-text.php:139
+msgid "Click to copy"
+msgstr "Kopyalamak için tıklayın"
+
+#: templates/admin/extensions.php:45
+msgid "Update"
+msgstr "Güncelle"
+
+#: templates/admin/extensions.php:38 templates/admin/themes.php:25
+msgid "Purchase"
+msgstr "Satın al"
+
+#: includes/configs/settings.php:310
+msgid "Full Name"
+msgstr "Ad soyad"
+
+#: includes/configs/settings.php:223
+msgid "User Name"
+msgstr "Kullanıcı adı"
+
+#: includes/configs/settings.php:222 includes/configs/settings.php:298
+msgctxt "noun"
+msgid "Display Name"
+msgstr "Görünen ad"
+
+#: includes/configs/strings.php:180
+msgid "Display vendors on the front-end"
+msgstr "İlan verenleri ön yüzde görüntüle"
+
+#: includes/configs/strings.php:59
+msgid "Redirect URL"
+msgstr "Yönlendirme adresi"
+
+#: includes/configs/strings.php:58
+msgid "Client Secret"
+msgstr "Client Secret"
+
+#: includes/fields/class-google-oauth-button.php:119
+msgid "Please set Google Client ID and Secret to proceed."
+msgstr "Lütfen ilerlemek için Google Client ID ve Client Secret değerlerini girin."
+
+#: includes/fields/class-google-oauth-button.php:57
+msgid "Revoke Access"
+msgstr "Erişimi kaldır"
+
+#: includes/fields/class-google-oauth-button.php:36
+msgid "Grant Access"
+msgstr "Erişim ver"
+
+#: includes/configs/strings.php:158
+msgid "Set the number of days after which an expired listing is deleted."
+msgstr "Bir ilanın süresi dolduktan kaç gün sonra silineceğini belirleyin."
+
+#: includes/blocks/class-user-register-form.php:28
+msgid "User Registration Form"
+msgstr "Kullanıcı kayıt formu"
+
+#: includes/configs/strings.php:179
+msgid "Choose a page that displays all vendors."
+msgstr "Tüm ilan verenleri görüntüleyen bir sayfa seçin."
+
+#: includes/configs/strings.php:178
+msgid "Vendors per Page"
+msgstr "Sayfa başına ilan veren sayısı"
+
+#: includes/configs/strings.php:177
+msgid "Vendors Page"
+msgstr "İlan verenler sayfası"
+
+#: includes/configs/strings.php:175
+msgid "Vendor Search Form"
+msgstr "İlan veren arama formu"
+
+#: includes/configs/strings.php:160
+msgid "Set a date on which the listing will lose featured status."
+msgstr "İlanın öne çıkma durumunun biteceği tarihi belirleyin."
+
+#: includes/configs/strings.php:159
+msgid "Set a date on which the listing will expire."
+msgstr "İlanın yayında kalma süresinin dolacağı bir tarih seçin."
+
+#: includes/configs/strings.php:147
+msgid "Related Listings per Page"
+msgstr "Sayfa başına ilgili ilan sayısı"
+
+#. translators: %s: Listing title.
+#: includes/configs/strings.php:141
+msgid "Thank you! Your listing \"%s\" has been renewed and will appear at the top of the page."
+msgstr "Teşekkürler! \"%s\" ilanınız yenilenmiştir ve sayfanın üst kısmında görünecektir."
+
+#: includes/configs/strings.php:135
+msgid "Listing Renewed"
+msgstr "İlan yenilendi"
+
+#: includes/configs/strings.php:125
+msgid "Renew Listing"
+msgstr "İlanı yenile"
+
+#: includes/configs/strings.php:109
+msgid "Related Listings"
+msgstr "İlgili ilanlar"
+
+#: includes/configs/strings.php:81
+msgctxt "sort order"
+msgid "Date Registered"
+msgstr "Kayıt tarihi"
+
+#: includes/configs/strings.php:54
+msgid "Storage Period"
+msgstr "Saklama süresi"
+
+#: includes/configs/strings.php:53
+msgid "Storage"
+msgstr "Depolama"
+
+#: includes/configs/strings.php:42
+msgid "Overview"
+msgstr "Genel bakış"
+
+#: includes/configs/strings.php:38
+msgid "Expiration Date"
+msgstr "Yayından kalkma tarihi"
+
+#: includes/configs/meta-boxes.php:84
+msgid "Featuring Date"
+msgstr "Son öne çıkma tarihi"
+
+#: includes/emails/class-listing-expire.php:48
+msgid "Hi, %user_name%! Your listing \"%listing_title%\" has expired, click on the following link to renew it: %listing_url%"
+msgstr "Merhaba %user_name%! \"%listing_title%\" ilanınızın süresi doldu, yenilemek için aşağıdaki bağlantıya tıklayın: %listing_url%"
+
+#: includes/fields/class-embed.php:28
+msgctxt "field"
+msgid "Embed"
+msgstr "Gömülü"
+
+#: includes/fields/class-text.php:97
+msgid "Regex Pattern"
+msgstr "Regex deseni"
+
+#: includes/fields/class-attachment-upload.php:362
+#: templates/listing/edit/page/listing-delete-link.php:5
+msgid "Delete"
+msgstr "Sil"
+
+#: includes/components/class-listing.php:715
+msgid "Edit"
+msgstr "Düzenle"
+
+#: includes/configs/strings.php:85
+msgctxt "imperative"
+msgid "Add Details"
+msgstr "Ayrıntıları ekle"
+
+#: includes/configs/strings.php:195
+msgctxt "imperative"
+msgid "Select Category"
+msgstr "Kategori seç"
+
+#: includes/configs/strings.php:83
+msgctxt "sort order"
+msgid "Random"
+msgstr "Rasgele"
+
+#: includes/configs/strings.php:82
+msgctxt "sort order"
+msgid "Title"
+msgstr "Başlık"
+
+#: includes/configs/strings.php:80
+msgctxt "sort order"
+msgid "Date Added"
+msgstr "Eklenme tarihi"
+
+#: includes/configs/strings.php:78
+msgctxt "sort order"
+msgid "Item Count"
+msgstr "Öğe sayısı"
+
+#: includes/configs/strings.php:79
+msgctxt "sort order"
+msgid "Name"
+msgstr "İsim"
+
+#: includes/configs/strings.php:84
+msgctxt "sort"
+msgid "Order"
+msgstr "Sırala"
+
+#: includes/configs/strings.php:71
+msgctxt "quantity"
+msgid "Number"
+msgstr "Sayı"
+
+#: includes/configs/strings.php:70
+msgctxt "quantity"
+msgid "Columns"
+msgstr "Sütunlar"
+
+#: includes/models/class-listing.php:77
+msgctxt "listing"
+msgid "Pending"
+msgstr "Beklemede"
+
+#: includes/models/class-listing.php:76
+msgctxt "listing"
+msgid "Hidden"
+msgstr "Gizli"
+
+#: includes/emails/class-user-password-request.php:29
+msgid "This email is sent to users when a password reset is requested."
+msgstr "Parola sıfırlama istendiğinde kullanıcılara gönderilen epostadır."
+
+#: includes/emails/class-user-register.php:29
+msgid "This email is sent to users after registration."
+msgstr "Kayıt olduktan sonra kullanıcılara gönderilen epostadır."
+
+#: includes/emails/class-listing-expire.php:29
+msgid "This email is sent to users when listing is expired."
+msgstr "İlan yayın süresi dolduğunda kullanıcılara gönderilen epostadır."
+
+#: includes/emails/class-listing-reject.php:29
+msgid "This email is sent to users when listing is rejected."
+msgstr "İlan onaylanmadığında kullanıcılara gönderilen epostadır."
+
+#: includes/emails/class-listing-approve.php:29
+msgid "This email is sent to users when listing is approved."
+msgstr "İlan onaylandıktan sonra kullanıcılara gönderilen epostadır."
+
+#: includes/configs/strings.php:193
+msgid "Search Categories"
+msgstr "Kategori ara"
+
+#: includes/configs/strings.php:188
+msgid "Parent Category"
+msgstr "Üst kategori"
+
+#: includes/configs/strings.php:192
+msgid "View Category"
+msgstr "Kategoriyi görüntüle"
+
+#: includes/configs/strings.php:191
+msgid "Update Category"
+msgstr "Kategoriyi güncelle"
+
+#: includes/configs/strings.php:190
+msgid "Edit Category"
+msgstr "Kategoriyi düzenle"
+
+#: includes/configs/strings.php:189
+msgid "Add Category"
+msgstr "Kategori ekle"
+
+#: includes/configs/strings.php:186
+msgid "Categories"
+msgstr "Kategoriler"
+
+#: includes/configs/strings.php:169
+msgid "Add Vendor"
+msgstr "İlan veren ekle"
+
+#: includes/configs/strings.php:150
+msgid "Make listings featured"
+msgstr "İlanları öne çıkan ilanlara dönüştür"
+
+#: includes/configs/strings.php:123
+msgid "Listing Expiration"
+msgstr "İlan yayından kalkma tarihi"
+
+#: includes/configs/strings.php:116
+msgid "View Listings"
+msgstr "İlanları görüntüle"
+
+#: includes/configs/strings.php:115
+msgid "Featured Listings"
+msgstr "Öne çıkan ilanlar"
+
+#: includes/configs/strings.php:114
+msgid "Featuring of Listings"
+msgstr "İlanların öne çıkartılması"
+
+#. translators: %s: extension name.
+#: includes/configs/strings.php:93
+msgid "%s extension is incompatible with the current HivePress version, please update HivePress or deactivate it."
+msgstr "%s uzantısı mevcut HivePress sürümüyle uyumlu değil, lütfen HivePress'i güncelleyin veya devre dışı bırakın."
+
+#. translators: %s: token list.
+#: includes/configs/strings.php:91
+msgid "The following tokens are available: %s."
+msgstr "Aşağıdaki anahtarlar kullanılabilir: %s."
+
+#. translators: %s: WooCommerce.
+#: includes/configs/strings.php:89
+msgid "%s Product"
+msgstr "%s ürün"
+
+#: includes/configs/strings.php:60
+msgid "App ID"
+msgstr "App ID"
+
+#: includes/configs/strings.php:57
+msgid "Client ID"
+msgstr "Client ID"
+
+#: includes/configs/strings.php:55
+msgid "API Key"
+msgstr "API anahtarı"
+
+#: includes/configs/strings.php:40
+msgid "Free"
+msgstr "Ücretsiz"
+
+#: includes/configs/post-types.php:94
+msgctxt "vendor"
+msgid "Add New"
+msgstr "Yeni ekle"
+
+#: includes/configs/strings.php:201
+msgid "Add Attribute"
+msgstr "Seçenek ekle"
+
+#: includes/configs/strings.php:200
+msgctxt "attribute"
+msgid "Add New"
+msgstr "Yeni ekle"
+
+#: includes/configs/post-types.php:67
+msgctxt "listing"
+msgid "Add New"
+msgstr "Yeni ekle"
+
+#: includes/components/class-attribute.php:1820
+#: includes/configs/meta-boxes.php:132
+msgctxt "sort priority"
+msgid "Order"
+msgstr "Sıralama"
+
+#: includes/components/class-attribute.php:1804
+msgid "Set the attribute display format."
+msgstr "Özel alan görünüm biçimini belirleyin."
+
+#: includes/components/class-attribute.php:1788
+#: includes/components/class-attribute.php:1789
+#: includes/components/class-attribute.php:1790
+msgid "Page"
+msgstr "Sayfa"
+
+#: includes/components/class-attribute.php:1786
+#: includes/components/class-attribute.php:1789
+msgctxt "area"
+msgid "secondary"
+msgstr "ikincil"
+
+#: includes/components/class-attribute.php:1785
+#: includes/components/class-attribute.php:1788
+msgctxt "area"
+msgid "primary"
+msgstr "birincil"
+
+#: includes/components/class-attribute.php:1785
+#: includes/components/class-attribute.php:1786
+#: includes/components/class-attribute.php:1787
+msgid "Block"
+msgstr "Blok"
+
+#: includes/configs/strings.php:17
+msgctxt "noun"
+msgid "Display"
+msgstr "Görünüm"
+
+#: includes/components/class-attribute.php:1758
+msgid "Display as a sorting option"
+msgstr "Sıralama seçeneği olarak görüntüle"
+
+#: includes/components/class-attribute.php:1757
+msgctxt "attribute"
+msgid "Sortable"
+msgstr "Sıralanabilir"
+
+#: includes/components/class-attribute.php:957
+msgctxt "attribute"
+msgid "Searchable"
+msgstr "Aranabilir"
+
+#: includes/configs/strings.php:18
+msgctxt "noun"
+msgid "Search"
+msgstr "Arama"
+
+#: includes/components/class-attribute.php:1721
+msgctxt "attribute"
+msgid "Editable"
+msgstr "Düzenlenebilir"
+
+#: includes/configs/strings.php:64
+msgid "Save Changes"
+msgstr "Değişiklikleri kaydet"
+
+#: includes/configs/strings.php:65
+msgid "Changes have been saved."
+msgstr "Değişiklikler kaydedildi."
+
+#. translators: %s: field label.
+#: includes/fields/class-field.php:517 includes/fields/class-file.php:79
+msgid "\"%s\" field is required."
+msgstr "\"%s\" alanı gereklidir."
+
+#: includes/fields/class-field.php:230
+msgctxt "field"
+msgid "optional"
+msgstr "isteğe bağlı"
+
+#: includes/fields/class-field.php:141
+msgctxt "field"
+msgid "Required"
+msgstr "Gerekli"
+
+#. translators: %s: field label.
+#: includes/configs/strings.php:97
+msgid "\"%s\" field contains an invalid value."
+msgstr "\"%s\" alanı geçersiz bir değer içeriyor."
+
+#: includes/fields/class-select.php:89
+msgctxt "selection"
+msgid "Multiple"
+msgstr "Çoklu"
+
+#: includes/fields/class-select.php:77
+msgctxt "field"
+msgid "Select"
+msgstr "Seçim"
+
+#: includes/fields/class-textarea.php:44
+msgid "Allow HTML formatting"
+msgstr "HTML biçimlendirmeye izin ver"
+
+#: includes/fields/class-textarea.php:43
+msgid "Formatting"
+msgstr "Biçimlendirme"
+
+#: includes/fields/class-radio.php:28
+msgid "Radio Buttons"
+msgstr "Radyo düğmeleri"
+
+#: includes/fields/class-number.php:70
+msgctxt "quantity"
+msgid "Decimals"
+msgstr "Ondalık sayılar"
+
+#: includes/components/class-admin.php:975
+msgctxt "plural"
+msgid "Installed"
+msgstr "Yüklü"
+
+#: includes/components/class-admin.php:970
+msgctxt "plural"
+msgid "All"
+msgstr "Tümü"
+
+#: includes/components/class-listing.php:586 includes/configs/meta-boxes.php:70
+#: includes/models/class-listing.php:97
+#: templates/listing/view/listing-verified-badge.php:7
+msgctxt "listing"
+msgid "Verified"
+msgstr "Doğrulanmış"
+
+#: includes/components/class-listing.php:582 includes/configs/meta-boxes.php:77
+#: includes/models/class-listing.php:91
+#: templates/listing/view/listing-featured-badge.php:7
+msgctxt "listing"
+msgid "Featured"
+msgstr "Öne çıkan"
+
+#. translators: %s: terms URL.
+#: includes/configs/strings.php:95
+msgid "I agree to the <a href=\"%s\" target=\"_blank\">terms and conditions</a>"
+msgstr "<a href=\"%s\" target=\"_blank\">Sartlar ve koşulları</a> kabul ediyorum"
+
+#: includes/components/class-attribute.php:1212
+msgctxt "field"
+msgid "requires review"
+msgstr "inceleme gerektirir"
+
+#: includes/components/class-attribute.php:718
+msgid "No options found."
+msgstr "Seçenek bulunamadı."
+
+#: includes/components/class-attribute.php:717
+msgid "Search Options"
+msgstr "Arama Seçenekleri"
+
+#: includes/components/class-attribute.php:716
+msgid "Parent Option"
+msgstr "Ebeveyn seçenek"
+
+#: includes/components/class-attribute.php:715
+msgid "Update Option"
+msgstr "Seçeneği güncelle"
+
+#: includes/components/class-attribute.php:714
+msgid "Edit Option"
+msgstr "Seçeneği düzenle"
+
+#: includes/components/class-attribute.php:713
+msgid "Add Option"
+msgstr "Seçenek ekle"
+
+#: includes/emails/class-listing-update.php:29
+msgid "Listing \"%listing_title%\" %listing_url% has been updated with the following details: %listing_attributes%."
+msgstr "\"%listing_title%\" %listing_url% ilanı şu ayrıntılarla güncellendi: %listing_attributes%."
+
+#. translators: 1: field label, 2: date.
+#: includes/fields/class-date.php:344
+msgid "\"%1$s\" can't be later than %2$s."
+msgstr "\"%1$s\" %2$s daha ileri bir tarihte olamaz."
+
+#. translators: 1: field label, 2: date.
+#: includes/fields/class-date.php:335
+msgid "\"%1$s\" can't be earlier than %2$s."
+msgstr "\"%1$s\" %2$s daha erken bir tarihte bulunamaz."
+
+#: includes/fields/class-date.php:132
+msgid "Maximum Date"
+msgstr "En ileri tarih"
+
+#: includes/fields/class-date.php:126
+msgid "Minimum Date"
+msgstr "En erken tarih"
+
+#: includes/fields/class-date-range.php:63
+msgid "Date Range"
+msgstr "Tarih aralığı"
+
+#: includes/configs/strings.php:151
+msgid "Display only featured listings"
+msgstr "Sadece öne çıkan ilanları göster"
+
+#: includes/components/class-attribute.php:907
+msgid "Edit Options"
+msgstr "Seçenekleri düzenle"
+
+#: includes/configs/strings.php:31
+msgid "Details"
+msgstr "Ayrıntılar"
+
+#: includes/configs/strings.php:163
+msgid "Please provide details that will help us verify that this listing violates the terms of service."
+msgstr "Lütfen bu ilanın hizmet şartlarını ihlal ettiğini doğrulamamıza yardımcı olacak ayrıntıları sağlayın."
+
+#: includes/configs/strings.php:126
+msgid "Add Listing"
+msgstr "İlan ekle"
+
+#: includes/configs/strings.php:148
+msgid "Mark this listing as verified"
+msgstr "Bu ilanı doğrulanmış olarak işaretle"
+
+#: includes/configs/strings.php:157
+msgid "Set the number of days after which a listing expires."
+msgstr "Bir girişin süresinin dolacağı gün sayısını ayarlayın."
+
+#: includes/configs/strings.php:37
+msgid "Expiration Period"
+msgstr "Yayından kalkma süresi"
+
+#: includes/configs/settings.php:159 includes/configs/strings.php:36
+msgid "Expiration"
+msgstr "Sona erme"
+
+#: includes/configs/strings.php:155
+msgid "Allow submitting new listings"
+msgstr "Yeni ilanların gönderilmesine izin ver"
+
+#: includes/configs/strings.php:146
+msgid "Featured Listings per Page"
+msgstr "Sayfa başına öne çıkan ilan sayısı"
+
+#: includes/configs/strings.php:145
+msgid "Regular Listings per Page"
+msgstr "Sayfa başına normal ilan sayısı"
+
+#: includes/fields/class-select.php:106 includes/fields/class-select.php:116
+msgid "Options"
+msgstr "Seçenekler"
+
+#: includes/fields/class-url.php:28
+msgid "URL"
+msgstr "URL"
+
+#: includes/configs/strings.php:134
+msgid "Listing Expired"
+msgstr "İlan yayın süresi doldu"
+
+#. Description of the plugin
+#: hivepress.php
+msgid "Multipurpose directory, listing & classifieds plugin."
+msgstr "Çok amaçlı dizin, listeleme ve ilan eklentisi."
+
+#: includes/components/class-admin.php:145 templates/admin/extensions.php:6
+msgid "Extensions"
+msgstr "Uzantılar"
+
+#: includes/configs/strings.php:122
+msgid "Listing Search Form"
+msgstr "İlan arama formu"
+
+#: includes/controllers/class-user.php:584
+msgid "Password reset key is expired or invalid."
+msgstr "Şifre sıfırlama anahtarının süresi dolmuş veya geçersiz."
+
+#. translators: %s: files number.
+#: includes/controllers/class-attachment.php:171
+msgid "Only up to %s files can be uploaded."
+msgstr "Yalnızca en fazla %s dosya yüklenebilir."
+
+#: includes/configs/strings.php:173
+msgid "No vendors found."
+msgstr "İlan veren bulunamadı."
+
+#: includes/configs/strings.php:172
+msgid "Search Vendors"
+msgstr "İlan veren ara"
+
+#: includes/configs/strings.php:168
+msgid "View Vendor"
+msgstr "İlan vereni görüntüle"
+
+#: includes/configs/strings.php:170
+msgid "Edit Vendor"
+msgstr "İlan vereni düzenle"
+
+#: includes/configs/strings.php:167
+msgid "Vendor"
+msgstr "İlan veren"
+
+#: includes/configs/strings.php:171
+msgid "Vendors"
+msgstr "İlan verenler"
+
+#: includes/components/class-attribute.php:1744
+msgid "Display in the filter form"
+msgstr "Filtre formunda göster"
+
+#: includes/components/class-attribute.php:958
+msgid "Display in the search form"
+msgstr "Arama formunda göster"
+
+#: includes/components/class-attribute.php:1728
+#: includes/components/class-attribute.php:1764
+msgid "Field Type"
+msgstr "Alan tipi"
+
+#: includes/components/class-attribute.php:1722
+msgid "Allow front-end editing"
+msgstr "Ön yüzde düzenlemeyi etkinleştir"
+
+#: includes/configs/strings.php:33
+msgid "Editing"
+msgstr "Düzenleniyor"
+
+#: includes/components/class-user.php:243 includes/configs/settings.php:305
+#: includes/configs/settings.php:340 includes/models/class-user.php:48
+msgid "Username"
+msgstr "Kullanıcı adı"
+
+#: includes/configs/strings.php:24
+msgid "Name"
+msgstr "Ad"
+
+#: includes/fields/class-checkbox.php:97
+msgid "No"
+msgstr "Hayır"
+
+#: includes/fields/class-checkbox.php:97
+msgid "Yes"
+msgstr "Evet"
+
+#: includes/fields/class-field.php:142
+msgid "Make this field required"
+msgstr "Bu alanı zorunlu kıl"
+
+#. translators: 1: field label, 2: length.
+#: includes/configs/strings.php:101
+msgid "\"%1$s\" can't be longer than %2$s characters."
+msgstr "\"%1$s\" %2$s karakterden daha uzun olamaz."
+
+#. translators: 1: field label, 2: length.
+#: includes/configs/strings.php:103
+msgid "\"%1$s\" should be at least %2$s characters long."
+msgstr "\"%1$s\" en az %2$s karakter uzunluğunda olmalıdır."
+
+#: includes/fields/class-text.php:90
+msgid "Maximum Length"
+msgstr "Maksimum uzunluk"
+
+#: includes/fields/class-text.php:83
+msgid "Minimum Length"
+msgstr "Minimum uzunluk"
+
+#: includes/fields/class-number.php:87
+msgid "Maximum Value"
+msgstr "Maksimum değer"
+
+#: includes/fields/class-number.php:80
+msgid "Minimum Value"
+msgstr "Minimum değer"
+
+#: includes/fields/class-date.php:119 includes/fields/class-number.php:63
+#: includes/fields/class-select.php:82 includes/fields/class-text.php:76
+msgid "Placeholder"
+msgstr "Yer tutucu"
+
+#: includes/fields/class-textarea.php:35
+msgid "Textarea"
+msgstr "Metin alanı"
+
+#: includes/fields/class-attachment-upload.php:68
+#: includes/fields/class-checkbox.php:47
+msgid "Caption"
+msgstr "Başlık"
+
+#: includes/fields/class-attachment-upload.php:120
+msgid "Select Files"
+msgstr "Dosyaları seçin"
+
+#. translators: 1: field label, 2: number.
+#: includes/fields/class-number.php:201
+msgid "\"%1$s\" can't be greater than %2$s."
+msgstr "\"%1$s\" %2$s değerinden büyük olamaz."
+
+#. translators: 1: field label, 2: number.
+#: includes/fields/class-number.php:196
+msgid "\"%1$s\" can't be lower than %2$s."
+msgstr "\"%1$s\" %2$s değerinden daha küçük olamaz."
+
+#: includes/fields/class-number-range.php:42
+msgid "Number Range"
+msgstr "Sayı aralığı"
+
+#: includes/fields/class-select.php:90
+msgid "Allow multiple selection"
+msgstr "Çoklu seçime izin ver"
+
+#: templates/page/no-results-message.php:7
+msgid "Sorry, but nothing matched your search terms. Please try again with some different keywords."
+msgstr "Üzgünüz, ancak arama terimlerinizle hiçbir şey eşleşmedi. Lütfen farklı anahtar kelimelerle tekrar deneyin."
+
+#: templates/page/no-results-message.php:6
+msgid "Nothing found"
+msgstr "Hiçbir şey bulunamadı"
+
+#. translators: %s: extensions number.
+#: templates/admin/extensions.php:78
+msgid "%s Extensions"
+msgstr "%s uzantı"
+
+#: includes/configs/strings.php:26
+msgid "Status"
+msgstr "Durum"
+
+#: includes/configs/strings.php:121
+msgid "Listing Categories"
+msgstr "İlan kategorileri"
+
+#: includes/configs/strings.php:149
+msgid "Make this listing featured"
+msgstr "Bu ilanı öne çıkartın"
+
+#. translators: %s: version number.
+#: templates/admin/extensions.php:82
+msgid "Version %s"
+msgstr "Sürüm %s"
+
+#: templates/admin/extensions.php:47 templates/admin/themes.php:32
+msgid "Activate"
+msgstr "Etkinleştir"
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+#: hivepress.php
+msgid "https://hivepress.io/"
+msgstr "https://hivepress.io/"
+
+#. Plugin Name of the plugin
+#. Author of the plugin
+#: hivepress.php
+msgid "HivePress"
+msgstr "HivePress"
+
+#. translators: %s: date.
+#: templates/user/view/user-registered-date.php:8
+msgid "Member since %s"
+msgstr "%s tarihinden beri üye"
+
+#. translators: %s: Vendor name.
+#: includes/configs/strings.php:113
+msgid "Listings by %s"
+msgstr "%s tarafından verilen ilanlar"
+
+#: includes/forms/class-user-delete.php:44
+msgid "Please enter your password below to permanently delete your account."
+msgstr "Hesabınızı kalıcı olarak silmek için lütfen şifrenizi aşağıya girin."
+
+#: includes/forms/class-user-password-reset.php:44
+msgid "Please enter a new password below."
+msgstr "Lütfen aşağıya yeni bir şifre girin."
+
+#: includes/forms/class-user-password-request.php:45
+msgid "Please enter your username or email address, you will receive a link to create a new password via email."
+msgstr "Lütfen kullanıcı adınızı veya e-posta adresinizi girin, e-posta yoluyla yeni bir şifre oluşturmanızı sağlayacak bir bağlantı alacaksınız."
+
+#: templates/user/register/user-login-link.php:5
+msgid "Already have an account?"
+msgstr "Zaten hesabınız var mı?"
+
+#: templates/user/login/user-password-request-link.php:5
+msgid "Forgot password?"
+msgstr "Şifrenizi mi unuttunuz?"
+
+#: templates/user/login/user-register-link.php:7
+msgid "Don't have an account yet?"
+msgstr "Henüz bir hesabınız yok mu?"
+
+#: includes/configs/strings.php:63
+msgid "My Account"
+msgstr "Hesabım"
+
+#: includes/menus/class-user-account.php:35
+msgid "Sign Out"
+msgstr "Çıkış yap"
+
+#: includes/configs/strings.php:62
+msgid "Return to My Account"
+msgstr "Hesabıma geri dön"
+
+#. translators: %s: Listing title.
+#: includes/configs/strings.php:139
+msgid "Thank you! Your listing \"%s\" has been submitted and will be reviewed as soon as possible."
+msgstr "Teşekkürler! \"%s\" ilanınız gönderilmiştir ve mümkün olan en kısa sürede incelenecektir."
+
+#: templates/listing/edit/block/listing-view-link.php:7
+msgid "View"
+msgstr "Görüntüle"
+
+#: includes/configs/strings.php:118
+msgid "No listings found."
+msgstr "İlan bulunamadı."
+
+#: includes/configs/strings.php:153
+msgid "Are you sure you want to permanently delete this listing?"
+msgstr "Bu ilanı kalıcı olarak silmek istediğinizden emin misiniz?"
+
+#. translators: %s: date.
+#: includes/configs/strings.php:87
+msgid "Added on %s"
+msgstr "%s tarihinde eklendi"
+
+#: includes/configs/strings.php:194
+msgid "No categories found."
+msgstr "Kategori bulunamadı."
+
+#. translators: %s: Listings number.
+#: includes/configs/strings.php:111
+msgid "%s Listing"
+msgid_plural "%s Listings"
+msgstr[0] "%s ilan"
+msgstr[1] "%s ilan"
+
+#: includes/configs/strings.php:142
+msgid "Listing has been reported."
+msgstr "İlan şikayet edildi."
+
+#: includes/configs/strings.php:130
+msgid "Report Listing"
+msgstr "İlanı şikayet et"
+
+#: includes/configs/strings.php:129
+msgid "Delete Listing"
+msgstr "İlanı sil"
+
+#: includes/configs/strings.php:29
+msgid "Select Images"
+msgstr "Görselleri seç"
+
+#: includes/configs/strings.php:28
+msgid "Images"
+msgstr "Görseller"
+
+#: includes/configs/strings.php:30
+msgid "Description"
+msgstr "Açıklama"
+
+#: includes/configs/strings.php:23
+msgid "Title"
+msgstr "Başlık"
+
+#: includes/configs/strings.php:124
+msgid "Submit Listing"
+msgstr "İlanı gönder"
+
+#: includes/configs/strings.php:21
+msgid "Sort by"
+msgstr "Şuna göre sırala"
+
+#: includes/configs/strings.php:20
+msgid "Filter"
+msgstr "Filtre"
+
+#: includes/configs/strings.php:19
+msgid "Search"
+msgstr "Ara"
+
+#: includes/configs/strings.php:22
+msgid "Keywords"
+msgstr "Anahtar kelimeler"
+
+#: includes/configs/meta-boxes.php:124 includes/configs/strings.php:27
+msgid "Image"
+msgstr "Görsel"
+
+#: includes/components/class-attribute.php:1779
+msgid "Choose the template areas where you want to display this attribute."
+msgstr "Bu özel alanı göstermek istediğiniz şablon bölgesini belirleyin."
+
+#: includes/components/class-attribute.php:1778
+msgid "Areas"
+msgstr "Bölgeler"
+
+#: includes/components/class-attribute.php:1803
+msgid "Format"
+msgstr "Biçim"
+
+#: includes/fields/class-checkboxes.php:28
+msgid "Checkboxes"
+msgstr "Onay kutuları"
+
+#: includes/fields/class-checkbox.php:42
+msgid "Checkbox"
+msgstr "Onay Kutusu"
+
+#: includes/fields/class-number.php:56
+msgid "Number"
+msgstr "Sayı"
+
+#: includes/fields/class-text.php:70
+msgid "Text"
+msgstr "Metin"
+
+#: includes/components/class-admin.php:1725 includes/configs/strings.php:16
+#: templates/admin/settings.php:6
+msgid "Settings"
+msgstr "Ayarlar"
+
+#: includes/configs/strings.php:204
+msgid "No attributes found."
+msgstr "Özel alan bulunamadı."
+
+#: includes/configs/strings.php:203
+msgid "Search Attributes"
+msgstr "Özel alan ara"
+
+#: includes/configs/strings.php:202
+msgid "Edit Attribute"
+msgstr "Özel alanı düzenle"
+
+#: includes/configs/strings.php:199
+msgid "Attribute"
+msgstr "Özel alan"
+
+#: includes/components/class-attribute.php:1712
+#: includes/configs/strings.php:198
+msgid "Attributes"
+msgstr "Özel alanlar"
+
+#: includes/configs/strings.php:117
+msgid "Search Listings"
+msgstr "İlan ara"
+
+#: includes/configs/strings.php:108
+msgid "All Listings"
+msgstr "Tüm ilanlar"
+
+#: includes/configs/strings.php:127
+msgid "View Listing"
+msgstr "İlanı görüntüle"
+
+#: includes/configs/strings.php:128
+msgid "Edit Listing"
+msgstr "İlanı düzenle"
+
+#: includes/configs/strings.php:106
+msgid "Listing"
+msgstr "İlan"
+
+#: includes/emails/class-listing-report.php:29
+msgid "Listing \"%listing_title%\" %listing_url% has been reported with the following details: %report_details%"
+msgstr "\"%listing_title%\" %listing_url% ilanı aşağıdaki ayrıntılarla şikayet edilmiştir: %report_details%"
+
+#: includes/configs/strings.php:137
+msgid "Listing Reported"
+msgstr "İlan şikayet edildi"
+
+#: includes/configs/strings.php:136
+msgid "Listing Updated"
+msgstr "İlan güncellendi"
+
+#: includes/emails/class-listing-submit.php:29
+msgid "A new listing \"%listing_title%\" has been submitted, click on the following link to view it: %listing_url%"
+msgstr "\"%listing_title%\" başlıklı yeni bir ilan gönderildi, görüntülemek için şu bağlantıya tıklayın: %listing_url%"
+
+#: includes/configs/strings.php:131
+msgid "Listing Submitted"
+msgstr "İlan gönderildi"
+
+#: includes/emails/class-listing-reject.php:48
+msgid "Hi, %user_name%! Unfortunately, your listing \"%listing_title%\" has been rejected."
+msgstr "Merhaba %user_name%! Ne yazık ki, \"%listing_title%\" ilanınız onaylanmadı."
+
+#: includes/configs/strings.php:133
+msgid "Listing Rejected"
+msgstr "İlan onaylanmadı"
+
+#: includes/emails/class-listing-approve.php:48
+msgid "Hi, %user_name%! Your listing \"%listing_title%\" has been approved, click on the following link to view it: %listing_url%"
+msgstr "Merhaba %user_name%! \"%listing_title%\" ilanınız onaylandı, görüntülemek için şu bağlantıya tıklayın: %listing_url%"
+
+#: includes/configs/strings.php:132
+msgid "Listing Approved"
+msgstr "İlan onaylandı"
+
+#: includes/configs/strings.php:154
+msgid "Manually approve new listings"
+msgstr "Yeni ilanları manuel olarak onayla"
+
+#: includes/configs/strings.php:35
+msgid "Moderation"
+msgstr "Moderasyon"
+
+#: includes/configs/strings.php:162
+msgid "Choose a page with terms that user has to accept before submitting a new listing."
+msgstr "Yeni bir ilan göndermeden önce kullanıcının kabul etmesi gereken şartları içeren bir sayfa seçin."
+
+#: includes/configs/settings.php:122
+msgid "Submission Terms Page"
+msgstr "İlan gönderme koşulları sayfası"
+
+#: includes/configs/settings.php:117 includes/configs/settings.php:132
+#: includes/configs/strings.php:34
+msgid "Submission"
+msgstr "İlan gönderimi"
+
+#: includes/configs/strings.php:144
+msgid "Listings Page Display"
+msgstr "İlanlar sayfası görünümü"
+
+#: includes/configs/strings.php:161
+msgid "Choose a page that displays all listings."
+msgstr "Tüm ilanları görüntüleyen bir sayfa seçin."
+
+#: includes/configs/strings.php:143
+msgid "Listings Page"
+msgstr "İlanlar sayfası"
+
+#: includes/configs/strings.php:107
+msgid "Listings"
+msgstr "İlanlar"
+
+#: includes/forms/class-user-delete.php:61
+#: includes/templates/class-user-edit-settings-page.php:49
+#: templates/user/edit/page/user-delete-link.php:7
+msgid "Delete Account"
+msgstr "Hesabı sil"
+
+#: includes/forms/class-user-update.php:77
+msgid "Current Password"
+msgstr "Mevcut şifre"
+
+#: includes/models/class-user.php:113
+msgid "Profile Info"
+msgstr "Profil bilgileri"
+
+#: includes/configs/settings.php:308 includes/models/class-user.php:92
+msgid "Last Name"
+msgstr "Soyad"
+
+#: includes/configs/settings.php:306 includes/models/class-user.php:77
+msgid "First Name"
+msgstr "Ad"
+
+#: includes/configs/meta-boxes.php:125 includes/models/class-user.php:133
+msgid "Select Image"
+msgstr "Görsel seç"
+
+#: includes/models/class-user.php:132
+msgid "Profile Image"
+msgstr "Profil resmi"
+
+#: includes/forms/class-user-password-reset.php:50
+#: includes/forms/class-user-update.php:68
+msgid "New Password"
+msgstr "Yeni şifre"
+
+#: includes/forms/class-user-password-request.php:64
+msgid "Send Email"
+msgstr "Eposta gönder"
+
+#: includes/forms/class-user-password-request.php:46
+msgid "Password reset email has been sent."
+msgstr "Şifre sıfırlama e-postası gönderildi."
+
+#: includes/components/class-user.php:572
+#: includes/controllers/class-user.php:198
+#: includes/forms/class-user-password-request.php:28
+#: includes/forms/class-user-password-reset.php:71
+#: includes/templates/class-user-password-reset-page.php:28
+#: templates/user/password-reset/user-password-reset-message.php:6
+msgid "Reset Password"
+msgstr "Şifre sıfırla"
+
+#: includes/components/class-user.php:546
+#: includes/controllers/class-user.php:184
+#: includes/forms/class-user-login.php:75
+#: templates/user/login/user-login-link.php:17
+#: templates/user/register/user-login-link.php:5
+msgid "Sign In"
+msgstr "Giriş yap"
+
+#: includes/forms/class-user-login.php:51
+#: includes/forms/class-user-password-request.php:51
+msgid "Username or Email"
+msgstr "Kullanıcı adı ya da e-posta"
+
+#: includes/forms/class-user-login.php:28
+#: includes/templates/class-user-login-page.php:28
+msgid "Login User"
+msgstr "Kullanıcı girişi"
+
+#: includes/components/class-user.php:559
+#: includes/forms/class-user-register.php:69
+#: templates/user/login/user-register-link.php:7
+msgid "Register"
+msgstr "Kayıt ol"
+
+#: includes/models/class-user.php:63
+msgid "Password"
+msgstr "Şifre"
+
+#: includes/configs/post-types.php:22 includes/configs/settings.php:349
+#: includes/fields/class-email.php:28 includes/models/class-user.php:56
+msgid "Email"
+msgstr "Eposta"
+
+#: includes/forms/class-user-register.php:28
+msgid "Register User"
+msgstr "Kullanıcı kaydı"
+
+#: includes/emails/class-user-register.php:47
+msgid "Registration Complete"
+msgstr "Kayıt tamamlandı"
+
+#: includes/emails/class-user-password-request.php:48
+msgid "Hi, %user_name%! Please click on the following link to set a new password: %password_reset_url%"
+msgstr "Merhaba %user_name%! Yeni bir şifre belirlemek için lütfen aşağıdaki bağlantıya tıklayın: %password_reset_url%"
+
+#: includes/emails/class-user-password-request.php:28
+#: includes/emails/class-user-password-request.php:47
+msgid "Password Reset"
+msgstr "Parola sıfırla"
+
+#: includes/emails/class-user-register.php:28
+msgid "User Registered"
+msgstr "Kulanıcı kaydı oluşturuldu"
+
+#: includes/configs/post-types.php:21 includes/configs/post-types.php:27
+#: includes/configs/strings.php:32
+msgid "Emails"
+msgstr "E-postalar"
+
+#: includes/configs/settings.php:323
+msgid "Choose a page with terms that user has to accept before registering."
+msgstr "Kullanıcının kaydolmadan önce kabul etmesi gereken şartları içeren bir sayfa seçin."
+
+#: includes/configs/settings.php:322
+msgid "Registration Terms Page"
+msgstr "Kayıt koşulları sayfası"
+
+#: includes/configs/settings.php:258 includes/configs/settings.php:263
+#: includes/configs/settings.php:317 includes/configs/settings.php:332
+msgid "Registration"
+msgstr "Kayıt"
+
+#: includes/configs/settings.php:274
+msgid "Users"
+msgstr "Kullanıcılar"
+
+#: includes/configs/settings.php:389
+msgid "Protected Forms"
+msgstr "Korumalı formlar"
+
+#: includes/configs/strings.php:56
+msgid "Secret Key"
+msgstr "Gizli anahtar"
+
+#: includes/configs/settings.php:397
+msgid "Site Key"
+msgstr "Site anahtarı"
+
+#: includes/configs/settings.php:379
+msgid "Integrations"
+msgstr "Entegrasyonlar"
+
+#: includes/controllers/class-user.php:750
+msgid "Password is incorrect."
+msgstr "Şifre hatalı."
+
+#: includes/controllers/class-user.php:660
+msgid "Current password is incorrect."
+msgstr "Mevcut şifre hatalı."
+
+#: includes/controllers/class-user.php:656
+msgid "Current password is required."
+msgstr "Mevcut şifre gereklidir."
+
+#: templates/user/password-reset/user-password-reset-message.php:5
+msgid "Password reset link is expired or invalid."
+msgstr "Parola sıfırlama bağlantısının süresi dolmuş veya geçersiz."
+
+#: includes/controllers/class-user.php:522
+msgid "User with this username doesn't exist."
+msgstr "Bu kullanıcı adına sahip kullanıcı mevcut değil."
+
+#: includes/controllers/class-user.php:520
+msgid "User with this email doesn't exist."
+msgstr "Bu e-postaya sahip kullanıcı mevcut değil."
+
+#: includes/controllers/class-user.php:447
+#: includes/controllers/class-user.php:454
+msgid "Username or password is incorrect."
+msgstr "Kullanıcı adı veya şifre yanlış."
+
+#: includes/controllers/class-user.php:315
+msgid "This email is already registered."
+msgstr "Bu e-posta adresi zaten kayıtlı."
+
+#: includes/controllers/class-user.php:309
+msgid "This username is already in use."
+msgstr "Bu kullanıcı adı zaten kullanımda."
+
+#: includes/controllers/class-user.php:307
+msgid "Username contains invalid characters."
+msgstr "Kullanıcı adı geçersiz karakterler içeriyor."
+
+#. translators: 1: results range start, 2: results range end, 3: total results.
+#: includes/blocks/class-result-count.php:55
+msgid "Showing %1$s-%2$s of %3$s results"
+msgstr "%3$s sonuçtan %1$s-%2$s arası gösteriliyor"
+
+#. translators: %s: file extensions.
+#: includes/controllers/class-attachment.php:183
+#: includes/fields/class-file.php:83
+msgid "Only %s files are allowed."
+msgstr "Yalnızca %s dosyalarına izin verilir."
+
+#: includes/fields/class-attachment-select.php:36
+#: includes/fields/class-attachment-upload.php:122
+msgid "Select File"
+msgstr "Dosya seç"
+
+#: includes/fields/class-number-range.php:82
+msgid "Max"
+msgstr "Maksimum"
+
+#: includes/fields/class-number-range.php:69
+msgid "Min"
+msgstr "Minimum"
+
+#: includes/forms/class-form.php:147
+msgid "Submit"
+msgstr "Gönder"
+
+#: includes/components/class-form.php:528
+msgid "Captcha is invalid."
+msgstr "Captcha geçersiz."
+
+#: includes/configs/strings.php:185
+msgid "Category"
+msgstr "Kategori"
+
+#: includes/configs/strings.php:187
+msgid "All Categories"
+msgstr "Tüm kategoriler"
+
+#: includes/configs/strings.php:25
+msgid "Date"
+msgstr "Tarih"

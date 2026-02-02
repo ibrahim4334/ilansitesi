@@ -1,0 +1,239 @@
+# Copyright (C) 2025 HivePress
+# This file is distributed under the same license as the HivePress Geolocation plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: HivePress Geolocation 1.3.9\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/hivepress-geolocation\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-10-15T20:53:03+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: hivepress-geolocation\n"
+
+#. Plugin Name of the plugin
+#: hivepress-geolocation.php
+msgid "HivePress Geolocation"
+msgstr ""
+
+#. Description of the plugin
+#: hivepress-geolocation.php
+msgid "Allow users to search listings by location."
+msgstr ""
+
+#. Author of the plugin
+#: hivepress-geolocation.php
+msgid "HivePress"
+msgstr ""
+
+#. Author URI of the plugin
+#: hivepress-geolocation.php
+msgid "https://hivepress.io/"
+msgstr ""
+
+#: includes/components/class-geolocation.php:149
+#: includes/components/class-geolocation.php:157
+#: includes/components/class-geolocation.php:494
+#: includes/components/class-geolocation.php:849
+msgid "Location"
+msgstr ""
+
+#: includes/components/class-geolocation.php:169
+msgid "Latitude"
+msgstr ""
+
+#: includes/components/class-geolocation.php:184
+msgid "Longitude"
+msgstr ""
+
+#: includes/components/class-geolocation.php:199
+#: includes/components/class-geolocation.php:239
+#: includes/configs/settings.php:133
+msgid "Region"
+msgstr ""
+
+#: includes/components/class-geolocation.php:238
+#: includes/configs/settings.php:114
+msgid "Regions"
+msgstr ""
+
+#: includes/components/class-geolocation.php:240
+msgid "Add Region"
+msgstr ""
+
+#: includes/components/class-geolocation.php:241
+msgid "Edit Region"
+msgstr ""
+
+#: includes/components/class-geolocation.php:242
+msgid "Update Region"
+msgstr ""
+
+#: includes/components/class-geolocation.php:243
+msgid "View Region"
+msgstr ""
+
+#: includes/components/class-geolocation.php:244
+msgid "Parent Region"
+msgstr ""
+
+#: includes/components/class-geolocation.php:245
+msgid "Search Regions"
+msgstr ""
+
+#: includes/components/class-geolocation.php:246
+msgid "No regions found"
+msgstr ""
+
+#: includes/components/class-geolocation.php:732
+#: includes/configs/settings.php:72
+msgid "Radius"
+msgstr ""
+
+#: includes/components/class-geolocation.php:741
+msgctxt "miles"
+msgid "mi"
+msgstr ""
+
+#: includes/components/class-geolocation.php:741
+msgctxt "kilometers"
+msgid "km"
+msgstr ""
+
+#: includes/components/class-geolocation.php:765
+msgctxt "sort order"
+msgid "Distance"
+msgstr ""
+
+#: includes/components/class-geolocation.php:829
+#: includes/components/class-geolocation.php:882
+msgid "Map"
+msgstr ""
+
+#: includes/configs/settings.php:15
+msgid "Geolocation"
+msgstr ""
+
+#: includes/configs/settings.php:24
+msgid "Content Types"
+msgstr ""
+
+#: includes/configs/settings.php:25
+msgid "Select the content types that should have the location features."
+msgstr ""
+
+#: includes/configs/settings.php:39
+msgid "Map Provider"
+msgstr ""
+
+#: includes/configs/settings.php:40
+msgid "Choose the map provider and set the API credentials for it in the Integrations section."
+msgstr ""
+
+#: includes/configs/settings.php:52
+msgid "Countries"
+msgstr ""
+
+#: includes/configs/settings.php:53
+msgid "Select countries to restrict the location of the search results."
+msgstr ""
+
+#: includes/configs/settings.php:61
+msgid "Zoom"
+msgstr ""
+
+#: includes/configs/settings.php:62
+msgid "Set the maximum allowed zoom level for maps."
+msgstr ""
+
+#: includes/configs/settings.php:73
+msgid "Set the default radius used for the location search."
+msgstr ""
+
+#: includes/configs/settings.php:82
+msgid "Maximum Radius"
+msgstr ""
+
+#: includes/configs/settings.php:83
+msgid "Set the maximum radius allowed for the location search."
+msgstr ""
+
+#: includes/configs/settings.php:93
+msgid "Allow users to adjust the radius"
+msgstr ""
+
+#: includes/configs/settings.php:99
+msgid "Use miles instead of kilometers"
+msgstr ""
+
+#: includes/configs/settings.php:106
+msgid "Check this option to sort entries by distance instead of date when searched by location."
+msgstr ""
+
+#: includes/configs/settings.php:107
+msgid "Enable sorting by distance"
+msgstr ""
+
+#: includes/configs/settings.php:115
+msgid "Check this option to create pages for regions and enable region-specific search."
+msgstr ""
+
+#: includes/configs/settings.php:116
+msgid "Generate regions from locations"
+msgstr ""
+
+#: includes/configs/settings.php:122
+msgid "Region Types"
+msgstr ""
+
+#: includes/configs/settings.php:123
+msgid "Select which region types should have page creation and location search enabled."
+msgstr ""
+
+#: includes/configs/settings.php:132
+msgid "Country"
+msgstr ""
+
+#: includes/configs/settings.php:134
+msgid "Subregion"
+msgstr ""
+
+#: includes/configs/settings.php:135
+msgid "City"
+msgstr ""
+
+#: includes/configs/settings.php:136
+msgid "District"
+msgstr ""
+
+#: includes/configs/settings.php:137
+msgid "Postcode"
+msgstr ""
+
+#: includes/configs/settings.php:142
+msgid "Address"
+msgstr ""
+
+#: includes/configs/settings.php:143
+msgid "Check this option to prevent displaying exact locations."
+msgstr ""
+
+#: includes/configs/settings.php:144
+msgid "Hide the exact address"
+msgstr ""
+
+#: includes/configs/settings.php:169
+#: includes/configs/settings.php:198
+msgid "Set the API key without HTTP restrictions used for generating regions from locations."
+msgstr ""
+
+#: includes/configs/settings.php:177
+msgid "Use the legacy version of Places API"
+msgstr ""
+
+#: includes/fields/class-location.php:116
+msgid "Locate Me"
+msgstr ""
