@@ -190,7 +190,7 @@ curl https://siteniz.com/wp-json/umrebuldum/v1/poster/status \
 ## ✅ Production Checklist
 
 - [ ] Tüm testler geçti
-- [ ] Font dosyası yüklendi (Inter-Bold.ttf)
+- [x] Font dosyası yüklendi (Inter_28pt-Bold.ttf)
 - [ ] .htaccess cache dizininde var
 - [ ] LiteSpeed Cache aktif
 - [ ] Error log temiz

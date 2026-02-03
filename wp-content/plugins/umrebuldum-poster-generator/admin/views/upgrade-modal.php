@@ -161,3 +161,61 @@ $recommended = $offer_engine->get_recommended_plan();
         </a>
     </div>
 </template>
+
+<!-- Pro Value Toast Container (JS tarafından kullanılır) -->
+<div id="upg-pro-value-container" aria-live="polite" aria-atomic="true"></div>
+
+<?php
+/**
+ * Pro kullanıcı için değer göstergesi inline badge'leri
+ * Render sonrası gerçek metriklere göre gösterilir
+ */
+if ($funnel->is_pro()): ?>
+<template id="upg-pro-value-template">
+    <div class="upg-pro-value-inline">
+        <div class="upg-pro-value-header">
+            <span class="upg-pro-badge">✨ PRO</span>
+            <span class="upg-pro-value-title">Avantajlarınız</span>
+        </div>
+        <div class="upg-pro-value-badges" id="upg-dynamic-value-badges">
+            <!-- JS tarafından doldurulur -->
+        </div>
+    </div>
+</template>
+<style>
+    .upg-pro-value-inline {
+        background: linear-gradient(145deg, rgba(102, 126, 234, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin: 12px 0;
+    }
+    .upg-pro-value-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .upg-pro-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .upg-pro-value-title {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    .upg-pro-value-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+</style>
+<?php endif; ?>
+

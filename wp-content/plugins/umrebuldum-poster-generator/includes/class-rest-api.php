@@ -101,6 +101,14 @@ class Rest_API {
             'callback'            => [$this, 'get_user_tier'],
             'permission_callback' => '__return_true', // Login olmamışsa da çağrılabilir
         ]);
+        
+        // GET /umrebuldum/v1/health
+        // System health check - read-only, public
+        register_rest_route($this->namespace, '/health', [
+            'methods'             => 'GET',
+            'callback'            => [$this, 'get_health'],
+            'permission_callback' => '__return_true',
+        ]);
     }
     
     /**
@@ -293,5 +301,153 @@ class Rest_API {
                 'free_templates'    => Access_Control::FREE_TEMPLATES,
             ],
         ], 200);
+    }
+    
+    /**
+     * GET: System Health Check
+     * 
+     * @return \WP_REST_Response
+     */
+    public function get_health(): \WP_REST_Response {
+        global $wpdb;
+        
+        $cache = new Cache();
+        $tracker = new Usage_Tracker();
+        $processor = new Image_Processor();
+        
+        // ====================================
+        // 1. CORE STATUS
+        // ====================================
+        $core = [
+            'plugin_version'  => defined('UPG_VERSION') ? UPG_VERSION : 'unknown',
+            'php_version'     => PHP_VERSION,
+            'wp_version'      => get_bloginfo('version'),
+            'memory_limit'    => ini_get('memory_limit'),
+            'gd_available'    => extension_loaded('gd'),
+            'webp_supported'  => $cache->supports_webp(),
+        ];
+        
+        // ====================================
+        // 2. CACHE HEALTH
+        // ====================================
+        $cache_health = $cache->health_stats();
+        
+        // ====================================
+        // 3. ERROR HEALTH (son 24 saat)
+        // ====================================
+        $today_errors = $tracker->get_today_errors();
+        $critical_codes = [
+            Usage_Tracker::ERROR_FETCH_FAILED,
+            Usage_Tracker::ERROR_GD_FAILED,
+            Usage_Tracker::ERROR_SAVE_FAILED,
+        ];
+        
+        $critical_count = 0;
+        foreach ($critical_codes as $code) {
+            $critical_count += $today_errors['by_type'][$code] ?? 0;
+        }
+        
+        $error_health = [
+            'total_errors'    => $today_errors['total'],
+            'errors_by_type'  => $today_errors['by_type'],
+            'critical_errors' => $critical_count,
+        ];
+        
+        // ====================================
+        // 4. PERFORMANCE SNAPSHOT
+        // ====================================
+        $today = date('Y-m-d');
+        $daily_stats = get_option(Usage_Tracker::OPTION_DAILY_STATS, []);
+        $today_stats = $daily_stats[$today] ?? [
+            'total_renders' => 0,
+            'cache_hits'    => 0,
+            'total_cpu_ms'  => 0,
+        ];
+        
+        $avg_render_time = $today_stats['total_renders'] > 0 
+            ? round($today_stats['total_cpu_ms'] / $today_stats['total_renders'], 1)
+            : 0;
+        
+        $cache_hit_ratio = $today_stats['total_renders'] > 0 
+            ? round(($today_stats['cache_hits'] / $today_stats['total_renders']) * 100, 1)
+            : 0;
+        
+        $performance = [
+            'avg_render_time_ms'  => $avg_render_time,
+            'cache_hit_ratio'     => $cache_hit_ratio,
+            'total_renders_today' => $today_stats['total_renders'],
+        ];
+        
+        // ====================================
+        // 5. MONETIZATION READINESS
+        // ====================================
+        $pro_product_id = get_option('upg_pro_product_id', 0);
+        
+        // Pro users count (approximate - cached query)
+        $pro_count = wp_cache_get('upg_pro_users_count');
+        if ($pro_count === false) {
+            $pro_count = (int) $wpdb->get_var(
+                "SELECT COUNT(*) FROM {$wpdb->usermeta} 
+                 WHERE meta_key = '_upg_tier_override' AND meta_value = 'pro'"
+            );
+            wp_cache_set('upg_pro_users_count', $pro_count, '', 300); // 5 min cache
+        }
+        
+        $monetization = [
+            'woo_active'          => class_exists('WooCommerce'),
+            'subscriptions_active' => function_exists('wcs_user_has_subscription'),
+            'pro_product_id_set'  => $pro_product_id > 0,
+            'pro_users_count'     => $pro_count,
+        ];
+        
+        // ====================================
+        // OVERALL STATUS
+        // ====================================
+        $status = 'OK';
+        $issues = [];
+        
+        // FAIL conditions
+        if (!$core['gd_available']) {
+            $status = 'FAIL';
+            $issues[] = 'GD extension not available';
+        }
+        if (!$cache_health['cache_dir_exists']) {
+            $status = 'FAIL';
+            $issues[] = 'Cache directory does not exist';
+        }
+        if (!$cache_health['cache_writable']) {
+            $status = 'FAIL';
+            $issues[] = 'Cache directory not writable';
+        }
+        
+        // DEGRADED conditions (only if not already FAIL)
+        if ($status === 'OK') {
+            if ($error_health['critical_errors'] > 10) {
+                $status = 'DEGRADED';
+                $issues[] = 'High critical error count: ' . $error_health['critical_errors'];
+            }
+            if (!$core['webp_supported']) {
+                $status = 'DEGRADED';
+                $issues[] = 'WebP not supported, using PNG fallback';
+            }
+            if ($performance['cache_hit_ratio'] < 30 && $performance['total_renders_today'] > 10) {
+                $status = 'DEGRADED';
+                $issues[] = 'Low cache hit ratio: ' . $performance['cache_hit_ratio'] . '%';
+            }
+        }
+        
+        // Response
+        $http_code = $status === 'FAIL' ? 503 : 200;
+        
+        return new \WP_REST_Response([
+            'status'       => $status,
+            'issues'       => $issues,
+            'timestamp'    => time(),
+            'core'         => $core,
+            'cache'        => $cache_health,
+            'errors'       => $error_health,
+            'performance'  => $performance,
+            'monetization' => $monetization,
+        ], $http_code);
     }
 }

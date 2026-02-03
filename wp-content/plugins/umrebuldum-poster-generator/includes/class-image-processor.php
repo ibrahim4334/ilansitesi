@@ -236,11 +236,42 @@ class Image_Processor {
     // PRIVATE HELPERS
     // =========================================
     
+    /**
+     * Güvenli resim fetch (SSRF korumalı)
+     * 
+     * @param string $url Resim URL'i
+     * @return string|null Resim binary data
+     */
     private function fetch_image(string $url): ?string {
-        // WordPress HTTP API kullan (timeout ve error handling)
+        // ====================================
+        // SSRF PROTECTION
+        // ====================================
+        
+        // 1. URL scheme kontrolü (sadece http/https)
+        $scheme = wp_parse_url($url, PHP_URL_SCHEME);
+        if (!in_array(strtolower($scheme), ['http', 'https'], true)) {
+            return null;
+        }
+        
+        // 2. WordPress URL validator (private IP'leri engeller)
+        if (!wp_http_validate_url($url)) {
+            return null;
+        }
+        
+        // 3. Ek private/local IP kontrolü
+        $host = wp_parse_url($url, PHP_URL_HOST);
+        if ($this->is_private_ip($host)) {
+            return null;
+        }
+        
+        // ====================================
+        // SECURE FETCH
+        // ====================================
         $response = wp_remote_get($url, [
-            'timeout' => 10,
-            'sslverify' => false,
+            'timeout'     => 10,
+            'sslverify'   => true,  // SSL doğrulama aktif
+            'redirection' => 2,     // Max 2 redirect
+            'limit_response_size' => 10 * 1024 * 1024, // 10MB max
         ]);
         
         if (is_wp_error($response)) {
@@ -252,7 +283,38 @@ class Image_Processor {
             return null;
         }
         
+        // Content-Type kontrolü (resim mi?)
+        $content_type = wp_remote_retrieve_header($response, 'content-type');
+        if ($content_type && strpos($content_type, 'image/') !== 0) {
+            return null;
+        }
+        
         return wp_remote_retrieve_body($response);
+    }
+    
+    /**
+     * Private/local IP kontrolü
+     */
+    private function is_private_ip(string $host): bool {
+        // IP resolve
+        $ip = gethostbyname($host);
+        
+        // Resolve edilemedi
+        if ($ip === $host && !filter_var($host, FILTER_VALIDATE_IP)) {
+            return true; // Güvenlik: bilinmeyen host'u engelle
+        }
+        
+        // IPv6 localhost
+        if ($ip === '::1') {
+            return true;
+        }
+        
+        // Private IP ranges
+        return filter_var(
+            $ip,
+            FILTER_VALIDATE_IP,
+            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+        ) === false;
     }
     
     private function parse_memory_limit(string $limit): int {
@@ -292,9 +354,9 @@ class Image_Processor {
      * @return array   ['path', 'url', 'format', 'size', 'quality']
      */
     public function generate_output($gd_resource, array $context): array {
-        // Tier bazlı kalite
-        $tier = $context['tier'] ?? 'free';
-        $quality = $this->get_quality_for_tier($tier);
+        // Quality: Access_Control'dan gelmeli (tek kaynak)
+        // context['quality'] zorunlu, fallback yok - tutarlılık için
+        $quality = $context['quality'] ?? Access_Control::FREE_QUALITY;
         
         // Upload dizini
         $upload = wp_upload_dir();
@@ -353,14 +415,15 @@ class Image_Processor {
     
     /**
      * Tier bazlı kalite ayarı
+     * 
+     * @deprecated Use Access_Control::get_quality() instead
+     * Backward compatibility için tutuldu
      */
     public function get_quality_for_tier(string $tier): int {
-        $qualities = [
-            'free' => 70,
-            'pro'  => 88,
-        ];
-        
-        return $qualities[$tier] ?? 70;
+        // Tek kaynak: Access_Control constants
+        return $tier === 'pro' 
+            ? Access_Control::PRO_QUALITY 
+            : Access_Control::FREE_QUALITY;
     }
     
     /**
@@ -400,10 +463,10 @@ class Image_Processor {
     /**
      * Output config döndür
      */
-    public function get_output_config(string $tier = 'free'): array {
+    public function get_output_config(string $tier = 'free', ?int $quality = null): array {
         return [
             'format'  => $this->get_best_format(),
-            'quality' => $this->get_quality_for_tier($tier),
+            'quality' => $quality ?? ($tier === 'pro' ? Access_Control::PRO_QUALITY : Access_Control::FREE_QUALITY),
             'ttl'     => $tier === 'pro' ? (30 * DAY_IN_SECONDS) : DAY_IN_SECONDS,
         ];
     }

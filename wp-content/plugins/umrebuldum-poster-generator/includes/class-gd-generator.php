@@ -70,6 +70,10 @@ class GD_Generator implements Generator_Interface {
         if (!$access->is_pro()) {
             $rate_check = $this->rate_limiter->check('generate');
             if (!$rate_check['allowed']) {
+                $this->usage_tracker->track_error(Usage_Tracker::ERROR_RATE_LIMITED, [
+                    'listing_id' => $listing_id,
+                    'reset'      => $rate_check['reset'],
+                ]);
                 return new \WP_Error(
                     'rate_limited',
                     'Çok sık istek gönderiyorsunuz. Lütfen bekleyin.',
@@ -78,9 +82,11 @@ class GD_Generator implements Generator_Interface {
             }
         }
         
-        // Erişim kontrolü
         $can_generate = $access->can_generate();
         if (!$can_generate['allowed']) {
+            $this->usage_tracker->track_error($can_generate['reason'], [
+                'listing_id' => $listing_id,
+            ]);
             return new \WP_Error(
                 $can_generate['reason'],
                 $can_generate['message'],
@@ -88,8 +94,11 @@ class GD_Generator implements Generator_Interface {
             );
         }
         
-        // Template kontrolü (Free kullanıcılar kısıtlı)
         if (!$access->can_use_template($template)) {
+            $this->usage_tracker->track_error(Usage_Tracker::ERROR_TEMPLATE_RESTRICTED, [
+                'listing_id' => $listing_id,
+                'template'   => $template,
+            ]);
             return new \WP_Error(
                 'template_restricted',
                 "Bu template Pro üyelik gerektirir.",
@@ -114,6 +123,9 @@ class GD_Generator implements Generator_Interface {
                 update_post_meta($listing_id, '_poster_path', $cached['path']);
                 update_post_meta($listing_id, '_poster_from_cache', true);
                 update_post_meta($listing_id, '_poster_user_id', get_current_user_id());
+                
+                // Agency metadata kaydet (görünmez ama kritik)
+                Agency_Helper::save_poster_agency_meta($listing_id);
                 
                 // Cache metadata kaydet
                 $metadata = $this->cache->create_poster_metadata($listing_id, $template, true);
@@ -152,16 +164,21 @@ class GD_Generator implements Generator_Interface {
             }
         }
         
-        // Listing verilerini al
         $data = $this->get_listing_data($listing_id);
         
         if (!$data) {
+            $this->usage_tracker->track_error(Usage_Tracker::ERROR_NO_LISTING, [
+                'listing_id' => $listing_id,
+            ]);
             return new \WP_Error('no_listing', 'İlan bulunamadı');
         }
         
-        // Bellek kontrolü
         $memory = $this->processor->get_memory_usage();
         if ($memory['available_mb'] < 30) {
+            $this->usage_tracker->track_error(Usage_Tracker::ERROR_LOW_MEMORY, [
+                'listing_id'   => $listing_id,
+                'available_mb' => $memory['available_mb'],
+            ]);
             return new \WP_Error('low_memory', 'Yetersiz bellek: ' . $memory['available_mb'] . 'MB');
         }
         
@@ -233,6 +250,10 @@ class GD_Generator implements Generator_Interface {
         $result = $this->cache->set($cache_key, $temp_path, $quality);
         
         if (!$result) {
+            $this->usage_tracker->track_error(Usage_Tracker::ERROR_SAVE_FAILED, [
+                'listing_id' => $listing_id,
+                'cache_key'  => $cache_key,
+            ]);
             return new \WP_Error('cache_error', 'Afiş kaydedilemedi');
         }
         
@@ -252,6 +273,9 @@ class GD_Generator implements Generator_Interface {
         update_post_meta($listing_id, '_poster_from_cache', false);
         update_post_meta($listing_id, '_poster_user_id', get_current_user_id());
         update_post_meta($listing_id, '_poster_quality', $quality);
+        
+        // Agency metadata kaydet (görünmez ama kritik)
+        Agency_Helper::save_poster_agency_meta($listing_id);
         
         // Cache metadata kaydet
         $metadata = $this->cache->create_poster_metadata($listing_id, $template, false);
@@ -409,17 +433,28 @@ class GD_Generator implements Generator_Interface {
     
     /**
      * Font yolu
+     * Mevcut Inter fontlarına uyumlu
      */
     private function get_font_path(): string {
-        $custom_font = UPG_PATH . 'fonts/Inter-Bold.ttf';
+        // Inter font öncelikleri (büyükten küçüğe - poster için ideal)
+        $inter_fonts = [
+            UPG_PATH . 'fonts/Inter_28pt-Bold.ttf',  // En büyük, posterler için ideal
+            UPG_PATH . 'fonts/Inter_24pt-Bold.ttf',  // Alternatif
+            UPG_PATH . 'fonts/Inter_18pt-Bold.ttf',  // Küçük poster için
+            UPG_PATH . 'fonts/Inter-Bold.ttf',       // Eski format (backward compat)
+        ];
         
-        if (file_exists($custom_font)) {
-            return $custom_font;
+        foreach ($inter_fonts as $font) {
+            if (file_exists($font)) {
+                return $font;
+            }
         }
         
-        // Sistem fontları
+        // Sistem fontları (fallback)
         $system_fonts = [
             '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
+            'C:/Windows/Fonts/arialbd.ttf',  // Arial Bold
             'C:/Windows/Fonts/arial.ttf',
         ];
         
@@ -476,6 +511,10 @@ class GD_Generator implements Generator_Interface {
         $loaded = $this->processor->load_safe($image_url);
         
         if (!$loaded) {
+            // Error track (görsel yüklenemedi)
+            $this->usage_tracker->track_error(Usage_Tracker::ERROR_FETCH_FAILED, [
+                'image_url' => substr($image_url, 0, 100), // Truncate for privacy
+            ]);
             // Fallback: eski yöntem
             $this->render_background($canvas, $image_url, $width, $height);
             return;

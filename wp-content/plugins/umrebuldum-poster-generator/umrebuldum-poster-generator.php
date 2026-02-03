@@ -76,6 +76,7 @@ final class Umrebuldum_Poster_Plugin {
         require_once UPG_PATH . 'includes/class-usage-tracker.php';  // Usage metrics & friction
         require_once UPG_PATH . 'includes/class-offer-engine.php';   // Multi-plan pricing
         require_once UPG_PATH . 'includes/class-upgrade-funnel.php'; // Conversion
+        require_once UPG_PATH . 'includes/class-agency-helper.php';  // Agency altyapısı (sub-users)
         require_once UPG_PATH . 'includes/class-gd-generator.php';
         require_once UPG_PATH . 'includes/class-api-generator.php';
         require_once UPG_PATH . 'includes/class-rest-api.php';
@@ -196,3 +197,50 @@ function upg() {
 
 // Başlat
 add_action('plugins_loaded', 'upg');
+
+// =========================================
+// CACHE AUTO-CLEANUP (WP CRON)
+// =========================================
+
+/**
+ * Cron event adı
+ */
+define('UPG_CACHE_CLEANUP_HOOK', 'upg_daily_cache_cleanup');
+
+/**
+ * Plugin activation - Cron schedule
+ */
+register_activation_hook(__FILE__, function() {
+    if (!wp_next_scheduled(UPG_CACHE_CLEANUP_HOOK)) {
+        wp_schedule_event(time(), 'daily', UPG_CACHE_CLEANUP_HOOK);
+    }
+});
+
+/**
+ * Plugin deactivation - Cron temizle
+ */
+register_deactivation_hook(__FILE__, function() {
+    wp_clear_scheduled_hook(UPG_CACHE_CLEANUP_HOOK);
+});
+
+/**
+ * Cron callback - Tier bazlı cache cleanup
+ */
+add_action(UPG_CACHE_CLEANUP_HOOK, function() {
+    // Free tier TTL (1 gün)
+    $free_cache = new Umrebuldum\Poster\Cache('free');
+    $free_result = $free_cache->cleanup(DAY_IN_SECONDS);
+    
+    // Pro tier TTL (30 gün)
+    $pro_cache = new Umrebuldum\Poster\Cache('pro');
+    $pro_result = $pro_cache->cleanup(DAY_IN_SECONDS * 30);
+    
+    // Log (debug için)
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log(sprintf(
+            '[UPG Cache Cleanup] Free: %d deleted, Pro: %d deleted',
+            $free_result['deleted'] ?? 0,
+            $pro_result['deleted'] ?? 0
+        ));
+    }
+});

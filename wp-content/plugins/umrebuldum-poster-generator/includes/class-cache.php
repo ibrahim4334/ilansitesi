@@ -289,6 +289,43 @@ class Cache {
         return !empty($gd_info['WebP Support']);
     }
     
+    /**
+     * Health check için cache durumu
+     */
+    public function health_stats(): array {
+        $dir_exists = file_exists($this->cache_dir);
+        $writable = $dir_exists && is_writable($this->cache_dir);
+        
+        $total_files = 0;
+        $total_size = 0;
+        $oldest_age_hours = 0;
+        
+        if ($dir_exists) {
+            $files = glob($this->cache_dir . '/*');
+            $now = time();
+            
+            foreach ($files as $file) {
+                if (!is_file($file)) continue;
+                
+                $total_files++;
+                $total_size += filesize($file);
+                
+                $age_hours = ($now - filemtime($file)) / 3600;
+                if ($age_hours > $oldest_age_hours) {
+                    $oldest_age_hours = $age_hours;
+                }
+            }
+        }
+        
+        return [
+            'cache_dir_exists'          => $dir_exists,
+            'cache_writable'            => $writable,
+            'cache_total_files'         => $total_files,
+            'cache_total_size_mb'       => round($total_size / 1024 / 1024, 2),
+            'oldest_cache_file_age_hours' => round($oldest_age_hours, 1),
+        ];
+    }
+    
     // =========================================
     // METADATA MANAGEMENT
     // =========================================
@@ -348,17 +385,30 @@ class Cache {
     
     /**
      * Poster metadata oluştur
+     * Agency altyapısı ile genişletildi
      */
     public function create_poster_metadata(int $listing_id, string $template, bool $from_cache = false): array {
+        $user_id = get_current_user_id();
+        
+        // Agency metadata al
+        $agency_meta = Agency_Helper::get_poster_agency_metadata($user_id);
+        
         return [
-            'user_id'     => get_current_user_id(),
-            'listing_id'  => $listing_id,
-            'plan'        => $this->tier,
-            'template_id' => $template,
-            'created_at'  => time(),
-            'from_cache'  => $from_cache,
-            'ttl'         => $this->ttl,
-            'format'      => $this->supports_webp() ? 'webp' : 'jpg',
+            // Temel bilgiler
+            'user_id'             => $user_id,
+            'listing_id'          => $listing_id,
+            'plan'                => $this->tier,
+            'template_id'         => $template,
+            'created_at'          => time(),
+            'from_cache'          => $from_cache,
+            'ttl'                 => $this->ttl,
+            'format'              => $this->supports_webp() ? 'webp' : 'jpg',
+            
+            // Agency altyapısı (görünmez ama kritik)
+            'owner_user_id'       => $agency_meta['owner_user_id'],
+            'generated_by_user_id'=> $agency_meta['generated_by_user_id'],
+            'agency_id'           => $agency_meta['agency_id'],
+            'is_agency_render'    => $agency_meta['is_agency_render'],
         ];
     }
     
@@ -435,6 +485,161 @@ class Cache {
      */
     public function get_cache_url(): string {
         return $this->cache_url;
+    }
+    
+    // =========================================
+    // PERFORMANCE METRICS - PRO VALUE
+    // =========================================
+    
+    /**
+     * Cache performans metrikleri
+     * Pro değer hesaplaması için kullanılır
+     */
+    public function get_performance_metrics(): array {
+        $stats = $this->stats();
+        
+        // Tahmini render süresi tasarrufu
+        // Her cache hit ortalama 400ms tasarruf sağlar
+        $avg_render_time_ms = 400;
+        $estimated_time_saved_ms = $stats['count'] * $avg_render_time_ms;
+        
+        // Disk alanı tasarrufu
+        // PNG yerine WebP kullanarak ~60% tasarruf
+        $webp_savings_percent = 60;
+        $estimated_disk_saved = $stats['total_size'] * ($webp_savings_percent / 40);
+        
+        return [
+            // Temel stats
+            'total_files'      => $stats['count'],
+            'total_size_bytes' => $stats['total_size'],
+            'total_size_mb'    => $stats['total_mb'],
+            'webp_count'       => $stats['types']['webp'] ?? 0,
+            'png_count'        => $stats['types']['png'] ?? 0,
+            
+            // Performans
+            'webp_support'     => $stats['webp_support'],
+            'webp_ratio'       => $stats['count'] > 0 
+                ? round((($stats['types']['webp'] ?? 0) / $stats['count']) * 100) 
+                : 0,
+            
+            // Tasarruflar
+            'time_saved_ms'    => $estimated_time_saved_ms,
+            'time_saved_sec'   => round($estimated_time_saved_ms / 1000, 1),
+            'time_saved_min'   => round($estimated_time_saved_ms / 1000 / 60, 2),
+            'disk_saved_mb'    => round($estimated_disk_saved / 1024 / 1024, 2),
+            
+            // Tier bilgisi
+            'tier'             => $this->tier,
+            'ttl_seconds'      => $this->ttl,
+            'ttl_days'         => round($this->ttl / DAY_IN_SECONDS, 1),
+        ];
+    }
+    
+    /**
+     * Cache hit/miss simülasyonu
+     * Free vs Pro karşılaştırması için
+     */
+    public function simulate_tier_comparison(int $render_count): array {
+        // Free: 1 gün TTL → günde 1 cache miss per listing
+        // Pro: 30 gün TTL → ayda 1 cache miss per listing
+        
+        $avg_render_ms = 400;
+        
+        // Free senaryosu
+        $free_ttl_days = 1;
+        $free_cache_misses = $render_count * (30 / $free_ttl_days) / 30; // Aylık miss oranı
+        $free_total_render_time = $free_cache_misses * $avg_render_ms;
+        
+        // Pro senaryosu
+        $pro_ttl_days = 30;
+        $pro_cache_misses = $render_count * (30 / $pro_ttl_days) / 30;
+        $pro_total_render_time = $pro_cache_misses * $avg_render_ms;
+        
+        // Fark
+        $time_saved_ms = $free_total_render_time - $pro_total_render_time;
+        
+        return [
+            'render_count'         => $render_count,
+            
+            'free' => [
+                'ttl_days'         => $free_ttl_days,
+                'cache_misses'     => round($free_cache_misses),
+                'total_render_ms'  => round($free_total_render_time),
+                'total_render_sec' => round($free_total_render_time / 1000, 1),
+            ],
+            
+            'pro' => [
+                'ttl_days'         => $pro_ttl_days,
+                'cache_misses'     => round($pro_cache_misses),
+                'total_render_ms'  => round($pro_total_render_time),
+                'total_render_sec' => round($pro_total_render_time / 1000, 1),
+            ],
+            
+            'savings' => [
+                'cache_misses_avoided' => round($free_cache_misses - $pro_cache_misses),
+                'time_saved_ms'        => round($time_saved_ms),
+                'time_saved_sec'       => round($time_saved_ms / 1000, 1),
+                'efficiency_boost'     => $free_cache_misses > 0 
+                    ? round((1 - ($pro_cache_misses / $free_cache_misses)) * 100) 
+                    : 0,
+            ],
+        ];
+    }
+    
+    /**
+     * Tier bazlı kalite karşılaştırması
+     */
+    public function get_quality_comparison(): array {
+        return [
+            'free' => [
+                'quality'      => 60,
+                'format'       => 'webp',
+                'ttl_days'     => 1,
+                'watermark'    => true,
+                'description'  => 'Standart kalite, günlük cache',
+            ],
+            'pro' => [
+                'quality'      => 85,
+                'format'       => 'webp',
+                'ttl_days'     => 30,
+                'watermark'    => false,
+                'description'  => 'Yüksek kalite, aylık cache',
+            ],
+            'difference' => [
+                'quality_boost'     => '+42%',
+                'cache_ttl_boost'   => '30x',
+                'watermark_removed' => true,
+            ],
+        ];
+    }
+    
+    /**
+     * Belirli bir listing için cache durumu
+     */
+    public function get_listing_cache_status(int $listing_id, string $template = 'default', string $size = 'instagram'): array {
+        $key = $this->get_key($listing_id, $template, $size);
+        $info = $this->get_cache_info($key);
+        
+        if (!$info['cached']) {
+            return [
+                'status'    => 'miss',
+                'cached'    => false,
+                'needs_render' => true,
+                'estimated_time_ms' => 400,
+            ];
+        }
+        
+        return [
+            'status'      => 'hit',
+            'cached'      => true,
+            'needs_render' => false,
+            'estimated_time_ms' => 50,
+            'size_kb'     => round($info['size'] / 1024, 2),
+            'format'      => $info['format'],
+            'expires_in'  => $info['remaining'],
+            'expires_in_hours' => round($info['remaining'] / 3600, 1),
+            'tier'        => $info['tier'],
+        ];
     }
 }
 

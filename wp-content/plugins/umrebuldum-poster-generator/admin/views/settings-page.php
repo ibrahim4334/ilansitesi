@@ -11,12 +11,123 @@ defined('ABSPATH') || exit;
 $templates = \Umrebuldum\Poster\Templates::get_template_options();
 $sizes = \Umrebuldum\Poster\Templates::get_size_options();
 $recent_posters = $this->get_recent_posters();
+$dashboard_stats = $this->get_dashboard_stats();
 ?>
 
 <div class="wrap upg-admin">
     <h1>🖼️ Umrebuldum Afiş Üretici</h1>
     
     <?php echo $message; ?>
+    
+    <!-- ============================================ -->
+    <!-- MINI DASHBOARD (SADECE OKUNUR) -->
+    <!-- ============================================ -->
+    <div class="upg-dashboard">
+        <h2>📊 Dashboard</h2>
+        
+        <div class="upg-stats-grid">
+            <!-- Toplam Render -->
+            <div class="upg-stat-card upg-stat-primary">
+                <div class="upg-stat-icon">🎨</div>
+                <div class="upg-stat-content">
+                    <span class="upg-stat-value"><?php echo number_format($dashboard_stats['total_renders']); ?></span>
+                    <span class="upg-stat-label">Toplam Render</span>
+                </div>
+            </div>
+            
+            <!-- Cache Hit Oranı -->
+            <div class="upg-stat-card upg-stat-success">
+                <div class="upg-stat-icon">⚡</div>
+                <div class="upg-stat-content">
+                    <span class="upg-stat-value"><?php echo $dashboard_stats['cache_hit_ratio']; ?>%</span>
+                    <span class="upg-stat-label">Cache Hit Oranı</span>
+                    <span class="upg-stat-detail"><?php echo number_format($dashboard_stats['cache_hits']); ?> / <?php echo number_format($dashboard_stats['total_renders']); ?></span>
+                </div>
+            </div>
+            
+            <!-- CPU Tasarrufu -->
+            <div class="upg-stat-card upg-stat-info">
+                <div class="upg-stat-icon">💾</div>
+                <div class="upg-stat-content">
+                    <span class="upg-stat-value"><?php echo esc_html($dashboard_stats['cpu_savings']['human_readable']); ?></span>
+                    <span class="upg-stat-label">CPU Tasarrufu</span>
+                    <span class="upg-stat-detail">~<?php echo number_format($dashboard_stats['cpu_savings']['total_saved_ms']); ?> ms</span>
+                </div>
+            </div>
+            
+            <!-- Tier Dağılımı -->
+            <div class="upg-stat-card upg-stat-warning">
+                <div class="upg-stat-icon">👥</div>
+                <div class="upg-stat-content">
+                    <span class="upg-stat-value">
+                        <?php echo $dashboard_stats['tier_stats']['free_users']; ?> / <?php echo $dashboard_stats['tier_stats']['pro_users']; ?>
+                    </span>
+                    <span class="upg-stat-label">Free / Pro</span>
+                    <?php if ($dashboard_stats['tier_stats']['agency_users'] > 0): ?>
+                    <span class="upg-stat-detail">+<?php echo $dashboard_stats['tier_stats']['agency_users']; ?> Agency</span>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Günlük Trend (Son 7 Gün) -->
+        <div class="upg-trend-section">
+            <h3>📈 Son 7 Gün</h3>
+            <div class="upg-trend-chart">
+                <?php 
+                $max_renders = max(array_column($dashboard_stats['daily_trend'], 'renders'));
+                $max_renders = $max_renders > 0 ? $max_renders : 1;
+                
+                foreach ($dashboard_stats['daily_trend'] as $day): 
+                    $height = ($day['renders'] / $max_renders) * 100;
+                    $cache_height = $day['renders'] > 0 ? ($day['cache_hits'] / $day['renders']) * $height : 0;
+                ?>
+                <div class="upg-trend-bar-wrapper">
+                    <div class="upg-trend-bar" style="height: <?php echo $height; ?>%;">
+                        <div class="upg-trend-cache" style="height: <?php echo $cache_height; ?>%;"></div>
+                    </div>
+                    <span class="upg-trend-label"><?php echo esc_html($day['day_tr']); ?></span>
+                    <span class="upg-trend-value"><?php echo $day['renders']; ?></span>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <div class="upg-trend-legend">
+                <span><span class="upg-legend-box upg-legend-total"></span> Toplam Render</span>
+                <span><span class="upg-legend-box upg-legend-cache"></span> Cache Hit</span>
+            </div>
+        </div>
+        
+        <!-- Free vs Pro CPU Karşılaştırması -->
+        <div class="upg-comparison-section">
+            <h3>⚡ Pro Avantajı</h3>
+            <div class="upg-comparison-bars">
+                <div class="upg-compare-item">
+                    <span class="upg-compare-label">Free Renderlar</span>
+                    <div class="upg-compare-bar">
+                        <div class="upg-compare-fill upg-compare-free" style="width: <?php 
+                            $total = $dashboard_stats['tier_stats']['free_renders'] + $dashboard_stats['tier_stats']['pro_renders'];
+                            echo $total > 0 ? round(($dashboard_stats['tier_stats']['free_renders'] / $total) * 100) : 50;
+                        ?>%;"></div>
+                    </div>
+                    <span class="upg-compare-value"><?php echo number_format($dashboard_stats['tier_stats']['free_renders']); ?></span>
+                </div>
+                <div class="upg-compare-item">
+                    <span class="upg-compare-label">Pro Renderlar</span>
+                    <div class="upg-compare-bar">
+                        <div class="upg-compare-fill upg-compare-pro" style="width: <?php 
+                            echo $total > 0 ? round(($dashboard_stats['tier_stats']['pro_renders'] / $total) * 100) : 50;
+                        ?>%;"></div>
+                    </div>
+                    <span class="upg-compare-value"><?php echo number_format($dashboard_stats['tier_stats']['pro_renders']); ?></span>
+                </div>
+            </div>
+            <?php if ($dashboard_stats['cpu_savings']['pro_bonus_ms'] > 0): ?>
+            <p class="upg-pro-bonus">
+                ✨ Pro kullanıcılar sayesinde <strong>~<?php echo number_format($dashboard_stats['cpu_savings']['pro_bonus_ms']); ?> ms</strong> ekstra CPU tasarrufu
+            </p>
+            <?php endif; ?>
+        </div>
+    </div>
     
     <div class="upg-grid">
         <!-- Ayarlar -->
@@ -74,6 +185,25 @@ $recent_posters = $this->get_recent_posters();
                                 </option>
                             </select>
                             <p class="description">Phase 3'te Python servisine geçiş yapılabilir.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Pro Product ID</th>
+                        <td>
+                            <input type="number" 
+                                   name="upg_pro_product_id" 
+                                   value="<?php echo esc_attr(get_option('upg_pro_product_id', '')); ?>"
+                                   class="regular-text"
+                                   min="1"
+                                   placeholder="Örn: 123">
+                            <p class="description">
+                                WooCommerce Subscriptions ürün ID'si. 
+                                <?php if (function_exists('wcs_user_has_subscription')): ?>
+                                    <span style="color: #46b450;">✓ WooCommerce Subscriptions aktif</span>
+                                <?php else: ?>
+                                    <span style="color: #dc3232;">✗ WooCommerce Subscriptions yüklü değil</span>
+                                <?php endif; ?>
+                            </p>
                         </td>
                     </tr>
                 </table>
@@ -188,10 +318,28 @@ $recent_posters = $this->get_recent_posters();
                 <td><strong>Font Dosyası</strong></td>
                 <td>
                     <?php 
-                    $font_path = UPG_PATH . 'fonts/Inter-Bold.ttf';
-                    echo file_exists($font_path) 
-                        ? '✅ Inter-Bold.ttf' 
-                        : '⚠️ Yok - <a href="https://fonts.google.com/specimen/Inter" target="_blank">İndir</a>';
+                    // Inter font variants kontrol
+                    $fonts_dir = UPG_PATH . 'fonts/';
+                    $inter_fonts = [
+                        'Inter_28pt-Bold.ttf',
+                        'Inter_24pt-Bold.ttf', 
+                        'Inter_18pt-Bold.ttf',
+                        'Inter-Bold.ttf',
+                    ];
+                    
+                    $found_font = null;
+                    foreach ($inter_fonts as $font) {
+                        if (file_exists($fonts_dir . $font)) {
+                            $found_font = $font;
+                            break;
+                        }
+                    }
+                    
+                    if ($found_font) {
+                        echo '✅ ' . esc_html($found_font);
+                    } else {
+                        echo '⚠️ Yok - <a href="https://fonts.google.com/specimen/Inter" target="_blank">İndir</a>';
+                    }
                     ?>
                 </td>
             </tr>

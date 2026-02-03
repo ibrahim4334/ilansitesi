@@ -38,6 +38,12 @@ class Usage_Tracker {
     const META_DAILY_RENDERS    = '_upg_daily_renders';
     
     /**
+     * Error tracking meta keys
+     */
+    const META_TOTAL_ERRORS     = '_upg_total_errors';
+    const META_ERROR_TYPES      = '_upg_error_types';
+    
+    /**
      * Agency meta keys
      */
     const META_OWNER_USER_ID    = '_upg_owner_user_id';
@@ -47,6 +53,20 @@ class Usage_Tracker {
      * Daily aggregate option key
      */
     const OPTION_DAILY_STATS    = 'upg_daily_stats';
+    const OPTION_DAILY_ERRORS   = 'upg_daily_errors';
+    
+    /**
+     * Standard error codes
+     */
+    const ERROR_RATE_LIMITED    = 'rate_limited';
+    const ERROR_QUOTA_EXCEEDED  = 'quota_exceeded';
+    const ERROR_LOGIN_REQUIRED  = 'login_required';
+    const ERROR_TEMPLATE_RESTRICTED = 'template_restricted';
+    const ERROR_FETCH_FAILED    = 'fetch_failed';
+    const ERROR_GD_FAILED       = 'gd_failed';
+    const ERROR_SAVE_FAILED     = 'save_failed';
+    const ERROR_LOW_MEMORY      = 'low_memory';
+    const ERROR_NO_LISTING      = 'no_listing';
     
     private $access;
     
@@ -189,6 +209,121 @@ class Usage_Tracker {
         }, ARRAY_FILTER_USE_KEY);
         
         update_option(self::OPTION_DAILY_STATS, $stats, false);
+    }
+    
+    // =========================================
+    // ERROR TRACKING
+    // =========================================
+    
+    /**
+     * Hata kaydı oluştur
+     * 
+     * @param string $error_code Standart hata kodu (ERROR_* constants)
+     * @param array  $context    Opsiyonel context bilgisi
+     */
+    public function track_error(string $error_code, array $context = []): void {
+        $user_id = get_current_user_id();
+        
+        // User-level error tracking
+        if ($user_id) {
+            $this->update_user_errors($user_id, $error_code);
+        }
+        
+        // Daily aggregate error tracking
+        $this->update_daily_errors($error_code, $context);
+        
+        // WP Debug log (opsiyonel)
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf(
+                '[UPG Error] Code: %s, User: %d, Context: %s',
+                $error_code,
+                $user_id,
+                json_encode($context)
+            ));
+        }
+    }
+    
+    /**
+     * User error sayaçlarını güncelle
+     */
+    private function update_user_errors(int $user_id, string $error_code): void {
+        // Toplam hata sayısı
+        $total = (int) get_user_meta($user_id, self::META_TOTAL_ERRORS, true);
+        update_user_meta($user_id, self::META_TOTAL_ERRORS, $total + 1);
+        
+        // Hata tipi bazlı sayaçlar
+        $error_types = get_user_meta($user_id, self::META_ERROR_TYPES, true) ?: [];
+        
+        if (!isset($error_types[$error_code])) {
+            $error_types[$error_code] = 0;
+        }
+        $error_types[$error_code]++;
+        
+        update_user_meta($user_id, self::META_ERROR_TYPES, $error_types);
+    }
+    
+    /**
+     * Daily error aggregate güncelle
+     */
+    private function update_daily_errors(string $error_code, array $context): void {
+        $today = date('Y-m-d');
+        $option_key = self::OPTION_DAILY_ERRORS . '_' . $today;
+        
+        $errors = get_option($option_key, [
+            'total'       => 0,
+            'by_type'     => [],
+            'last_errors' => [],
+        ]);
+        
+        // Toplam hata
+        $errors['total']++;
+        
+        // Tip bazlı
+        if (!isset($errors['by_type'][$error_code])) {
+            $errors['by_type'][$error_code] = 0;
+        }
+        $errors['by_type'][$error_code]++;
+        
+        // Son 10 hata (debug için)
+        array_unshift($errors['last_errors'], [
+            'code'      => $error_code,
+            'timestamp' => time(),
+            'user_id'   => get_current_user_id(),
+            'context'   => array_slice($context, 0, 3), // Sadece ilk 3 context key
+        ]);
+        $errors['last_errors'] = array_slice($errors['last_errors'], 0, 10);
+        
+        update_option($option_key, $errors, false);
+    }
+    
+    /**
+     * Bugünkü hata istatistikleri
+     */
+    public function get_today_errors(): array {
+        $today = date('Y-m-d');
+        $option_key = self::OPTION_DAILY_ERRORS . '_' . $today;
+        
+        return get_option($option_key, [
+            'total'       => 0,
+            'by_type'     => [],
+            'last_errors' => [],
+        ]);
+    }
+    
+    /**
+     * Kullanıcının hata istatistikleri
+     */
+    public function get_user_errors(?int $user_id = null): array {
+        $user_id = $user_id ?? get_current_user_id();
+        
+        if (!$user_id) {
+            return ['total' => 0, 'by_type' => []];
+        }
+        
+        return [
+            'total'   => (int) get_user_meta($user_id, self::META_TOTAL_ERRORS, true),
+            'by_type' => get_user_meta($user_id, self::META_ERROR_TYPES, true) ?: [],
+        ];
     }
     
     // =========================================
@@ -595,6 +730,273 @@ class Usage_Tracker {
             'is_pro'      => $this->access->is_pro(),
             'tier'        => $this->access->get_tier(),
             'total_renders' => (int) get_user_meta(get_current_user_id(), self::META_TOTAL_RENDERS, true),
+        ];
+    }
+    
+    // =========================================
+    // PRO VALUE COMPARISON - SAYILARLA GÖSTER
+    // =========================================
+    
+    /**
+     * Kullanıcının tüm metriklerini al
+     */
+    public function get_user_metrics(?int $user_id = null): array {
+        $user_id = $user_id ?? get_current_user_id();
+        
+        if (!$user_id) {
+            return $this->get_empty_metrics();
+        }
+        
+        $total_renders = (int) get_user_meta($user_id, self::META_TOTAL_RENDERS, true);
+        $cache_hits = (int) get_user_meta($user_id, self::META_CACHE_HITS, true);
+        $total_cpu_ms = (int) get_user_meta($user_id, self::META_TOTAL_CPU_MS, true);
+        $total_size_kb = (float) get_user_meta($user_id, self::META_TOTAL_SIZE_KB, true);
+        
+        return [
+            'total_renders'    => $total_renders,
+            'cache_hits'       => $cache_hits,
+            'cache_misses'     => $total_renders - $cache_hits,
+            'cache_hit_ratio'  => $total_renders > 0 ? round(($cache_hits / $total_renders) * 100) : 0,
+            'total_cpu_ms'     => $total_cpu_ms,
+            'total_cpu_sec'    => round($total_cpu_ms / 1000, 2),
+            'avg_render_ms'    => $total_renders > 0 ? round($total_cpu_ms / $total_renders) : 0,
+            'total_size_kb'    => round($total_size_kb, 2),
+            'total_size_mb'    => round($total_size_kb / 1024, 2),
+            'avg_size_kb'      => $total_renders > 0 ? round($total_size_kb / $total_renders, 2) : 0,
+        ];
+    }
+    
+    /**
+     * Boş metrik seti
+     */
+    private function get_empty_metrics(): array {
+        return [
+            'total_renders'    => 0,
+            'cache_hits'       => 0,
+            'cache_misses'     => 0,
+            'cache_hit_ratio'  => 0,
+            'total_cpu_ms'     => 0,
+            'total_cpu_sec'    => 0,
+            'avg_render_ms'    => 0,
+            'total_size_kb'    => 0,
+            'total_size_mb'    => 0,
+            'avg_size_kb'      => 0,
+        ];
+    }
+    
+    /**
+     * Pro vs Free karşılaştırması
+     * Free kullanıcıya Pro'nun avantajlarını göster
+     */
+    public function get_pro_value_comparison(): array {
+        $user_metrics = $this->get_user_metrics();
+        $is_pro = $this->access->is_pro();
+        
+        // Tier bazlı değerler
+        $free_quality = 60;
+        $pro_quality = 85;
+        $free_cache_ttl_days = 1;
+        $pro_cache_ttl_days = 30;
+        
+        // Hesaplamalar
+        $quality_boost_percent = round((($pro_quality / $free_quality) - 1) * 100);
+        $cache_ttl_boost_times = $pro_cache_ttl_days / $free_cache_ttl_days;
+        
+        // Tahmini tasarruflar
+        $estimated_time_saved_ms = $user_metrics['cache_hits'] * 400; // Her cache hit ~400ms tasarruf
+        $estimated_time_saved_sec = round($estimated_time_saved_ms / 1000, 1);
+        
+        // Pro ile potansiyel tasarruf (cache TTL 30x daha uzun)
+        $potential_cache_savings = 0;
+        if (!$is_pro && $user_metrics['cache_misses'] > 0) {
+            // Pro olsaydı cache misses daha az olurdu
+            $potential_cache_savings = round($user_metrics['cache_misses'] * 0.8); // %80 daha az miss
+        }
+        
+        return [
+            'is_pro'                => $is_pro,
+            'user_metrics'          => $user_metrics,
+            
+            // Kalite karşılaştırması
+            'quality' => [
+                'free'          => $free_quality,
+                'pro'           => $pro_quality,
+                'boost_percent' => $quality_boost_percent,
+                'label'         => "+%{$quality_boost_percent} daha yüksek kalite",
+            ],
+            
+            // Cache TTL karşılaştırması
+            'cache_ttl' => [
+                'free_days'     => $free_cache_ttl_days,
+                'pro_days'      => $pro_cache_ttl_days,
+                'boost_times'   => $cache_ttl_boost_times,
+                'label'         => "{$cache_ttl_boost_times}x daha uzun cache süresi",
+            ],
+            
+            // Hız karşılaştırması
+            'speed' => [
+                'avg_render_ms'        => $user_metrics['avg_render_ms'],
+                'cache_hit_ms'         => 50, // Cache hit ortalama
+                'time_saved_sec'       => $estimated_time_saved_sec,
+                'potential_savings'    => $potential_cache_savings,
+                'label'                => "Cache ile ~8x daha hızlı",
+            ],
+            
+            // Özellikler
+            'features' => [
+                'watermark'     => ['free' => true, 'pro' => false, 'label' => 'Watermark yok'],
+                'templates'     => ['free' => 2, 'pro' => 'Sınırsız', 'label' => 'Tüm şablonlar'],
+                'rate_limit'    => ['free' => '2/dk', 'pro' => 'Limit yok', 'label' => 'Sınırsız üretim'],
+                'priority'      => ['free' => false, 'pro' => true, 'label' => 'Öncelikli işlem'],
+            ],
+            
+            // Value badges (UI için)
+            'badges' => $this->get_value_badges($user_metrics, $is_pro),
+        ];
+    }
+    
+    /**
+     * Value badges oluştur
+     */
+    private function get_value_badges(array $metrics, bool $is_pro): array {
+        $badges = [];
+        
+        if ($is_pro) {
+            // Pro kullanıcı için kazanımlar
+            if ($metrics['cache_hit_ratio'] >= 50) {
+                $badges[] = [
+                    'icon'  => '⚡',
+                    'text'  => "%{$metrics['cache_hit_ratio']} cache hit",
+                    'color' => '#22c55e',
+                    'type'  => 'success',
+                ];
+            }
+            
+            if ($metrics['total_cpu_sec'] > 0) {
+                $badges[] = [
+                    'icon'  => '🚀',
+                    'text'  => "{$metrics['total_cpu_sec']}sn CPU tasarrufu",
+                    'color' => '#667eea',
+                    'type'  => 'info',
+                ];
+            }
+            
+            $badges[] = [
+                'icon'  => '✨',
+                'text'  => "%85 kalite",
+                'color' => '#f59e0b',
+                'type'  => 'quality',
+            ];
+        } else {
+            // Free kullanıcı için Pro teşvikleri
+            $badges[] = [
+                'icon'  => '🔓',
+                'text'  => "Pro ile watermark yok",
+                'color' => '#667eea',
+                'type'  => 'upgrade',
+            ];
+            
+            $badges[] = [
+                'icon'  => '⚡',
+                'text'  => "Pro ile 30x cache",
+                'color' => '#22c55e',
+                'type'  => 'upgrade',
+            ];
+            
+            $badges[] = [
+                'icon'  => '✨',
+                'text'  => "Pro ile +42% kalite",
+                'color' => '#f59e0b',
+                'type'  => 'upgrade',
+            ];
+        }
+        
+        return $badges;
+    }
+    
+    /**
+     * Son render detayları (metabox için)
+     */
+    public function get_last_render_details(int $listing_id): array {
+        $user_id = get_current_user_id();
+        $last = get_user_meta($user_id, self::META_LAST_RENDER, true);
+        
+        if (!$last || ($last['listing_id'] ?? 0) !== $listing_id) {
+            return [];
+        }
+        
+        return [
+            'listing_id'     => $last['listing_id'],
+            'render_time_ms' => $last['render_time_ms'] ?? 0,
+            'from_cache'     => $last['from_cache'] ?? false,
+            'tier'           => $last['tier'] ?? 'free',
+            'timestamp'      => $last['timestamp'] ?? 0,
+            'time_ago'       => human_time_diff($last['timestamp'], time()) . ' önce',
+        ];
+    }
+    
+    /**
+     * Günlük render özeti
+     */
+    public function get_daily_summary(): array {
+        $today = date('Y-m-d');
+        $stats = get_option(self::OPTION_DAILY_STATS, []);
+        
+        if (!isset($stats[$today])) {
+            return [
+                'renders'     => 0,
+                'cache_hits'  => 0,
+                'avg_ms'      => 0,
+                'total_kb'    => 0,
+            ];
+        }
+        
+        $day = $stats[$today];
+        
+        return [
+            'renders'     => $day['total_renders'] ?? 0,
+            'cache_hits'  => $day['cache_hits'] ?? 0,
+            'cache_ratio' => $day['total_renders'] > 0 
+                ? round(($day['cache_hits'] / $day['total_renders']) * 100) 
+                : 0,
+            'avg_ms'      => $day['total_renders'] > 0 
+                ? round($day['total_cpu_ms'] / $day['total_renders']) 
+                : 0,
+            'total_kb'    => round($day['total_size_kb'] ?? 0, 1),
+        ];
+    }
+    
+    /**
+     * Performans karşılaştırması (Free vs Pro simülasyon)
+     */
+    public function simulate_pro_benefits(): array {
+        $metrics = $this->get_user_metrics();
+        
+        if ($metrics['total_renders'] === 0) {
+            return [
+                'has_data' => false,
+                'message'  => 'Henüz yeterli veri yok',
+            ];
+        }
+        
+        // Mevcut durum
+        $current_cache_misses = $metrics['cache_misses'];
+        $current_avg_ms = $metrics['avg_render_ms'];
+        
+        // Pro ile tahmini iyileşme
+        // Pro cache 30 gün, Free 1 gün → ~96% daha az cache miss
+        $pro_estimated_misses = round($current_cache_misses * 0.04);
+        $pro_time_saved_ms = ($current_cache_misses - $pro_estimated_misses) * $current_avg_ms;
+        $pro_time_saved_sec = round($pro_time_saved_ms / 1000, 1);
+        
+        return [
+            'has_data'           => true,
+            'current_misses'     => $current_cache_misses,
+            'pro_misses'         => $pro_estimated_misses,
+            'miss_reduction'     => $current_cache_misses - $pro_estimated_misses,
+            'time_saved_sec'     => $pro_time_saved_sec,
+            'time_saved_min'     => round($pro_time_saved_sec / 60, 1),
+            'message'            => "Pro ile tahmini {$pro_time_saved_sec} saniye tasarruf",
         ];
     }
 }
