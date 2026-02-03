@@ -1,0 +1,600 @@
+{
+    "apiVersion": "1.0.0",
+    "baseUrls": {
+        "hivepress": "/wp-json/hivepress/v1",
+        "umrebuldum": "/wp-json/umrebuldum/v1",
+        "wordpress": "/wp-json/wp/v2"
+    },
+    "endpoints": {
+        "listings": {
+            "search": {
+                "method": "GET",
+                "path": "/wp/v2/hp_listing",
+                "auth": false,
+                "description": "Search and filter listings (public)",
+                "params": {
+                    "search": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Search term"
+                    },
+                    "page": {
+                        "type": "integer",
+                        "required": false,
+                        "default": 1
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "required": false,
+                        "default": 10,
+                        "max": 100
+                    },
+                    "categories": {
+                        "type": "array",
+                        "required": false,
+                        "description": "Category IDs"
+                    },
+                    "orderby": {
+                        "type": "string",
+                        "required": false,
+                        "enum": [
+                            "date",
+                            "title",
+                            "modified",
+                            "rand"
+                        ]
+                    },
+                    "order": {
+                        "type": "string",
+                        "required": false,
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "default": "desc"
+                    },
+                    "_embed": {
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Include featured image"
+                    }
+                },
+                "response": {
+                    "type": "array",
+                    "items": {
+                        "id": "integer",
+                        "title": {
+                            "rendered": "string"
+                        },
+                        "content": {
+                            "rendered": "string"
+                        },
+                        "excerpt": {
+                            "rendered": "string"
+                        },
+                        "date": "string (ISO 8601)",
+                        "link": "string (URL)",
+                        "featured_media": "integer",
+                        "_embedded": {
+                            "wp:featuredmedia": "array"
+                        }
+                    }
+                }
+            },
+            "detail": {
+                "method": "GET",
+                "path": "/wp/v2/hp_listing/{id}",
+                "auth": false,
+                "description": "Get single listing details",
+                "pathParams": {
+                    "id": {
+                        "type": "integer",
+                        "required": true,
+                        "description": "Listing ID"
+                    }
+                },
+                "params": {
+                    "_embed": {
+                        "type": "boolean",
+                        "required": false
+                    }
+                },
+                "response": {
+                    "id": "integer",
+                    "title": {
+                        "rendered": "string"
+                    },
+                    "content": {
+                        "rendered": "string"
+                    },
+                    "excerpt": {
+                        "rendered": "string"
+                    },
+                    "date": "string",
+                    "author": "integer",
+                    "featured_media": "integer",
+                    "hp_listing_category": "array<integer>",
+                    "meta": {
+                        "_price": "string",
+                        "_location": "string",
+                        "_date_start": "string",
+                        "_date_end": "string"
+                    }
+                }
+            },
+            "update": {
+                "method": "POST",
+                "path": "/hivepress/v1/listings/{listing_id}",
+                "auth": true,
+                "authCapability": "owner or edit_others_posts",
+                "description": "Update a listing",
+                "pathParams": {
+                    "listing_id": {
+                        "type": "integer",
+                        "required": true
+                    }
+                },
+                "body": {
+                    "title": {
+                        "type": "string",
+                        "required": false
+                    },
+                    "description": {
+                        "type": "string",
+                        "required": false
+                    }
+                },
+                "response": {
+                    "id": "integer"
+                }
+            },
+            "hide": {
+                "method": "POST",
+                "path": "/hivepress/v1/listings/{listing_id}/hide",
+                "auth": true,
+                "description": "Toggle listing visibility (publish/draft)",
+                "response": {
+                    "id": "integer"
+                }
+            },
+            "report": {
+                "method": "POST",
+                "path": "/hivepress/v1/listings/{listing_id}/report",
+                "auth": true,
+                "description": "Report listing to admin",
+                "body": {
+                    "details": {
+                        "type": "string",
+                        "required": true,
+                        "description": "Report reason"
+                    }
+                },
+                "response": {
+                    "id": "integer"
+                }
+            },
+            "delete": {
+                "method": "DELETE",
+                "path": "/hivepress/v1/listings/{listing_id}",
+                "auth": true,
+                "description": "Delete listing",
+                "response": {
+                    "status": 204
+                }
+            }
+        },
+        "categories": {
+            "list": {
+                "method": "GET",
+                "path": "/wp/v2/hp_listing_category",
+                "auth": false,
+                "description": "Get listing categories for filters",
+                "params": {
+                    "per_page": {
+                        "type": "integer",
+                        "default": 100
+                    },
+                    "parent": {
+                        "type": "integer",
+                        "description": "Parent category ID"
+                    },
+                    "hide_empty": {
+                        "type": "boolean",
+                        "default": true
+                    }
+                },
+                "response": {
+                    "type": "array",
+                    "items": {
+                        "id": "integer",
+                        "name": "string",
+                        "slug": "string",
+                        "count": "integer",
+                        "parent": "integer"
+                    }
+                }
+            }
+        },
+        "vendors": {
+            "list": {
+                "method": "GET",
+                "path": "/wp/v2/hp_vendor",
+                "auth": false,
+                "description": "Get vendors (organizers)",
+                "response": {
+                    "type": "array",
+                    "items": {
+                        "id": "integer",
+                        "title": {
+                            "rendered": "string"
+                        },
+                        "content": {
+                            "rendered": "string"
+                        }
+                    }
+                }
+            },
+            "detail": {
+                "method": "GET",
+                "path": "/wp/v2/hp_vendor/{id}",
+                "auth": false,
+                "description": "Get vendor profile"
+            }
+        },
+        "users": {
+            "register": {
+                "method": "POST",
+                "path": "/hivepress/v1/users",
+                "auth": false,
+                "description": "Register new user",
+                "body": {
+                    "username": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Auto-generated from email if empty"
+                    },
+                    "email": {
+                        "type": "string",
+                        "required": true,
+                        "format": "email"
+                    },
+                    "password": {
+                        "type": "string",
+                        "required": true,
+                        "minLength": 6
+                    }
+                },
+                "response": {
+                    "id": "integer"
+                }
+            },
+            "login": {
+                "method": "POST",
+                "path": "/hivepress/v1/users/login",
+                "auth": false,
+                "description": "Authenticate user (sets auth cookie)",
+                "body": {
+                    "username_or_email": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "required": true
+                    }
+                },
+                "response": {
+                    "id": "integer"
+                },
+                "notes": "Sets WordPress authentication cookie on success"
+            },
+            "requestPassword": {
+                "method": "POST",
+                "path": "/hivepress/v1/users/request-password",
+                "auth": false,
+                "description": "Request password reset email",
+                "body": {
+                    "username_or_email": {
+                        "type": "string",
+                        "required": true
+                    }
+                },
+                "response": {
+                    "id": "integer"
+                }
+            },
+            "resetPassword": {
+                "method": "POST",
+                "path": "/hivepress/v1/users/reset-password",
+                "auth": false,
+                "description": "Reset password with token from email",
+                "body": {
+                    "username": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "password_reset_key": {
+                        "type": "string",
+                        "required": true
+                    }
+                },
+                "response": {
+                    "id": "integer"
+                }
+            },
+            "update": {
+                "method": "POST",
+                "path": "/hivepress/v1/users/{user_id}",
+                "auth": true,
+                "description": "Update user profile",
+                "pathParams": {
+                    "user_id": {
+                        "type": "integer",
+                        "required": true
+                    }
+                },
+                "body": {
+                    "email": {
+                        "type": "string",
+                        "required": false
+                    },
+                    "password": {
+                        "type": "string",
+                        "required": false
+                    },
+                    "current_password": {
+                        "type": "string",
+                        "required": "if changing email/password"
+                    }
+                },
+                "response": {
+                    "id": "integer"
+                }
+            },
+            "delete": {
+                "method": "DELETE",
+                "path": "/hivepress/v1/users/{user_id}",
+                "auth": true,
+                "description": "Delete user account",
+                "body": {
+                    "password": {
+                        "type": "string",
+                        "required": true
+                    }
+                },
+                "response": {
+                    "status": 204
+                }
+            }
+        },
+        "poster": {
+            "generate": {
+                "method": "POST",
+                "path": "/umrebuldum/v1/poster/generate",
+                "auth": true,
+                "authCapability": "edit_posts",
+                "description": "Generate poster image for listing",
+                "body": {
+                    "listing_id": {
+                        "type": "integer",
+                        "required": true
+                    },
+                    "template": {
+                        "type": "string",
+                        "required": false,
+                        "default": "default"
+                    },
+                    "size": {
+                        "type": "string",
+                        "required": false,
+                        "default": "instagram",
+                        "enum": [
+                            "instagram",
+                            "facebook",
+                            "twitter",
+                            "story"
+                        ]
+                    },
+                    "force": {
+                        "type": "boolean",
+                        "required": false,
+                        "default": false,
+                        "description": "Force regeneration"
+                    }
+                },
+                "response": {
+                    "success": "boolean",
+                    "poster_url": "string (URL)",
+                    "cached": "boolean",
+                    "render_time_ms": "integer"
+                }
+            },
+            "get": {
+                "method": "GET",
+                "path": "/umrebuldum/v1/poster/{id}",
+                "auth": false,
+                "description": "Get poster URL for listing",
+                "pathParams": {
+                    "id": {
+                        "type": "integer",
+                        "required": true,
+                        "description": "Listing ID"
+                    }
+                },
+                "response": {
+                    "success": "boolean",
+                    "exists": "boolean",
+                    "poster_url": "string",
+                    "generated_at": "string (datetime)"
+                }
+            },
+            "delete": {
+                "method": "DELETE",
+                "path": "/umrebuldum/v1/poster/{id}",
+                "auth": true,
+                "description": "Delete cached poster"
+            },
+            "templates": {
+                "method": "GET",
+                "path": "/umrebuldum/v1/poster/templates",
+                "auth": false,
+                "description": "List available poster templates",
+                "response": {
+                    "templates": [
+                        {
+                            "id": "string",
+                            "name": "string",
+                            "pro_only": "boolean",
+                            "preview_url": "string"
+                        }
+                    ]
+                }
+            },
+            "cacheStats": {
+                "method": "GET",
+                "path": "/umrebuldum/v1/poster/cache/stats",
+                "auth": true,
+                "authCapability": "manage_options",
+                "description": "Get cache statistics"
+            },
+            "cacheCleanup": {
+                "method": "POST",
+                "path": "/umrebuldum/v1/poster/cache/cleanup",
+                "auth": true,
+                "authCapability": "manage_options",
+                "description": "Clean old cache files"
+            }
+        },
+        "userTier": {
+            "get": {
+                "method": "GET",
+                "path": "/umrebuldum/v1/user/tier",
+                "auth": false,
+                "description": "Get current user subscription tier (works for guests too)",
+                "response": {
+                    "success": "boolean",
+                    "tier": {
+                        "type": "string",
+                        "enum": [
+                            "free",
+                            "pro",
+                            "agency"
+                        ]
+                    },
+                    "is_pro": "boolean",
+                    "poster_count": "integer (today's usage)",
+                    "remaining": "integer (remaining quota)",
+                    "limits": {
+                        "free_poster_limit": "integer",
+                        "free_templates": "array<string>"
+                    }
+                }
+            }
+        },
+        "health": {
+            "get": {
+                "method": "GET",
+                "path": "/umrebuldum/v1/health",
+                "auth": false,
+                "description": "System health check",
+                "response": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "OK",
+                            "DEGRADED",
+                            "FAIL"
+                        ]
+                    },
+                    "issues": "array<string>",
+                    "timestamp": "integer (unix)",
+                    "core": {
+                        "plugin_version": "string",
+                        "php_version": "string",
+                        "wp_version": "string",
+                        "gd_available": "boolean",
+                        "webp_supported": "boolean"
+                    },
+                    "cache": {
+                        "cache_dir_exists": "boolean",
+                        "cache_writable": "boolean",
+                        "cache_total_files": "integer",
+                        "cache_total_size_mb": "number"
+                    },
+                    "performance": {
+                        "avg_render_time_ms": "number",
+                        "cache_hit_ratio": "number",
+                        "total_renders_today": "integer"
+                    },
+                    "insights": [
+                        {
+                            "type": {
+                                "enum": [
+                                    "critical",
+                                    "warning",
+                                    "opportunity"
+                                ]
+                            },
+                            "title": "string",
+                            "message": "string",
+                            "action": "string"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "authentication": {
+        "methods": {
+            "cookie": {
+                "description": "WordPress auth cookie (browser-based)",
+                "headers": {
+                    "X-WP-Nonce": "wpApiSettings.nonce (from wp_localize_script)"
+                },
+                "notes": "Used for same-origin requests from WordPress frontend"
+            },
+            "applicationPassword": {
+                "description": "Basic Auth with WP Application Password",
+                "headers": {
+                    "Authorization": "Basic base64(username:application_password)"
+                },
+                "notes": "For external apps. Generate in WP Admin > Users > Profile"
+            }
+        }
+    },
+    "errors": {
+        "format": {
+            "code": "string",
+            "message": "string",
+            "data": {
+                "status": "integer"
+            }
+        },
+        "codes": {
+            "rest_forbidden": {
+                "http": 403,
+                "description": "Permission denied"
+            },
+            "rest_not_found": {
+                "http": 404,
+                "description": "Resource not found"
+            },
+            "rest_invalid_param": {
+                "http": 400,
+                "description": "Validation error"
+            },
+            "quota_exceeded": {
+                "http": 429,
+                "description": "Rate/quota limit reached"
+            },
+            "rate_limited": {
+                "http": 429,
+                "description": "Too many requests"
+            }
+        }
+    }
+}
