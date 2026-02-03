@@ -1,0 +1,735 @@
+/**
+ * Upgrade Modal - CSS
+ * 
+ * SaaS tarzı modern modal tasarımı
+ * Framework bağımsız, WP Admin uyumlu
+ */
+
+/* =========================================
+   MODAL OVERLAY
+   ========================================= */
+
+.upg-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: upg-fadeIn 0.2s ease;
+}
+
+@keyframes upg-fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* =========================================
+   MODAL BOX
+   ========================================= */
+
+.upg-modal {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: upg-slideUp 0.3s ease;
+    overflow: hidden;
+}
+
+@keyframes upg-slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================
+   HEADER
+   ========================================= */
+
+.upg-modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 24px;
+    position: relative;
+    text-align: center;
+}
+
+.upg-modal-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.upg-badge-pro {
+    background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+    color: #fff;
+}
+
+.upg-badge-free {
+    background: #e0e0e0;
+    color: #666;
+}
+
+.upg-modal-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.upg-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upg-modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* =========================================
+   BODY
+   ========================================= */
+
+.upg-modal-body {
+    padding: 24px;
+}
+
+.upg-modal-desc {
+    text-align: center;
+    color: #666;
+    margin: 0 0 24px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* Features Grid */
+.upg-features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.upg-feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.upg-feature-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.upg-feature-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.upg-feature-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.upg-feature-text strong {
+    font-size: 13px;
+    color: #333;
+}
+
+.upg-feature-text span {
+    font-size: 11px;
+    color: #888;
+}
+
+/* Status Box */
+.upg-status-box {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.upg-status-label {
+    font-size: 13px;
+    color: #856404;
+}
+
+.upg-status-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #856404;
+}
+
+/* =========================================
+   FOOTER
+   ========================================= */
+
+.upg-modal-footer {
+    padding: 0 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Buttons */
+.upg-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 24px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.upg-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff !important;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.upg-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.upg-btn-secondary {
+    background: transparent;
+    color: #888;
+    padding: 10px;
+}
+
+.upg-btn-secondary:hover {
+    color: #333;
+}
+
+.upg-btn-small {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+
+/* Trust Badges */
+.upg-trust-badges {
+    background: #f8f9fa;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 12px;
+    color: #888;
+    border-top: 1px solid #eee;
+}
+
+/* =========================================
+   INLINE PROMPT (form içi)
+   ========================================= */
+
+.upg-inline-prompt {
+    background: linear-gradient(135deg, #667eea08 0%, #764ba208 100%);
+    border: 1px solid #667eea30;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.upg-inline-prompt-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.upg-inline-prompt-content {
+    flex: 1;
+}
+
+.upg-inline-prompt-title {
+    display: block;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.upg-inline-prompt-desc {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 540px) {
+    .upg-modal {
+        max-width: 100%;
+        margin: 10px;
+    }
+
+    .upg-features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .upg-trust-badges {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .upg-status-box {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* =========================================
+   QUOTA INDICATOR (listing edit page)
+   ========================================= */
+
+.upg-quota-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.upg-quota-indicator.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.upg-quota-indicator.danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.upg-quota-bar {
+    flex: 1;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.upg-quota-bar-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.upg-quota-bar-fill.low {
+    background: #ffc107;
+}
+
+.upg-quota-bar-fill.empty {
+    background: #dc3545;
+}
+
+/* =========================================
+   MULTI-PLAN PRICING GRID
+   ========================================= */
+
+/* Wide modal for multiple plans */
+.upg-modal-wide {
+    max-width: 820px;
+}
+
+.upg-modal-wide .upg-modal-body {
+    padding: 24px 20px;
+}
+
+/* Pricing Grid */
+.upg-pricing-grid {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.upg-pricing-grid[data-plan-count="2"] {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.upg-pricing-grid[data-plan-count="3"] {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+/* Pricing Card */
+.upg-pricing-card {
+    background: #fff;
+    border: 2px solid #e8e8e8;
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.upg-pricing-card:hover {
+    border-color: #667eea;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.15);
+}
+
+/* Highlighted Card */
+.upg-pricing-card-highlight {
+    border-color: #667eea;
+    background: linear-gradient(180deg, #f8f9ff 0%, #fff 100%);
+    transform: scale(1.02);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
+}
+
+.upg-pricing-card-highlight:hover {
+    transform: scale(1.02) translateY(-4px);
+}
+
+/* Badge */
+.upg-pricing-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+/* Title */
+.upg-pricing-title {
+    margin: 8px 0 4px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+}
+
+.upg-pricing-subtitle {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: #888;
+}
+
+/* Price */
+.upg-pricing-price {
+    margin-bottom: 8px;
+}
+
+.upg-price-main {
+    display: block;
+    font-size: 28px;
+    font-weight: 800;
+    color: #333;
+    line-height: 1.2;
+}
+
+.upg-price-monthly {
+    display: block;
+    font-size: 13px;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* Savings Badge */
+.upg-pricing-savings {
+    display: inline-block;
+    background: #dcfce7;
+    color: #16a34a;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+}
+
+/* Features List */
+.upg-pricing-features {
+    list-style: none;
+    margin: 0 0 20px;
+    padding: 0;
+    text-align: left;
+}
+
+.upg-pricing-features li {
+    font-size: 13px;
+    color: #555;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.upg-pricing-features li:last-child {
+    border-bottom: none;
+}
+
+/* CTA Button */
+.upg-pricing-btn {
+    width: 100%;
+    padding: 12px 20px;
+}
+
+.upg-btn-outline {
+    background: transparent;
+    border: 2px solid #667eea;
+    color: #667eea !important;
+}
+
+.upg-btn-outline:hover {
+    background: #667eea;
+    color: #fff !important;
+}
+
+/* Link Button */
+.upg-btn-link {
+    background: transparent;
+    color: #888;
+    font-size: 13px;
+}
+
+.upg-btn-link:hover {
+    color: #333;
+    text-decoration: underline;
+}
+
+/* Compact Footer */
+.upg-modal-footer-compact {
+    padding: 12px 24px 20px;
+    text-align: center;
+}
+
+/* =========================================
+   RESPONSIVE - PRICING
+   ========================================= */
+
+@media (max-width: 768px) {
+    .upg-modal-wide {
+        max-width: 100%;
+    }
+
+    .upg-pricing-grid[data-plan-count="3"] {
+        grid-template-columns: 1fr;
+    }
+
+    .upg-pricing-card-highlight {
+        order: -1;
+        /* Öne çıkan plan mobilde üstte */
+    }
+}
+
+@media (max-width: 540px) {
+    .upg-pricing-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .upg-pricing-card {
+        padding: 20px 16px;
+    }
+
+    .upg-price-main {
+        font-size: 24px;
+    }
+}
+
+/* =========================================
+   FRICTION LOADER
+   Free kullanıcı için yapay gecikme UI
+   ========================================= */
+
+.upg-friction-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 100001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: upg-fadeIn 0.2s ease;
+}
+
+.upg-friction-content {
+    background: #fff;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 320px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.upg-friction-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    animation: upg-spin 0.8s linear infinite;
+}
+
+@keyframes upg-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.upg-friction-message {
+    font-size: 16px;
+    color: #374151;
+    margin-bottom: 16px;
+}
+
+.upg-friction-upgrade {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.upg-friction-upgrade:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    color: #fff;
+}
+
+/* =========================================
+   VALUE SIGNALS - Pro Badge Toasts
+   ========================================= */
+
+.upg-value-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    color: #fff;
+    padding: 16px 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 99999;
+    min-width: 220px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.upg-value-toast.upg-toast-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.upg-toast-header {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #a5b4fc;
+}
+
+.upg-toast-item {
+    font-size: 13px;
+    padding: 4px 0;
+    color: #d1d5db;
+}
+
+/* =========================================
+   VALUE BADGES - Inline
+   ========================================= */
+
+.upg-value-signals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.upg-value-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.upg-value-badge.upg-value-speed {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+}
+
+.upg-value-badge.upg-value-quality {
+    background: rgba(168, 85, 247, 0.1);
+    color: #9333ea;
+}
+
+.upg-value-badge.upg-value-cache {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+}
