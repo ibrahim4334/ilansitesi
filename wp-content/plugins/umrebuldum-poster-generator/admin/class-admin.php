@@ -34,6 +34,26 @@ class Admin {
             'umrebuldum-posters',
             [$this, 'render_page']
         );
+        
+        // System Health Dashboard
+        add_submenu_page(
+            'hivepress',
+            'Sistem Durumu',
+            '🩺 Sistem Durumu',
+            'manage_options',
+            'upg-system-health',
+            [$this, 'render_health_page']
+        );
+        
+        // Content & Revenue Dashboard
+        add_submenu_page(
+            'hivepress',
+            'İçerik ve Gelir',
+            '📈 İçerik ve Gelir',
+            'manage_options',
+            'upg-revenue-stats',
+            [$this, 'render_revenue_page']
+        );
     }
     
     /**
@@ -67,16 +87,38 @@ class Admin {
      * CSS/JS yükle
      */
     public function enqueue_assets($hook): void {
-        if (strpos($hook, 'umrebuldum-posters') === false) {
-            return;
+        // Main posters page
+        if (strpos($hook, 'umrebuldum-posters') !== false) {
+            wp_enqueue_style(
+                'upg-admin',
+                UPG_ASSETS . 'css/admin.css',
+                [],
+                UPG_VERSION
+            );
         }
         
-        wp_enqueue_style(
-            'upg-admin',
-            UPG_ASSETS . 'css/admin.css',
-            [],
-            UPG_VERSION
-        );
+        // System Health page
+        if (strpos($hook, 'upg-system-health') !== false) {
+            wp_enqueue_style(
+                'upg-admin',
+                UPG_ASSETS . 'css/admin.css',
+                [],
+                UPG_VERSION
+            );
+            
+            wp_enqueue_script(
+                'upg-admin-health',
+                UPG_ASSETS . 'js/admin-health.js',
+                [],
+                UPG_VERSION,
+                true
+            );
+            
+            wp_localize_script('upg-admin-health', 'upgHealth', [
+                'endpoint' => rest_url('umrebuldum/v1/health'),
+                'nonce'    => wp_create_nonce('wp_rest'),
+            ]);
+        }
     }
     
     /**
@@ -365,6 +407,28 @@ class Admin {
             'Sun' => 'Paz',
         ];
         return $days[$day] ?? $day;
+    }
+    
+    /**
+     * System Health Dashboard render
+     */
+    public function render_health_page(): void {
+        if (!current_user_can('manage_options')) {
+            wp_die('Yetkiniz yok.');
+        }
+        
+        include UPG_PATH . 'admin/views/health-dashboard.php';
+    }
+    
+    /**
+     * Content & Revenue Dashboard render
+     */
+    public function render_revenue_page(): void {
+        if (!current_user_can('manage_options')) {
+            wp_die('Yetkiniz yok.');
+        }
+        
+        include UPG_PATH . 'admin/views/revenue-dashboard.php';
     }
 }
 

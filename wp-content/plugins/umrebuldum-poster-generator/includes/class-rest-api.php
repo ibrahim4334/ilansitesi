@@ -401,6 +401,12 @@ class Rest_API {
         ];
         
         // ====================================
+        // 6. ACTIONABLE INSIGHTS
+        // ====================================
+        $insights_engine = new Insights_Engine();
+        $insights_list = $insights_engine->generate();
+        
+        // ====================================
         // OVERALL STATUS
         // ====================================
         $status = 'OK';
@@ -448,6 +454,7 @@ class Rest_API {
             'errors'       => $error_health,
             'performance'  => $performance,
             'monetization' => $monetization,
+            'insights'     => $insights_list,
         ], $http_code);
     }
 }

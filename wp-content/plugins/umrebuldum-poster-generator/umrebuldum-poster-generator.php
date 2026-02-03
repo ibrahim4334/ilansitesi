@@ -74,6 +74,7 @@ final class Umrebuldum_Poster_Plugin {
         require_once UPG_PATH . 'includes/class-image-processor.php';
         require_once UPG_PATH . 'includes/class-access-control.php'; // Free/Pro tier
         require_once UPG_PATH . 'includes/class-usage-tracker.php';  // Usage metrics & friction
+        require_once UPG_PATH . 'includes/class-insights-engine.php'; // Actionable insights
         require_once UPG_PATH . 'includes/class-offer-engine.php';   // Multi-plan pricing
         require_once UPG_PATH . 'includes/class-upgrade-funnel.php'; // Conversion
         require_once UPG_PATH . 'includes/class-agency-helper.php';  // Agency altyapısı (sub-users)
