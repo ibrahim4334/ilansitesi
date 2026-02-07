@@ -103,99 +103,76 @@ export function HeroSection() {
         {mounted ? (
           <form
             onSubmit={handleSearch}
-            className="mx-auto max-w-5xl rounded-3xl bg-white p-6 shadow-2xl backdrop-blur-sm/90"
+            className="mx-auto max-w-6xl rounded-3xl bg-white p-6 shadow-2xl backdrop-blur-sm/90"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-
-              {/* Departure City */}
-              <div className="relative flex items-center">
-                <MapPin className="absolute left-3 h-5 w-5 text-gray-400 z-10 pointer-events-none" />
-                <Select value={city} onValueChange={setCity}>
-                  <SelectTrigger className="h-12 w-full border-gray-200 bg-gray-50 pl-10 text-base focus:ring-amber-500">
-                    <SelectValue placeholder="Kalkış Şehri" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tüm Şehirler</SelectItem>
-                    {CITIES.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Date */}
-              <div className="relative flex items-center">
-                <Calendar className="absolute left-3 h-5 w-5 text-gray-400 z-10 pointer-events-none" />
-                <Input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="h-12 w-full border-gray-200 bg-gray-50 pl-10 text-base focus:ring-amber-500"
-                />
-              </div>
-
-              {/* Room Type */}
-              <div className="relative flex items-center">
-                <Building className="absolute left-3 h-5 w-5 text-gray-400 z-10 pointer-events-none" />
-                <Select value={roomType} onValueChange={setRoomType}>
-                  <SelectTrigger className="h-12 w-full border-gray-200 bg-gray-50 pl-10 text-base focus:ring-amber-500">
-                    <SelectValue placeholder="Oda Tipi" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tümü</SelectItem>
-                    {ROOM_TYPES.map((t) => (
-                      <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Price Filters (Min/Max) */}
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Min</span>
-                  <Input
-                    type="number"
-                    placeholder="SAR"
-                    value={minPrice}
-                    onChange={e => setMinPrice(e.target.value)}
-                    className="h-12 pl-10 bg-gray-50 border-gray-200"
-                  />
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+              {/* Departure City (3 cols) */}
+              <div className="md:col-span-3">
+                <Label className="text-xs text-gray-500 font-medium ml-1 mb-1.5 block">Kalkış Yeri</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 h-5 w-5 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none" />
+                  <Select value={city} onValueChange={setCity}>
+                    <SelectTrigger className="h-12 w-full border-gray-200 bg-gray-50 pl-10 text-base focus:ring-amber-500">
+                      <SelectValue placeholder="Kalkış Şehri" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tüm Şehirler</SelectItem>
+                      {CITIES.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Max</span>
+              </div>
+
+              {/* Date (3 cols) */}
+              <div className="md:col-span-3">
+                <Label className="text-xs text-gray-500 font-medium ml-1 mb-1.5 block">Tarih</Label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 h-5 w-5 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none" />
                   <Input
-                    type="number"
-                    placeholder="SAR"
-                    value={maxPrice}
-                    onChange={e => setMaxPrice(e.target.value)}
-                    className="h-12 pl-10 bg-gray-50 border-gray-200"
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="h-12 w-full border-gray-200 bg-gray-50 pl-10 text-base focus:ring-amber-500"
                   />
                 </div>
               </div>
 
-            </div>
-
-            {/* Bottom Row: Filters & Button */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-t pt-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="diyanet" checked={isDiyanet} onCheckedChange={(c) => setIsDiyanet(c as boolean)} className="border-gray-300 data-[state=checked]:bg-amber-600" />
-                <Label htmlFor="diyanet" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-1">
-                  <BadgeCheck className="w-4 h-4 text-green-600" />
-                  Sadece Diyanet Onaylı
-                </Label>
+              {/* Budget / Price (4 cols) */}
+              <div className="md:col-span-4">
+                <Label className="text-xs text-gray-500 font-medium ml-1 mb-1.5 block">Bütçe Aralığı (SAR)</Label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Min</span>
+                    <Input
+                      type="number"
+                      placeholder="SAR"
+                      value={minPrice}
+                      onChange={e => setMinPrice(e.target.value)}
+                      className="h-12 pl-10 bg-gray-50 border-gray-200"
+                    />
+                  </div>
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Max</span>
+                    <Input
+                      type="number"
+                      placeholder="SAR"
+                      value={maxPrice}
+                      onChange={e => setMaxPrice(e.target.value)}
+                      className="h-12 pl-10 bg-gray-50 border-gray-200"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full md:w-auto px-8 bg-blue-900 hover:bg-blue-800 text-white font-semibold h-12"
-              >
-                <Search className="mr-2 h-5 w-5" />
-                Turları Listele
-              </Button>
+              {/* Button (2 cols) */}
+              <div className="md:col-span-2">
+                <Button type="submit" size="lg" className="h-12 w-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-base shadow-md">
+                  <Search className="w-5 h-5 mr-2" /> Ara
+                </Button>
+              </div>
             </div>
-
           </form>
         ) : (
           <div className="mx-auto mt-12 h-32 w-full max-w-5xl rounded-3xl bg-white/20 backdrop-blur-sm shadow-xl animate-pulse" />

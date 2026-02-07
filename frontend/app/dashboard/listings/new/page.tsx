@@ -15,6 +15,8 @@ import {
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Plus, Trash2, Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const CITIES = [
     "İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Konya", "Adana", "Gaziantep",
@@ -23,6 +25,17 @@ const CITIES = [
 const SAUDI_CITIES = ["Mekke", "Medine", "Cidde", "Riyad"];
 
 const AIRLINES = ["THY", "Saudia", "Flynas", "Pegasus", "Emirates", "Qatar", "Diğer"];
+
+const URGENCY_TAGS = [
+    { value: "", label: "Yok" },
+    { value: "SON_FIRSAT", label: "Son Fırsat" },
+    { value: "SINIRLI_KONTENJAN", label: "Sınırlı Kontenjan" },
+    { value: "ERKEN_REZERVASYON", label: "Erken Rezervasyon" },
+];
+
+const EXTRA_SERVICES_OPTIONS = [
+    "Kahvaltı", "Öğle Yemeği", "Akşam Yemeği", "Vize", "Ulaşım", "Rehberlik", "Ziyaretler", "Kite Seti", "Sim Kart"
+];
 
 export default function NewListingPage() {
     const router = useRouter();
@@ -38,13 +51,18 @@ export default function NewListingPage() {
         quota: "30",
         startDate: "",
         endDate: "",
+        totalDays: 10,
         pricing: {
             double: "",
             triple: "",
             quad: "",
             currency: "SAR"
         },
-        extraServices: [] as string[]
+        extraServices: [] as string[],
+        tourPlan: [] as { day: number; city: string; description: string }[],
+        urgencyTag: "",
+        legalConsent: false,
+        image: "" // Added image field to formData
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -62,9 +80,48 @@ export default function NewListingPage() {
         setFormData({ ...formData, [name]: value });
     };
 
+    const handleServiceToggle = (service: string) => {
+        setFormData(prev => {
+            const exists = prev.extraServices.includes(service);
+            if (exists) {
+                return { ...prev, extraServices: prev.extraServices.filter(s => s !== service) };
+            } else {
+                return { ...prev, extraServices: [...prev.extraServices, service] };
+            }
+        });
+    };
+
+    // Tour Plan Logic
+    const addTourDay = () => {
+        setFormData(prev => ({
+            ...prev,
+            tourPlan: [
+                ...prev.tourPlan,
+                { day: prev.tourPlan.length + 1, city: "Mekke", description: "" }
+            ]
+        }));
+    };
+
+    const updateTourDay = (index: number, field: string, value: string) => {
+        const newPlan = [...formData.tourPlan];
+        newPlan[index] = { ...newPlan[index], [field]: value };
+        setFormData({ ...formData, tourPlan: newPlan });
+    };
+
+    const removeTourDay = (index: number) => {
+        const newPlan = formData.tourPlan.filter((_, i) => i !== index).map((day, i) => ({ ...day, day: i + 1 }));
+        setFormData({ ...formData, tourPlan: newPlan });
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+
+        if (!formData.legalConsent) {
+            toast.error("Lütfen yasal sorumluluk beyanını onaylayın.");
+            setLoading(false);
+            return;
+        }
 
         const payload = {
             ...formData,
@@ -101,7 +158,7 @@ export default function NewListingPage() {
                 return;
             }
 
-            toast.success("Tur başarıyla oluşturuldu!");
+            toast.success(data.message || "Tur başarıyla oluşturuldu!");
             router.push("/dashboard/listings");
         } catch (error: any) {
             toast.error(error.message);
@@ -146,17 +203,39 @@ export default function NewListingPage() {
                         </div>
                     </div>
 
-                    <div>
-                        <Label>Hava Yolu</Label>
-                        <Select onValueChange={(v) => handleSelectChange("airline", v)} defaultValue="THY">
-                            <SelectTrigger><SelectValue placeholder="Seçiniz" /></SelectTrigger>
-                            <SelectContent>
-                                {AIRLINES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
+                    <div className="space-y-2">
+                        <Label>Kapak Resmi (URL)</Label>
+                        <Input
+                            name="image"
+                            placeholder="https://..."
+                            value={formData.image}
+                            onChange={handleChange}
+                        />
+                        <p className="text-xs text-muted-foreground">İlan kartında görünecek ana görsel.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <Label>Hava Yolu</Label>
+                            <Select onValueChange={(v) => handleSelectChange("airline", v)} defaultValue="THY">
+                                <SelectTrigger><SelectValue placeholder="Seçiniz" /></SelectTrigger>
+                                <SelectContent>
+                                    {AIRLINES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
+                            <Label>Aciliyet / Etiket</Label>
+                            <Select onValueChange={(v) => handleSelectChange("urgencyTag", v)}>
+                                <SelectTrigger><SelectValue placeholder="Yok" /></SelectTrigger>
+                                <SelectContent>
+                                    {URGENCY_TAGS.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <Label>Başlangıç Tarihi</Label>
                             <Input type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
@@ -164,6 +243,10 @@ export default function NewListingPage() {
                         <div>
                             <Label>Bitiş Tarihi</Label>
                             <Input type="date" name="endDate" value={formData.endDate} onChange={handleChange} required />
+                        </div>
+                        <div>
+                            <Label>Toplam Gün</Label>
+                            <Input type="number" name="totalDays" value={formData.totalDays} onChange={(e) => setFormData({ ...formData, totalDays: parseInt(e.target.value) })} required />
                         </div>
                     </div>
                 </div>
@@ -187,9 +270,74 @@ export default function NewListingPage() {
                     </div>
                 </div>
 
+                {/* Extra Services */}
+                <div className="space-y-4">
+                    <h2 className="text-xl font-semibold border-b pb-2">Hizmetler</h2>
+                    <div className="flex flex-wrap gap-2">
+                        {EXTRA_SERVICES_OPTIONS.map(service => (
+                            <Badge
+                                key={service}
+                                variant={formData.extraServices.includes(service) ? "default" : "outline"}
+                                className={`cursor-pointer hover:bg-gray-200 ${formData.extraServices.includes(service) ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+                                onClick={() => handleServiceToggle(service)}
+                            >
+                                {service}
+                                {formData.extraServices.includes(service) && <Check className="w-3 h-3 ml-1" />}
+                            </Badge>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Tour Plan Builder */}
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center border-b pb-2">
+                        <h2 className="text-xl font-semibold">Tur Programı</h2>
+                        <Button type="button" size="sm" onClick={addTourDay} variant="secondary">
+                            <Plus className="w-4 h-4 mr-1" /> Gün Ekle
+                        </Button>
+                    </div>
+
+                    <div className="space-y-4">
+                        {formData.tourPlan.length === 0 && (
+                            <div className="text-center py-8 text-gray-500 border-2 border-dashed rounded-lg">
+                                Henüz tur programı eklenmedi.
+                            </div>
+                        )}
+                        {formData.tourPlan.map((day, index) => (
+                            <div key={index} className="flex gap-4 items-start p-4 bg-gray-50 rounded-lg border">
+                                <div className="min-w-[80px] font-bold text-amber-600 pt-2">
+                                    {day.day}. Gün
+                                </div>
+                                <div className="flex-1 space-y-2">
+                                    <Select value={day.city} onValueChange={(v) => updateTourDay(index, 'city', v)}>
+                                        <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Mekke">Mekke</SelectItem>
+                                            <SelectItem value="Medine">Medine</SelectItem>
+                                            <SelectItem value="Cidde">Cidde</SelectItem>
+                                            <SelectItem value="Diğer">Diğer</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <Textarea
+                                        placeholder="Günün programı... (örn: Kabe ziyareti)"
+                                        value={day.description}
+                                        onChange={(e) => updateTourDay(index, 'description', e.target.value)}
+                                        className="bg-white min-h-[80px]"
+                                        maxLength={140}
+                                    />
+                                    <div className="text-xs text-right text-gray-400">{day.description.length}/140</div>
+                                </div>
+                                <Button type="button" variant="ghost" size="icon" onClick={() => removeTourDay(index)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 {/* Details */}
                 <div className="space-y-4">
-                    <h2 className="text-xl font-semibold border-b pb-2">Detaylar</h2>
+                    <h2 className="text-xl font-semibold border-b pb-2">Diğer Detaylar</h2>
                     <div>
                         <Label>Kontenjan</Label>
                         <Input type="number" name="quota" value={formData.quota} onChange={handleChange} required />
@@ -199,15 +347,35 @@ export default function NewListingPage() {
                         <Input name="hotelName" placeholder="Örn: Hilton Makkah" value={formData.hotelName} onChange={handleChange} />
                     </div>
                     <div>
-                        <Label>Açıklama</Label>
-                        <Textarea name="description" placeholder="Tur detayları..." className="h-32" value={formData.description} onChange={handleChange} />
+                        <Label>Genel Açıklama</Label>
+                        <Textarea name="description" placeholder="Tur genel detayları..." className="h-32" value={formData.description} onChange={handleChange} />
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-4 pt-4">
+                {/* Legal Consent */}
+                <div className="flex items-start space-x-2 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <Checkbox
+                        id="legalConsent"
+                        checked={formData.legalConsent}
+                        onCheckedChange={(c) => setFormData({ ...formData, legalConsent: c === true })}
+                    />
+                    <div className="grid gap-1.5 leading-none">
+                        <label
+                            htmlFor="legalConsent"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-blue-900"
+                        >
+                            Yasal Sorumluluk Beyanı
+                        </label>
+                        <p className="text-sm text-blue-700">
+                            Paylaştığım iletişim bilgilerinin ve tur detaylarının doğruluğundan tamamen sorumlu olduğumu kabul ediyorum.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex justify-end gap-4 pt-4 border-t">
                     <Button type="button" variant="outline" onClick={() => router.back()}>İptal</Button>
-                    <Button type="submit" disabled={loading}>
-                        {loading ? "Oluşturuluyor..." : "İlanı Yayınla"}
+                    <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+                        {loading ? "Oluşturuluyor..." : "İlanı Onaya Gönder"}
                     </Button>
                 </div>
 

@@ -65,6 +65,7 @@ export interface GuideListing {
     urgencyTag?: string; // 'SON_FIRSAT', 'SINIRLI_KONTENJAN', etc.
     legalConsent: boolean;
     consentTimestamp?: string;
+    createdAt?: string; // For sorting
 }
 
 export interface UmrahRequest {

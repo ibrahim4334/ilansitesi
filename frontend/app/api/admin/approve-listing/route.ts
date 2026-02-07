@@ -38,7 +38,12 @@ export async function POST(req: Request) {
             listing.active = true;
 
             // MOCK EMAIL NOTIFICATION
-            console.log(`[EMAIL MOCK] Sending 'Listing Approved' email to guide of listing ${listing.title}`);
+            console.log(`[EMAIL] To Guide: "İlanınız onaylandı. Görüntülemek için tıklayın." Link: /listings/${listing.id}`);
+
+            // SMS PLACEHOLDER
+            // TODO: Implement SMS Gateway
+            // Text: "İlanınız yayında: https://umrebuldum.com/listings/${listing.id}"
+            console.log(`[SMS] (Future) To Guide: "İlanınız yayında: /listings/${listing.id}"`);
         }
 
         database.guideListings[listingIndex] = listing;

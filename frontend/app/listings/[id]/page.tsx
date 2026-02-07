@@ -206,6 +206,12 @@ export default async function ListingPage({ params }: { params: { id: string } }
                                                 </Button>
                                             </>
                                         )}
+                                        {/* PDF Download - Premium Feature */}
+                                        <Button variant="secondary" className="w-full gap-2 border" asChild>
+                                            <a href={`/api/listings/pdf?id=${listing.id}`} target="_blank" rel="noopener noreferrer">
+                                                <Calendar className="w-4 h-4" /> Tur Programını İndir (PDF)
+                                            </a>
+                                        </Button>
                                     </div>
                                 </div>
                             ) : (

@@ -12,7 +12,9 @@ export async function GET(req: Request) {
         const guideId = searchParams.get('guideId');
 
         // Filters
+        // Filters
         const departureCity = searchParams.get('departureCity');
+        const searchDate = searchParams.get('date');
         const roomType = searchParams.get('roomType');
         const minPrice = searchParams.get('minPrice');
         const maxPrice = searchParams.get('maxPrice');
@@ -20,16 +22,15 @@ export async function GET(req: Request) {
 
         const database = db.read();
         const now = new Date();
-        // Default filter: APPROVED only (unless owner or admin - for now public only approved)
-        // If guideId matches session user? (TODO: Next phase)
+
         let listings = database.guideListings.filter(l => {
             if (!l.active) return false;
-            if (l.approvalStatus !== 'APPROVED') return false; // Enforce approval
+            if (l.approvalStatus !== 'APPROVED') return false;
 
             // Check expiry
             if (l.endDate) {
-                const end = new Date(l.endDate);
-                if (end < now) return false;
+                // Use string comparison for ISO dates YYYY-MM-DD
+                if (l.endDate < now.toISOString().split('T')[0]) return false;
             }
             return true;
         });
@@ -42,9 +43,18 @@ export async function GET(req: Request) {
             listings = listings.filter(l => l.departureCity.toLowerCase() === departureCity.toLowerCase());
         }
 
+        // Date Logic: Range match (start <= search <= end)
+        if (searchDate) {
+            listings = listings.filter(l => {
+                if (l.startDate && l.endDate) {
+                    return searchDate >= l.startDate && searchDate <= l.endDate;
+                }
+                return true;
+            });
+        }
+
         if (isDiyanet === 'true') {
             // We need to filter by guide's isDiyanet status.
-            // This is inefficient O(N*M) but fine for JSON DB scale.
             listings = listings.filter(l => {
                 const p = database.guideProfiles.find(prof => prof.userId === l.guideId);
                 return p?.isDiyanet;
@@ -56,8 +66,11 @@ export async function GET(req: Request) {
             const min = minPrice ? parseFloat(minPrice) : 0;
             const max = maxPrice ? parseFloat(maxPrice) : Infinity;
             listings = listings.filter(l => {
-                // Check against lowest available price (usually quad or explicit 'price' field)
-                const price = l.price || l.pricing?.quad || 0;
+                let price = l.price || 0;
+                if (l.pricing) {
+                    const prices = [l.pricing.quad, l.pricing.triple, l.pricing.double].filter(p => p > 0);
+                    if (prices.length > 0) price = Math.min(...prices);
+                }
                 return price >= min && price <= max;
             });
         }
@@ -86,10 +99,15 @@ export async function GET(req: Request) {
         });
 
         // Sort: Featured first
+        // Sort: Featured first, then Newest (Start Date)
         enrichedListings.sort((a, b) => {
             if (a.isFeatured && !b.isFeatured) return -1;
             if (!a.isFeatured && b.isFeatured) return 1;
-            return 0;
+
+            // Secondary sort: Newest (createdAt Descending)
+            const dateA = new Date(a.createdAt || a.startDate || 0).getTime();
+            const dateB = new Date(b.createdAt || b.startDate || 0).getTime();
+            return dateB - dateA;
         });
 
         return NextResponse.json(enrichedListings);
@@ -123,7 +141,8 @@ export async function POST(req: Request) {
             // Phase 10
             tourPlan,
             urgencyTag,
-            legalConsent
+            legalConsent,
+            posterImages
         } = body;
 
         if (!title || !departureCity) return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -200,10 +219,12 @@ export async function POST(req: Request) {
             totalDays: totalDays ? parseInt(totalDays) : 10,
             // Phase 10
             tourPlan: tourPlan || [],
+            posterImages: posterImages || [],
             approvalStatus: 'PENDING',
             urgencyTag: urgencyTag || "",
             legalConsent: !!legalConsent,
-            consentTimestamp: new Date().toISOString()
+            consentTimestamp: new Date().toISOString(),
+            createdAt: new Date().toISOString()
         };
 
         database.guideListings.push(newListing);
@@ -212,7 +233,7 @@ export async function POST(req: Request) {
         return NextResponse.json({
             success: true,
             listing: newListing,
-            message: "İlanınız onay için gönderildi."
+            message: "İlanınız kontrol ediliyor."
         }, { status: 201 });
 
     } catch (error) {
