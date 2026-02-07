@@ -17,11 +17,14 @@ if ( ! isset( $data ) ) {
     return;
 }
 
-// Prepare emergency data
+// Prepare emergency data (Kayboldum feature)
 $guide_name = $data['guide_name'] ?? $data['organizer']['name'] ?? 'Tur Rehberi';
 $guide_phone = $data['guide_phone'] ?? $data['organizer']['phone'] ?? '+90 XXX XXX XX XX';
+$agency_name = $data['agency_name'] ?? $data['organizer']['name'] ?? 'Organizasyon';
 $current_hotel = $data['hotel_mecca'] ?? $data['hotel_medina'] ?? 'Otel bilgisi yüklenmedi';
 $hotel_address = $data['hotel_address'] ?? 'Otel adres bilgisi';
+$guide_phone_qr = $data['guide_phone_qr'] ?? null;
+$clean_phone = preg_replace( '/[^0-9+]/', '', $guide_phone );
 ?>
 <!DOCTYPE html>
 <html lang="tr" dir="ltr">
@@ -488,25 +491,33 @@ $hotel_address = $data['hotel_address'] ?? 'Otel adres bilgisi';
             position: fixed;
             bottom: 1rem;
             left: 1rem;
-            width: 64px;
-            height: 64px;
+            right: 1rem;
+            height: auto;
+            padding: 1rem 1.5rem;
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
             color: #fff;
             border: none;
-            border-radius: 50%;
-            font-size: 1.75rem;
+            border-radius: 50px;
+            font-size: 1.25rem;
+            font-weight: 700;
             cursor: pointer;
             box-shadow: 0 4px 20px rgba(220, 38, 38, 0.5);
             z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 0.5rem;
             animation: pulse-emergency 2s infinite;
             -webkit-tap-highlight-color: transparent;
+            font-family: inherit;
         }
 
         .emergency-fab:active {
-            transform: scale(0.95);
+            transform: scale(0.98);
+        }
+
+        .emergency-fab__icon {
+            font-size: 1.5rem;
         }
 
         @keyframes pulse-emergency {
@@ -748,6 +759,68 @@ $hotel_address = $data['hotel_address'] ?? 'Otel adres bilgisi';
         .emergency-show-this__text {
             font-size: 1.1rem;
             font-weight: 600;
+        }
+
+        /* QR Code Section */
+        .emergency-qr-section {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .emergency-qr-section__title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e3a5f;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .emergency-qr-code {
+            display: inline-block;
+            background: #fff;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .emergency-qr-code img {
+            width: 200px;
+            height: 200px;
+            display: block;
+        }
+
+        .emergency-qr-caption {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 0.75rem;
+        }
+
+        /* Agency/Organization Card */
+        .emergency-agency-card {
+            background: rgba(255,255,255,0.9);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 0.75rem;
+            text-align: center;
+        }
+
+        .emergency-agency-card__label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .emergency-agency-card__value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e3a5f;
         }
 
         /* ============================================
@@ -1060,7 +1133,8 @@ $hotel_address = $data['hotel_address'] ?? 'Otel adres bilgisi';
          EMERGENCY HELP BUTTON (Floating Action Button)
          ============================================ -->
     <button class="emergency-fab" id="emergencyFab" aria-label="Acil Yardım" title="Acil Yardım / Kayboldum">
-        🆘
+        <span class="emergency-fab__icon">🆘</span>
+        Yardım / Kayboldum
     </button>
 
     <!-- ============================================
@@ -1085,126 +1159,156 @@ $hotel_address = $data['hotel_address'] ?? 'Otel adres bilgisi';
 
         <!-- TURKISH CONTENT -->
         <div class="emergency-content active" id="content-tr" dir="ltr">
+            <!-- Static Help Text -->
             <div class="emergency-help-text">
-                <strong>Kayboldum / Yardıma İhtiyacım Var</strong>
-                Lütfen aşağıdaki numarayı arayın veya bu ekranı birine gösterin.
+                <strong>Kayboldum. Umre grubumdan ayrıldım.</strong>
+                Lütfen tur rehberimi arayın.
             </div>
 
-            <!-- Guide Contact -->
+            <!-- REHBER -->
             <div class="emergency-contact-card">
-                <div class="emergency-contact-card__icon">👤</div>
-                <div class="emergency-contact-card__label">Tur Rehberi</div>
+                <div class="emergency-contact-card__label">REHBER</div>
                 <div class="emergency-contact-card__value"><?php echo esc_html( $guide_name ); ?></div>
             </div>
 
+            <!-- TEL -->
             <div class="emergency-contact-card">
-                <div class="emergency-contact-card__icon">📞</div>
-                <div class="emergency-contact-card__label">Telefon Numarası</div>
+                <div class="emergency-contact-card__label">TEL</div>
                 <div class="emergency-contact-card__value"><?php echo esc_html( $guide_phone ); ?></div>
             </div>
 
+            <!-- ORGANİZASYON -->
+            <div class="emergency-contact-card">
+                <div class="emergency-contact-card__label">ORGANİZASYON</div>
+                <div class="emergency-contact-card__value"><?php echo esc_html( $agency_name ); ?></div>
+            </div>
+
             <!-- Call Button -->
-            <a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $guide_phone ) ); ?>" class="emergency-call-btn">
+            <a href="tel:<?php echo esc_attr( $clean_phone ); ?>" class="emergency-call-btn">
                 <span class="emergency-call-btn__icon">📞</span>
                 HEMEN ARA
             </a>
 
-            <!-- Hotel Info -->
-            <div class="emergency-hotel-card">
-                <div class="emergency-hotel-card__title">🏨 Kaldığım Otel</div>
-                <div class="emergency-hotel-card__name"><?php echo esc_html( $current_hotel ); ?></div>
-                <div class="emergency-hotel-card__address"><?php echo esc_html( $hotel_address ); ?></div>
+            <!-- QR Code for Phone -->
+            <?php if ( $guide_phone_qr ) : ?>
+            <div class="emergency-qr-section">
+                <div class="emergency-qr-section__title">📱 Telefon için QR Kod</div>
+                <div class="emergency-qr-code">
+                    <img src="<?php echo esc_attr( $guide_phone_qr ); ?>" alt="QR Kod - Rehber Telefonu">
+                </div>
+                <div class="emergency-qr-caption">Bu QR kodu taratarak rehberi arayabilirsiniz</div>
             </div>
+            <?php endif; ?>
 
             <!-- Show This Box -->
             <div class="emergency-show-this">
                 <div class="emergency-show-this__title">👆 Bunu Birine Gösterin</div>
                 <div class="emergency-show-this__text">
-                    "Ben kayboldum. Lütfen bu numarayı arayın: <?php echo esc_html( $guide_phone ); ?>"
+                    "Kayboldum. Umre grubumdan ayrıldım. Lütfen tur rehberimi arayın: <?php echo esc_html( $guide_phone ); ?>"
                 </div>
             </div>
         </div>
 
         <!-- ENGLISH CONTENT -->
         <div class="emergency-content" id="content-en" dir="ltr">
+            <!-- Static Help Text -->
             <div class="emergency-help-text">
-                <strong>I'm Lost / I Need Help</strong>
-                Please call the number below or show this screen to someone.
+                <strong>I am lost. I am part of an Umrah group.</strong>
+                Please call my tour guide.
             </div>
 
-            <!-- Guide Contact -->
+            <!-- GUIDE -->
             <div class="emergency-contact-card">
-                <div class="emergency-contact-card__icon">👤</div>
-                <div class="emergency-contact-card__label">Tour Guide</div>
+                <div class="emergency-contact-card__label">GUIDE</div>
                 <div class="emergency-contact-card__value"><?php echo esc_html( $guide_name ); ?></div>
             </div>
 
+            <!-- PHONE -->
             <div class="emergency-contact-card">
-                <div class="emergency-contact-card__icon">📞</div>
-                <div class="emergency-contact-card__label">Phone Number</div>
+                <div class="emergency-contact-card__label">PHONE</div>
                 <div class="emergency-contact-card__value"><?php echo esc_html( $guide_phone ); ?></div>
             </div>
 
+            <!-- ORGANIZATION -->
+            <div class="emergency-contact-card">
+                <div class="emergency-contact-card__label">ORGANIZATION</div>
+                <div class="emergency-contact-card__value"><?php echo esc_html( $agency_name ); ?></div>
+            </div>
+
             <!-- Call Button -->
-            <a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $guide_phone ) ); ?>" class="emergency-call-btn">
+            <a href="tel:<?php echo esc_attr( $clean_phone ); ?>" class="emergency-call-btn">
                 <span class="emergency-call-btn__icon">📞</span>
                 CALL NOW
             </a>
 
-            <!-- Hotel Info -->
-            <div class="emergency-hotel-card">
-                <div class="emergency-hotel-card__title">🏨 My Hotel</div>
-                <div class="emergency-hotel-card__name"><?php echo esc_html( $current_hotel ); ?></div>
-                <div class="emergency-hotel-card__address"><?php echo esc_html( $hotel_address ); ?></div>
+            <!-- QR Code for Phone -->
+            <?php if ( $guide_phone_qr ) : ?>
+            <div class="emergency-qr-section">
+                <div class="emergency-qr-section__title">📱 QR Code for Phone</div>
+                <div class="emergency-qr-code">
+                    <img src="<?php echo esc_attr( $guide_phone_qr ); ?>" alt="QR Code - Guide Phone">
+                </div>
+                <div class="emergency-qr-caption">Scan this QR code to call the guide</div>
             </div>
+            <?php endif; ?>
 
             <!-- Show This Box -->
             <div class="emergency-show-this">
                 <div class="emergency-show-this__title">👆 Show This to Someone</div>
                 <div class="emergency-show-this__text">
-                    "I am lost. Please call this number: <?php echo esc_html( $guide_phone ); ?>"
+                    "I am lost. I am part of an Umrah group. Please call my tour guide: <?php echo esc_html( $guide_phone ); ?>"
                 </div>
             </div>
         </div>
 
         <!-- ARABIC CONTENT -->
         <div class="emergency-content" id="content-ar" dir="rtl">
+            <!-- Static Help Text -->
             <div class="emergency-help-text">
-                <strong>أنا ضائع / أحتاج مساعدة</strong>
-                يرجى الاتصال بالرقم أدناه أو إظهار هذه الشاشة لشخص ما.
+                <strong>أنا ضائع. أنا ضمن مجموعة عمرة.</strong>
+                الرجاء الاتصال بمرشد الرحلة.
             </div>
 
-            <!-- Guide Contact -->
+            <!-- المرشد -->
             <div class="emergency-contact-card">
-                <div class="emergency-contact-card__icon">👤</div>
-                <div class="emergency-contact-card__label">مرشد سياحي</div>
+                <div class="emergency-contact-card__label">المرشد</div>
                 <div class="emergency-contact-card__value"><?php echo esc_html( $guide_name ); ?></div>
             </div>
 
+            <!-- الهاتف -->
             <div class="emergency-contact-card">
-                <div class="emergency-contact-card__icon">📞</div>
-                <div class="emergency-contact-card__label">رقم الهاتف</div>
+                <div class="emergency-contact-card__label">الهاتف</div>
                 <div class="emergency-contact-card__value" dir="ltr"><?php echo esc_html( $guide_phone ); ?></div>
             </div>
 
+            <!-- المنظمة -->
+            <div class="emergency-contact-card">
+                <div class="emergency-contact-card__label">المنظمة</div>
+                <div class="emergency-contact-card__value"><?php echo esc_html( $agency_name ); ?></div>
+            </div>
+
             <!-- Call Button -->
-            <a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $guide_phone ) ); ?>" class="emergency-call-btn">
+            <a href="tel:<?php echo esc_attr( $clean_phone ); ?>" class="emergency-call-btn">
                 <span class="emergency-call-btn__icon">📞</span>
                 اتصل الآن
             </a>
 
-            <!-- Hotel Info -->
-            <div class="emergency-hotel-card">
-                <div class="emergency-hotel-card__title">🏨 فندقي</div>
-                <div class="emergency-hotel-card__name"><?php echo esc_html( $current_hotel ); ?></div>
-                <div class="emergency-hotel-card__address"><?php echo esc_html( $hotel_address ); ?></div>
+            <!-- QR Code for Phone -->
+            <?php if ( $guide_phone_qr ) : ?>
+            <div class="emergency-qr-section">
+                <div class="emergency-qr-section__title">📱 رمز QR للهاتف</div>
+                <div class="emergency-qr-code">
+                    <img src="<?php echo esc_attr( $guide_phone_qr ); ?>" alt="رمز QR - هاتف المرشد">
+                </div>
+                <div class="emergency-qr-caption">امسح هذا الرمز للاتصال بالمرشد</div>
             </div>
+            <?php endif; ?>
 
             <!-- Show This Box -->
             <div class="emergency-show-this">
                 <div class="emergency-show-this__title">👆 أظهر هذا لشخص ما</div>
                 <div class="emergency-show-this__text" dir="ltr">
-                    "أنا ضائع. يرجى الاتصال بهذا الرقم: <?php echo esc_html( $guide_phone ); ?>"
+                    "أنا ضائع. أنا ضمن مجموعة عمرة. الرجاء الاتصال بمرشد الرحلة: <?php echo esc_html( $guide_phone ); ?>"
                 </div>
             </div>
         </div>

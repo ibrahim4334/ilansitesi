@@ -2,7 +2,6 @@ export {
     FeaturedBadge,
     ListingCardPro,
     RequestPriorityUpsell,
-    PricingTable,
     LimitReachedModal,
     VerifiedOrganizerBadge,
     SocialProofBanner,
@@ -15,3 +14,10 @@ export {
     CountdownTimer,
     FeatureList,
 } from './UpgradePrompts';
+
+// Backend-synced components (Primary Source)
+export {
+    PricingTable, // The new correct one
+    QuotaStatus,
+    FeatureGate
+} from './BackendSyncedComponents';

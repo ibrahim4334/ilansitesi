@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { LayoutDashboard, FileText, MessageSquare, BarChart3, Wallet, Settings, Menu, X, Bell } from 'lucide-react';
+import { LayoutDashboard, FileText, MessageSquare, BarChart3, Wallet, Settings, Menu, X, Bell, Heart, User, Briefcase } from 'lucide-react';
 import { useState } from 'react';
+import { useSession } from "next-auth/react";
 
 interface NavItem {
     label: string;
@@ -9,17 +10,50 @@ interface NavItem {
     badge?: number;
 }
 
-const navItems: NavItem[] = [
+const organizerItems: NavItem[] = [
     { label: 'Ana Sayfa', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
     { label: 'İlanlarım', href: '/dashboard/listings', icon: <FileText className="w-5 h-5" />, badge: 12 },
     { label: 'Talepler', href: '/dashboard/requests', icon: <MessageSquare className="w-5 h-5" />, badge: 3 },
     { label: 'Performans', href: '/dashboard/analytics', icon: <BarChart3 className="w-5 h-5" /> },
     { label: 'Gelir', href: '/dashboard/revenue', icon: <Wallet className="w-5 h-5" /> },
+    { label: 'Mesajlar', href: '/dashboard/messages', icon: <MessageSquare className="w-5 h-5" />, badge: 5 },
+    { label: 'Ayarlar', href: '/dashboard/settings', icon: <Settings className="w-5 h-5" /> },
+];
+
+const pilgrimItems: NavItem[] = [
+    { label: 'Ana Sayfa', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { label: 'Taleplerim', href: '/dashboard/requests', icon: <MessageSquare className="w-5 h-5" /> },
+    { label: 'Favorilerim', href: '/dashboard/favorites', icon: <Heart className="w-5 h-5" /> },
+    { label: 'Mesajlar', href: '/dashboard/messages', icon: <MessageSquare className="w-5 h-5" /> },
+    { label: 'Ayarlar', href: '/dashboard/settings', icon: <Settings className="w-5 h-5" /> },
+];
+
+const guideItems: NavItem[] = [
+    { label: 'Ana Sayfa', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { label: 'Profilim', href: '/dashboard/profile', icon: <User className="w-5 h-5" /> },
+    { label: 'Başvurularım', href: '/dashboard/applications', icon: <Briefcase className="w-5 h-5" /> },
+    { label: 'Mesajlar', href: '/dashboard/messages', icon: <MessageSquare className="w-5 h-5" /> },
     { label: 'Ayarlar', href: '/dashboard/settings', icon: <Settings className="w-5 h-5" /> },
 ];
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const { data: session } = useSession();
+    const role = session?.user?.role;
+
+    let navItems = organizerItems; // Default fallback
+    let panelTitle = "Panel";
+
+    if (role === 'USER') { // Was umreci
+        navItems = pilgrimItems;
+        panelTitle = "Umreci Paneli";
+    } else if (role === 'GUIDE') { // Was rehber
+        navItems = guideItems;
+        panelTitle = "Rehber Paneli";
+    } else if (role === 'ORGANIZATION') { // Was organizasyon
+        navItems = organizerItems;
+        panelTitle = "Organizatör Paneli";
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -72,7 +106,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-white border-r flex-col">
                 <div className="p-4 border-b">
                     <span className="font-bold text-xl text-blue-600">Umre Buldum</span>
-                    <p className="text-xs text-gray-500 mt-1">Organizatör Paneli</p>
+                    <p className="text-xs text-gray-500 mt-1">{panelTitle}</p>
                 </div>
                 <nav className="flex-1 p-4 space-y-1">
                     {navItems.map((item) => (
@@ -93,10 +127,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </nav>
                 <div className="p-4 border-t">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                        <div className="w-10 h-10 bg-gray-200 rounded-full">
+                            {/* Valid Avatar or Placeholder */}
+                        </div>
                         <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate">Hac Umre Turizm</p>
-                            <p className="text-xs text-gray-500">Pro Plan</p>
+                            <p className="font-medium text-sm truncate">{session?.user?.name || "Kullanıcı"}</p>
+                            <p className="text-xs text-gray-500 capitalize">{session?.user?.role || "Misafir"}</p>
                         </div>
                     </div>
                 </div>

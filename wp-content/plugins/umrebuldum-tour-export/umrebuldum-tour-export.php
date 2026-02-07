@@ -14,9 +14,17 @@ namespace Umrebuldum\TourExport;
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
-define( 'UTE_VERSION', '1.0.0' );
+define( 'UTE_VERSION', '1.2.0' );
 define( 'UTE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'UTE_URL', plugin_dir_url( __FILE__ ) );
+
+// Include additional modules
+require_once UTE_PATH . 'includes/qr-generator.php';
+require_once UTE_PATH . 'includes/hivepress-fields.php';
+require_once UTE_PATH . 'includes/access-control.php';
+require_once UTE_PATH . 'includes/offer-engine.php';
+require_once UTE_PATH . 'includes/dashboard-widget.php';
+require_once UTE_PATH . 'includes/rest-api.php';
 
 /**
  * Main Export Class
@@ -54,6 +62,10 @@ class Tour_Exporter {
         
         // Add export button to listing actions
         add_filter( 'hivepress/v1/templates/listing_view_page/blocks', [ $this, 'add_export_button' ], 100 );
+        
+        // Initialize monetization
+        Dashboard_Widget::get_instance();
+        REST_API::get_instance();
     }
 
     /**
@@ -75,6 +87,16 @@ class Tour_Exporter {
             'umrebuldum-tour-export',
             [ $this, 'render_admin_page' ]
         );
+        
+        // Add Settings submenu
+        add_submenu_page(
+            'hivepress',
+            __( 'Tour Export - Ayarlar', 'umrebuldum-tour-export' ),
+            __( 'Tour Export Ayarlar', 'umrebuldum-tour-export' ),
+            'manage_options',
+            'umrebuldum-tour-export-settings',
+            [ $this, 'render_settings_page' ]
+        );
     }
 
     /**
@@ -82,6 +104,13 @@ class Tour_Exporter {
      */
     public function render_admin_page() {
         include UTE_PATH . 'templates/admin-page.php';
+    }
+
+    /**
+     * Render settings page
+     */
+    public function render_settings_page() {
+        include UTE_PATH . 'templates/settings-page.php';
     }
 
     /**
@@ -129,6 +158,26 @@ class Tour_Exporter {
             wp_die( 'Listing not found' );
         }
 
+        // Check quota for logged-in users
+        if ( is_user_logged_in() ) {
+            $access = Access_Control::get_instance();
+            $quota = $access->check_quota();
+            
+            if ( ! $quota['allowed'] ) {
+                $offer = Offer_Engine::get_instance()->get_quota_exceeded( $quota['used'], $quota['limit'] );
+                
+                wp_die(
+                    '<div style="text-align:center;max-width:500px;margin:50px auto;">' .
+                    '<h1 style="color:#dc3232;">' . esc_html( $offer['title'] ) . '</h1>' .
+                    '<p>' . esc_html( $offer['message'] ) . '</p>' .
+                    '<a href="' . esc_url( $offer['upgrade_url'] ) . '" class="button button-primary" style="margin-top:20px;">' . 
+                    esc_html( $offer['cta_label'] ) . '</a>' .
+                    '</div>',
+                    esc_html__( 'Günlük Limit Aşıldı', 'umrebuldum-tour-export' )
+                );
+            }
+        }
+
         $this->export_listing( $listing_id );
     }
 
@@ -153,6 +202,12 @@ class Tour_Exporter {
         $listing = get_post( $listing_id );
         if ( ! $listing ) {
             wp_die( 'Listing not found' );
+        }
+
+        // Increment quota for logged-in users
+        if ( is_user_logged_in() ) {
+            $access = Access_Control::get_instance();
+            $access->increment_quota();
         }
 
         // Gather all data
@@ -209,9 +264,10 @@ class Tour_Exporter {
             'hp_included'        => 'included',
             'hp_not_included'    => 'not_included',
             'hp_itinerary'       => 'itinerary',
-            // Emergency contact info
+            // Emergency contact info (Kayboldum feature)
             'hp_guide_name'      => 'guide_name',
             'hp_guide_phone'     => 'guide_phone',
+            'hp_agency_name'     => 'agency_name',
         ];
 
         foreach ( $meta_keys as $meta_key => $data_key ) {
@@ -263,6 +319,41 @@ class Tour_Exporter {
                 }
             }
         }
+
+        // Generate QR code for guide phone (for Emergency/Kayboldum feature)
+        if ( ! empty( $data['guide_phone'] ) ) {
+            $data['guide_phone_qr'] = QR_Generator::generate_for_phone( $data['guide_phone'], 250 );
+        }
+
+        // Add tier-based features
+        if ( is_user_logged_in() ) {
+            $access = Access_Control::get_instance();
+            $user_id = get_current_user_id();
+            $tier = $access->get_user_tier( $user_id );
+            
+            // Quality level
+            $data['quality_level'] = $access->get_quality_level( $user_id );
+            
+            // Watermark
+            $data['show_watermark'] = ! $access->has_feature( 'no_watermark', $user_id );
+            
+            // Emergency features
+            $data['has_emergency'] = $access->has_feature( 'emergency_screen', $user_id );
+            
+            // Tier info
+            $data['user_tier'] = $tier;
+            $data['tier_name'] = $access->get_tier_name( $tier );
+        } else {
+            // Not logged in - FREE tier
+            $data['quality_level'] = 60;
+            $data['show_watermark'] = true;
+            $data['has_emergency'] = false;
+            $data['user_tier'] = Access_Control::TIER_FREE;
+            $data['tier_name'] = 'FREE';
+        }
+
+        // Apply filter for extensibility
+        $data = apply_filters( 'ute_export_data', $data, $listing );
 
         return $data;
     }

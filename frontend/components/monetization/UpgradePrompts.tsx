@@ -63,7 +63,7 @@ export function UpgradeBanner({ variant = 'default', discount, onUpgrade }: Upgr
                     <Crown className="w-6 h-6 text-amber-400" />
                     <div>
                         <p className="font-semibold">Pro'ya yükselt, daha fazla müşteriye ulaş</p>
-                        <p className="text-sm text-gray-400">Aylık sadece ₺199</p>
+                        <p className="text-sm text-gray-400">Aylık sadece ₺999</p>
                     </div>
                 </div>
                 <button
@@ -117,7 +117,7 @@ export function InlineUpsell({ feature, onAction }: InlineUpsellProps) {
             title: 'Detaylı Analitik',
             description: 'Kimin ilanınızı görüntülediğini öğrenin',
             cta: 'Pro\'ya Geç',
-            price: '₺199/ay',
+            price: '₺999/ay',
             gradient: 'from-purple-500 to-indigo-600',
         },
     };
@@ -254,13 +254,13 @@ export function FeatureList({ features }: FeatureListProps) {
                 <div
                     key={index}
                     className={`flex gap-4 p-4 rounded-xl ${feature.isPro
-                            ? 'bg-purple-50 border border-purple-100'
-                            : 'bg-gray-50'
+                        ? 'bg-purple-50 border border-purple-100'
+                        : 'bg-gray-50'
                         }`}
                 >
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${feature.isPro
-                            ? 'bg-purple-100 text-purple-600'
-                            : 'bg-gray-200 text-gray-600'
+                        ? 'bg-purple-100 text-purple-600'
+                        : 'bg-gray-200 text-gray-600'
                         }`}>
                         {feature.icon}
                     </div>

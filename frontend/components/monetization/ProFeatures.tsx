@@ -83,10 +83,10 @@ export function ListingCardPro({
 }: ListingCardProProps) {
     return (
         <div className={`group relative bg-white rounded-2xl overflow-hidden transition-all duration-300 ${isPremium
-                ? 'ring-2 ring-purple-500 shadow-lg shadow-purple-100'
-                : isFeatured
-                    ? 'ring-2 ring-amber-400 shadow-lg shadow-amber-50'
-                    : 'border border-gray-200 hover:shadow-lg'
+            ? 'ring-2 ring-purple-500 shadow-lg shadow-purple-100'
+            : isFeatured
+                ? 'ring-2 ring-amber-400 shadow-lg shadow-amber-50'
+                : 'border border-gray-200 hover:shadow-lg'
             }`}>
             {/* Premium Glow Effect */}
             {isPremium && (
@@ -219,122 +219,15 @@ export function RequestPriorityUpsell({ onUpgrade, variant = 'card' }: RequestPr
 // PRICING COMPARISON TABLE
 // ============================================
 
-const plans = [
-    {
-        id: 'free',
-        name: 'Free',
-        price: '₺0',
-        period: '/ay',
-        description: 'Başlangıç için ideal',
-        features: [
-            { label: 'İlan Sayısı', value: '3' },
-            { label: 'Afiş Üretimi', value: '5/ay' },
-            { label: 'Arama Sırası', value: 'Normal' },
-            { label: 'Analitik', value: 'Temel' },
-            { label: 'Destek', value: 'Topluluk' },
-        ],
-        cta: 'Mevcut Plan',
-        popular: false,
-        current: true,
-    },
-    {
-        id: 'pro',
-        name: 'Pro',
-        price: '₺199',
-        period: '/ay',
-        description: 'Büyüyen acenteler için',
-        features: [
-            { label: 'İlan Sayısı', value: '15', highlight: true },
-            { label: 'Afiş Üretimi', value: 'Sınırsız', highlight: true },
-            { label: 'Arama Sırası', value: 'Öncelikli', highlight: true },
-            { label: 'Analitik', value: 'Detaylı' },
-            { label: 'Destek', value: 'Email' },
-        ],
-        cta: 'Pro\'ya Yükselt',
-        popular: true,
-        current: false,
-    },
-    {
-        id: 'agency',
-        name: 'Agency',
-        price: '₺499',
-        period: '/ay',
-        description: 'Kurumsal çözümler',
-        features: [
-            { label: 'İlan Sayısı', value: 'Sınırsız', highlight: true },
-            { label: 'Afiş Üretimi', value: 'Sınırsız', highlight: true },
-            { label: 'Arama Sırası', value: 'Maksimum', highlight: true },
-            { label: 'Analitik', value: 'Gelişmiş', highlight: true },
-            { label: 'Destek', value: 'Öncelikli', highlight: true },
-        ],
-        cta: 'İletişime Geç',
-        popular: false,
-        current: false,
-    },
-];
-
-export function PricingTable() {
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {plans.map((plan) => (
-                <div
-                    key={plan.id}
-                    className={`relative bg-white rounded-2xl p-6 ${plan.popular
-                            ? 'ring-2 ring-purple-500 shadow-xl'
-                            : 'border border-gray-200'
-                        }`}
-                >
-                    {plan.popular && (
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                            <span className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                En Popüler
-                            </span>
-                        </div>
-                    )}
-
-                    <div className="text-center mb-6">
-                        <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
-                        <p className="text-sm text-gray-500 mt-1">{plan.description}</p>
-                        <div className="mt-4">
-                            <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                            <span className="text-gray-500">{plan.period}</span>
-                        </div>
-                    </div>
-
-                    <ul className="space-y-3 mb-6">
-                        {plan.features.map((feature, index) => (
-                            <li key={index} className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600">{feature.label}</span>
-                                <span className={`font-medium ${feature.highlight ? 'text-purple-600' : 'text-gray-900'}`}>
-                                    {feature.value}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
-
-                    <button
-                        className={`w-full py-3 rounded-lg font-semibold transition-colors ${plan.current
-                                ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                                : plan.popular
-                                    ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700'
-                                    : 'bg-gray-900 text-white hover:bg-gray-800'
-                            }`}
-                        disabled={plan.current}
-                    >
-                        {plan.cta}
-                    </button>
-                </div>
-            ))}
-        </div>
-    );
-}
+// PricingTable component has been moved to BackendSyncedComponents.tsx
+// to align with backend tiers (FREE/PLUS/PRO).
 
 // ============================================
 // LIMIT REACHED MODAL
 // ============================================
 
 interface LimitReachedModalProps {
-    type: 'listing' | 'poster' | 'request';
+    type: 'poster'; // Only poster limits exist in backend
     currentUsage: number;
     limit: number;
     onUpgrade?: () => void;
@@ -343,24 +236,14 @@ interface LimitReachedModalProps {
 
 export function LimitReachedModal({ type, currentUsage, limit, onUpgrade, onClose }: LimitReachedModalProps) {
     const config = {
-        listing: {
-            title: 'İlan Limitine Ulaştınız',
-            description: 'Free planınızda maksimum ilan sayısına ulaştınız.',
-            benefit: 'Pro ile 15 ilan yayınlayın',
-            icon: '📋',
-        },
         poster: {
-            title: 'Afiş Limitine Ulaştınız',
-            description: 'Bu ay için afiş üretim hakkınız bitti.',
-            benefit: 'Pro ile sınırsız afiş oluşturun',
+            title: 'Günlük Afiş Limitine Ulaştınız',
+            description: 'Bugün için afiş üretim hakkınız bitti.',
+            benefit: 'PLUS ile sınırsız afiş oluşturun',
             icon: '🎨',
         },
-        request: {
-            title: 'Talep Limitine Ulaştınız',
-            description: 'Aktif talep limitinize ulaştınız.',
-            benefit: 'Pro ile daha fazla talep gönderin',
-            icon: '📨',
-        },
+        // Listing limits removed per backend alignment rules
+        // Request limits removed per backend alignment rules
     };
 
     const { title, description, benefit, icon } = config[type];
