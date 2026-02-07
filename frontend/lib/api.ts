@@ -4,8 +4,8 @@ const WP_API_URL = process.env.NEXT_PUBLIC_WP_API_URL || "";
 
 // Check if we have a valid API URL (not empty, not placeholder, not dummy)
 const hasValidApiUrl = Boolean(
-  WP_API_URL && 
-  WP_API_URL.length > 0 && 
+  WP_API_URL &&
+  WP_API_URL.length > 0 &&
   !WP_API_URL.includes("dummyjson") &&
   !WP_API_URL.includes("dummy") &&
   !WP_API_URL.includes("placeholder") &&
@@ -22,9 +22,11 @@ const mockTours: TourListItem[] = [
     price: 52000,
     duration: "10 Gün / 9 Gece",
     departureCity: "İstanbul",
+    departure_city: "İstanbul",
     rating: 4.9,
     reviewCount: 124,
     agencyName: "Hicaz Turizm",
+    agency_name: "Hicaz Turizm",
     featured: true,
   },
   {
@@ -35,9 +37,11 @@ const mockTours: TourListItem[] = [
     price: 38500,
     duration: "7 Gün / 6 Gece",
     departureCity: "Ankara",
+    departure_city: "Ankara",
     rating: 4.7,
     reviewCount: 89,
     agencyName: "Sefa Turizm",
+    agency_name: "Sefa Turizm",
     featured: true,
   },
   {
@@ -48,9 +52,11 @@ const mockTours: TourListItem[] = [
     price: 75000,
     duration: "12 Gün / 11 Gece",
     departureCity: "İstanbul",
+    departure_city: "İstanbul",
     rating: 5.0,
     reviewCount: 67,
     agencyName: "Zemzem Travel",
+    agency_name: "Zemzem Travel",
     featured: true,
   },
   {
@@ -61,9 +67,11 @@ const mockTours: TourListItem[] = [
     price: 45000,
     duration: "10 Gün / 9 Gece",
     departureCity: "İzmir",
+    departure_city: "İzmir",
     rating: 4.8,
     reviewCount: 156,
     agencyName: "Medine Turizm",
+    agency_name: "Medine Turizm",
     featured: true,
   },
   {
@@ -72,11 +80,13 @@ const mockTours: TourListItem[] = [
     title: "Kurban Bayramı Umresi",
     thumbnail: "https://images.unsplash.com/photo-1519817650390-64a93db51149?w=800&h=600&fit=crop",
     price: 62000,
-    duration: "14 Gün / 13 Gece",
+    duration: "14 Gün / 7 Gece",
     departureCity: "İstanbul",
+    departure_city: "İstanbul",
     rating: 4.6,
     reviewCount: 43,
     agencyName: "Hicaz Turizm",
+    agency_name: "Hicaz Turizm",
     featured: true,
   },
   {
@@ -87,9 +97,11 @@ const mockTours: TourListItem[] = [
     price: 41000,
     duration: "8 Gün / 7 Gece",
     departureCity: "Bursa",
+    departure_city: "Bursa",
     rating: 4.5,
     reviewCount: 78,
     agencyName: "Sefa Turizm",
+    agency_name: "Sefa Turizm",
     featured: false,
   },
 ];
@@ -103,9 +115,11 @@ const mockTourDetails: Record<string, Tour> = {
     price: 52000,
     duration: "10 Gün / 9 Gece",
     departureCity: "İstanbul",
+    departure_city: "İstanbul",
     rating: 4.9,
     reviewCount: 124,
     agencyName: "Hicaz Turizm",
+    agency_name: "Hicaz Turizm",
     agencyPhone: "+90 212 555 1234",
     agencyEmail: "info@hicazturizm.com",
     images: [
@@ -155,9 +169,9 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
   if (!hasValidApiUrl) {
     throw new Error("WP_API_URL not configured");
   }
-  
+
   const url = `${WP_API_URL}${endpoint}`;
-  
+
   const res = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
@@ -176,7 +190,7 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
 export async function getTours(filters?: TourFilters): Promise<ToursResponse> {
   if (useMockData) {
     let filteredTours = [...mockTours];
-    
+
     if (filters?.city) {
       filteredTours = filteredTours.filter(t => t.departureCity.toLowerCase() === filters.city?.toLowerCase());
     }
@@ -186,12 +200,12 @@ export async function getTours(filters?: TourFilters): Promise<ToursResponse> {
     if (filters?.maxPrice !== undefined) {
       filteredTours = filteredTours.filter(t => t.price <= (filters.maxPrice || Infinity));
     }
-    
+
     const page = filters?.page || 1;
     const perPage = filters?.perPage || 9;
     const start = (page - 1) * perPage;
     const paginatedTours = filteredTours.slice(start, start + perPage);
-    
+
     return {
       tours: paginatedTours,
       total: filteredTours.length,
@@ -200,7 +214,7 @@ export async function getTours(filters?: TourFilters): Promise<ToursResponse> {
   }
 
   const params = new URLSearchParams();
-  
+
   if (filters?.city) {
     params.append('departure_city', filters.city);
   }
@@ -219,9 +233,9 @@ export async function getTours(filters?: TourFilters): Promise<ToursResponse> {
 
   const queryString = params.toString();
   const endpoint = `/listings${queryString ? `?${queryString}` : ''}`;
-  
+
   const data = await fetchAPI<{ listings: TourListItem[]; total: number; total_pages: number }>(endpoint);
-  
+
   return {
     tours: data.listings || [],
     total: data.total || 0,
@@ -234,7 +248,7 @@ export async function getFeaturedTours(): Promise<TourListItem[]> {
   if (useMockData) {
     return mockTours.filter(t => t.featured).slice(0, 6);
   }
-  
+
   const data = await fetchAPI<{ listings: TourListItem[] }>('/listings?featured=true&per_page=6');
   return data.listings || [];
 }
@@ -302,7 +316,7 @@ export async function getCities(): Promise<City[]> {
   if (useMockData) {
     return mockCities;
   }
-  
+
   const data = await fetchAPI<City[]>('/listings/cities');
   return data || [];
 }
@@ -332,4 +346,54 @@ export async function getPriceRange(): Promise<{ min: number; max: number }> {
   } catch {
     return { min: 0, max: 100000 };
   }
+}
+
+// -----------------------------------------------------------------------------
+// Compatibility Wrapper Functions (to fix build errors)
+// These functions map existing Tour objects to the WordPress-style structure
+// expected by app/listings/[id]/page.tsx and app/search/page.tsx
+// -----------------------------------------------------------------------------
+
+export async function fetchListings(query?: string): Promise<any[]> {
+  const response = await getTours();
+  let filtered = response.tours;
+
+  if (query) {
+    const lowerQuery = query.toLowerCase();
+    filtered = filtered.filter(t => t.title.toLowerCase().includes(lowerQuery));
+  }
+
+  return filtered.map(t => ({
+    id: t.id,
+    title: { rendered: t.title },
+    meta: { _location: t.departure_city },
+    formatted_price: new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(t.price),
+    excerpt: { rendered: t.duration || "Detaylar için tıklayın" },
+    slug: t.slug
+  }));
+}
+
+export async function fetchListing(id: string | number): Promise<any | null> {
+  const tourId = typeof id === 'string' ? parseInt(id, 10) : id;
+  const tour = await getTourById(tourId); // Assuming getTourById handles mock/API
+
+  if (!tour) return null;
+
+  // Construct HTML content from itinerary if specific description is missing or mocked
+  let content = "";
+  if (tour.itinerary && Array.isArray(tour.itinerary)) {
+    content += "<h3>Program</h3><ul>" + tour.itinerary.map(i => `<li><strong>${i.title}</strong>: ${i.description}</li>`).join("") + "</ul>";
+  } else {
+    // Fallback content if itinerary is missing
+    content = "<p>Tur programı detayları için lütfen iletişime geçiniz.</p>";
+  }
+
+  return {
+    id: tour.id,
+    title: { rendered: tour.title },
+    content: { rendered: content },
+    meta: { _location: tour.departure_city },
+    formatted_price: new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(tour.price),
+    slug: tour.slug
+  };
 }

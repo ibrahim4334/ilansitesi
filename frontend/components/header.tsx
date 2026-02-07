@@ -80,6 +80,13 @@ export function Header() {
             0850 123 45 67
           </a>
 
+          {/* Teklif Al - Only for USERS or Guests */}
+          {(!session || session.user.role === 'USER') && (
+            <Button asChild variant="outline" className="hidden lg:flex mr-2">
+              <Link href="/request">Teklif Al</Link>
+            </Button>
+          )}
+
           {!isLoading && (
             <>
               {session?.user ? (

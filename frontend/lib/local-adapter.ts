@@ -27,6 +27,9 @@ export function LocalJSONAdapter(): Adapter {
     return {
         async createUser(user) {
             const db = readDb()
+            if (db.users.some((u: any) => u.email === user.email)) {
+                throw new Error("Bu email adresi ile zaten kayıtlı bir hesap bulunmaktadır.")
+            }
             const id = crypto.randomUUID()
             const newUser = { ...user, id }
             db.users.push(newUser)

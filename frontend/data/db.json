@@ -3,7 +3,7 @@
     {
       "id": "09b8e682-2e97-403c-98bb-1566f43b4015",
       "email": "ibrahim.erol3443@gmail.com",
-      "emailVerified": "2026-02-06T22:12:06.402Z"
+      "emailVerified": "2026-02-07T14:34:55.658Z"
     },
     {
       "id": "057e1a27-9c05-4684-ab69-7022183506f8",
@@ -24,6 +24,11 @@
       "id": "dce0b3c3-7bb1-46f0-822c-5195e43c73ff",
       "email": "aweaw@drrg.sfd",
       "emailVerified": "2026-02-06T22:10:44.844Z"
+    },
+    {
+      "id": "ec82a8d6-e6fa-4ba5-9472-8978ceb56b4c",
+      "email": "ibrahim.sadasdsaerol3443@gmail.com",
+      "emailVerified": "2026-02-07T14:36:05.328Z"
     }
   ],
   "sessions": [
@@ -114,6 +119,83 @@
       "identifier": "aasa@sdfssd.sdf",
       "token": "b114b944111998548fc55a4fe55fab97a8e12ae0ff498670093e8d0263e06cac",
       "expires": "2026-02-07T22:11:27.656Z"
+    },
+    {
+      "identifier": "ibrahim.erol3443@gmail.com",
+      "token": "90962fbd213a4f44892605013fd9cab8d36c51c9d6450a4cf5ef8cacfdbf4b46",
+      "expires": "2026-02-08T14:35:58.121Z"
     }
-  ]
+  ],
+  "guideProfiles": [
+    {
+      "userId": "09b8e682-2e97-403c-98bb-1566f43b4015",
+      "fullName": "ibrahim erol",
+      "phone": "+905058560215",
+      "city": "Muğla",
+      "bio": "yeni",
+      "photo": "",
+      "isDiyanet": true,
+      "quotaTarget": 30,
+      "currentCount": 0,
+      "isApproved": false
+    }
+  ],
+  "guideListings": [
+    {
+      "id": "efafce1a-825b-48f2-9bad-c5d183bcdf75",
+      "guideId": "09b8e682-2e97-403c-98bb-1566f43b4015",
+      "title": "şevval",
+      "description": "",
+      "city": "kütahya",
+      "departureCity": "istanbul",
+      "extraServices": [
+        "Otel Dahil",
+        "Transfer",
+        "Rehberlik",
+        "7/24 Destek",
+        "Bayan Rehber"
+      ],
+      "airline": "thy",
+      "price": 52660,
+      "quota": 30,
+      "filled": 0,
+      "active": true
+    }
+  ],
+  "umrahRequests": [
+    {
+      "id": "74175bb8-af3d-4700-8a05-2cc987cf6f30",
+      "userEmail": "ibrahim.erol3443@gmail.com",
+      "departureCity": "istanbul",
+      "peopleCount": 3,
+      "dateRange": "15-30 mart 2026",
+      "budget": 52000,
+      "createdAt": "2026-02-07T14:35:28.806Z",
+      "status": "open"
+    }
+  ],
+  "requestInterests": [],
+  "chatThreads": [],
+  "chatMessages": [],
+  "creditPackages": [
+    {
+      "id": "pkg_starter",
+      "name": "Başlangıç Paketi",
+      "credits": 10,
+      "priceTRY": 299
+    },
+    {
+      "id": "pkg_pro",
+      "name": "Pro Paket",
+      "credits": 30,
+      "priceTRY": 799
+    },
+    {
+      "id": "pkg_agency",
+      "name": "Ajans Paketi",
+      "credits": 100,
+      "priceTRY": 1999
+    }
+  ],
+  "transactions": []
 }

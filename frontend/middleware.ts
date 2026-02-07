@@ -71,6 +71,20 @@ export default auth((req) => {
             if (nextUrl.pathname.startsWith("/org") && role !== "ORGANIZATION") {
                 return NextResponse.redirect(new URL(rootPath, nextUrl));
             }
+
+            // 3. /request is ONLY for USER
+            if (nextUrl.pathname.startsWith("/request") && role !== "USER") {
+                // If a guide tries to go to /request, maybe show them the dashboard?
+                // For now, redirect home or dashboard.
+                return NextResponse.redirect(new URL(rootPath, nextUrl));
+            }
+
+            // 4. /dashboard/requests is for GUIDE or ORGANIZATION
+            if (nextUrl.pathname.startsWith("/dashboard/requests")) {
+                if (role !== "GUIDE" && role !== "ORGANIZATION") {
+                    return NextResponse.redirect(new URL(rootPath, nextUrl));
+                }
+            }
         }
     }
 

@@ -15,7 +15,9 @@ export async function GET(req: Request) {
         let profile = database.guideProfiles.find(p => p.userId === user.id);
 
         if (!profile) {
-            // Return default placeholder
+            // Return default placeholder (and create in DB for consistency?)
+            // If we don't create it here, we might have issues later.
+            // Let's create it.
             profile = {
                 userId: user.id,
                 fullName: session.user.name || "",
@@ -26,8 +28,18 @@ export async function GET(req: Request) {
                 isDiyanet: false,
                 quotaTarget: 30,
                 currentCount: 0,
-                isApproved: false
+                isApproved: false,
+                credits: 0,
+                package: "FREEMIUM",
+                tokens: 0
             };
+            database.guideProfiles.push(profile);
+            db.write(database);
+        } else {
+            // Ensure migration defaults
+            if (!profile.package) profile.package = "FREEMIUM";
+            if (profile.tokens === undefined) profile.tokens = 0;
+            if (profile.credits === undefined) profile.credits = 0;
         }
 
         return NextResponse.json(profile);
@@ -62,7 +74,10 @@ export async function PUT(req: Request) {
                 isDiyanet: body.isDiyanet || false,
                 quotaTarget: 30,
                 currentCount: 0,
-                isApproved: false
+                isApproved: false,
+                credits: 0,
+                package: "FREEMIUM",
+                tokens: 0
             });
         } else {
             // Update
