@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 
 const CITIES = [
     "İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Konya", "Adana", "Gaziantep",
@@ -99,12 +100,24 @@ export default function RequestPage() {
                 </div>
                 <div>
                     <label className="block text-sm font-medium mb-1">Tercih Edilen Tarih Aralığı</label>
-                    <Input
-                        name="dateRange"
-                        placeholder="Örn: 15-30 Mart 2025"
-                        value={formData.dateRange}
-                        onChange={handleChange}
-                        required
+                    <DatePickerWithRange
+                        className="w-full"
+                        date={{
+                            from: formData.dateRange ? new Date(formData.dateRange.split(" - ")[0]) : undefined,
+                            to: formData.dateRange && formData.dateRange.includes(" - ") ? new Date(formData.dateRange.split(" - ")[1]) : undefined
+                        }}
+                        setDate={(range) => {
+                            if (range?.from) {
+                                const start = range.from.toLocaleDateString('tr-TR');
+                                const end = range.to ? range.to.toLocaleDateString('tr-TR') : '';
+                                setFormData(prev => ({
+                                    ...prev,
+                                    dateRange: end ? `${start} - ${end}` : start
+                                }));
+                            } else {
+                                setFormData(prev => ({ ...prev, dateRange: "" }));
+                            }
+                        }}
                     />
                 </div>
                 <div>

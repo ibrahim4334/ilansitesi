@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { PackageSystem } from "@/lib/package-system";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,21 +8,63 @@ import { notFound } from "next/navigation";
 
 // Helper to get listing with guide info
 async function getListing(id: string) {
-    const database = db.read();
-    const listing = database.guideListings.find((l) => l.id === id);
+    const l = await prisma.guideListing.findUnique({
+        where: { id },
+        include: {
+            guide: true,
+            tourDays: { orderBy: { day: 'asc' } }
+        }
+    });
 
-    if (!listing) return null;
+    if (!l) return null;
 
-    const guide = database.guideProfiles.find((p) => p.userId === listing.guideId);
+    const guide = l.guide;
     const showPhone = guide ? PackageSystem.isPhoneVisible(guide) : false;
 
     return {
-        ...listing,
+        id: l.id,
+        guideId: l.guideId,
+        title: l.title,
+        description: l.description,
+        city: l.city,
+        departureCity: l.departureCity,
+        meetingCity: l.meetingCity,
+        extraServices: l.extraServices as string[],
+        hotelName: l.hotelName,
+        airline: l.airline,
+        pricing: {
+            double: l.pricingDouble,
+            triple: l.pricingTriple,
+            quad: l.pricingQuad,
+            currency: l.pricingCurrency,
+        },
+        price: l.price,
+        quota: l.quota,
+        filled: l.filled,
+        active: l.active,
+        isFeatured: l.isFeatured,
+        startDate: l.startDate.toISOString().split('T')[0],
+        endDate: l.endDate.toISOString().split('T')[0],
+        totalDays: l.totalDays,
+        tourPlan: l.tourDays.map(d => ({
+            day: d.day,
+            city: d.city,
+            title: d.title,
+            description: d.description,
+        })),
+        image: l.image,
+        createdAt: l.createdAt.toISOString(),
         guide: guide ? {
-            ...guide,
+            fullName: guide.fullName,
+            city: guide.city,
+            bio: guide.bio,
             phone: showPhone ? guide.phone : null,
+            isDiyanet: guide.isDiyanet,
+            photo: guide.photo,
+            trustScore: guide.trustScore || 50,
+            completedTrips: guide.completedTrips || 0,
             package: guide.package || "FREEMIUM",
-        } : null
+        } : null,
     };
 }
 

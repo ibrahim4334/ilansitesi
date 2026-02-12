@@ -10,11 +10,17 @@ export function GuideListingsSection() {
 
     useEffect(() => {
         fetch("/api/listings")
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to fetch");
+                return res.json();
+            })
             .then(data => {
                 if (Array.isArray(data)) setListings(data);
             })
-            .catch(err => console.error(err))
+            .catch(err => {
+                console.error("Guide listings fetch error:", err);
+                // Optionally set error state or keep empty listings
+            })
             .finally(() => setLoading(false));
     }, []);
 

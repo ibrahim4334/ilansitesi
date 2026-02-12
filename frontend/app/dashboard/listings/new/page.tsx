@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 
 const CITIES = [
     "İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Konya", "Adana", "Gaziantep",
@@ -27,7 +28,7 @@ const SAUDI_CITIES = ["Mekke", "Medine", "Cidde", "Riyad"];
 const AIRLINES = ["THY", "Saudia", "Flynas", "Pegasus", "Emirates", "Qatar", "Diğer"];
 
 const URGENCY_TAGS = [
-    { value: "", label: "Yok" },
+    { value: "NONE", label: "Yok" },
     { value: "SON_FIRSAT", label: "Son Fırsat" },
     { value: "SINIRLI_KONTENJAN", label: "Sınırlı Kontenjan" },
     { value: "ERKEN_REZERVASYON", label: "Erken Rezervasyon" },
@@ -77,6 +78,11 @@ export default function NewListingPage() {
     };
 
     const handleSelectChange = (name: string, value: string) => {
+        // Fix for SelectItem not allowing empty strings
+        if (name === "urgencyTag" && value === "NONE") {
+            setFormData({ ...formData, [name]: "" });
+            return;
+        }
         setFormData({ ...formData, [name]: value });
     };
 
@@ -203,15 +209,26 @@ export default function NewListingPage() {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label>Kapak Resmi (URL)</Label>
-                        <Input
-                            name="image"
-                            placeholder="https://..."
-                            value={formData.image}
-                            onChange={handleChange}
+                    <div className="flex items-start space-x-2 p-4 bg-amber-50 rounded-lg border border-amber-100">
+                        <Checkbox
+                            id="pdfProgram"
+                            checked={formData.extraServices.includes("PDF_PROGRAM")}
+                            onCheckedChange={(c) => {
+                                if (c) handleServiceToggle("PDF_PROGRAM");
+                                else handleServiceToggle("PDF_PROGRAM");
+                            }}
                         />
-                        <p className="text-xs text-muted-foreground">İlan kartında görünecek ana görsel.</p>
+                        <div className="grid gap-1.5 leading-none">
+                            <label
+                                htmlFor="pdfProgram"
+                                className="text-sm font-medium leading-none text-amber-900"
+                            >
+                                Tur Programı Oluşturulsun mu?
+                            </label>
+                            <p className="text-sm text-amber-700">
+                                İşaretlenirse, girdiğiniz tur programı otomatik olarak PDF formatına dönüştürülüp ilan sayfasında indirilebilir olarak sunulacaktır.
+                            </p>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -235,14 +252,23 @@ export default function NewListingPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <Label>Başlangıç Tarihi</Label>
-                            <Input type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
-                        </div>
-                        <div>
-                            <Label>Bitiş Tarihi</Label>
-                            <Input type="date" name="endDate" value={formData.endDate} onChange={handleChange} required />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                            <Label>Tur Tarih Aralığı</Label>
+                            <DatePickerWithRange
+                                className="w-full"
+                                date={{
+                                    from: formData.startDate ? new Date(formData.startDate) : undefined,
+                                    to: formData.endDate ? new Date(formData.endDate) : undefined
+                                }}
+                                setDate={(range) => {
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        startDate: range?.from ? range.from.toISOString() : "",
+                                        endDate: range?.to ? range.to.toISOString() : ""
+                                    }))
+                                }}
+                            />
                         </div>
                         <div>
                             <Label>Toplam Gün</Label>

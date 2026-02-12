@@ -1,57 +1,59 @@
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api-guards";
+import { logAdminAction } from "@/lib/admin-audit";
 
+/**
+ * APPROVE-ONLY endpoint.
+ * Reject logic is handled exclusively by /api/admin/reject-listing.
+ */
 export async function POST(req: Request) {
     try {
         const session = await auth();
-        // Strict Admin Check
-        // For development/demo, we might allow GUIDE to self-approve or use a special secret
-        // Assuming we have an ADMIN role or we just strictly check for now.
-        // Let's allow if role is ORGANIZATION or we pass a secret query param for simulation
+        const guard = requireAdmin(session);
+        if (guard) return guard;
 
-        const { searchParams } = new URL(req.url);
-        const secret = searchParams.get('secret');
-        const isSimulatedAdmin = secret === 'demo-admin-secret';
-
-        if (!isSimulatedAdmin) {
-            if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-            // In a real app: if (session.user.role !== 'ADMIN') ...
-        }
-
-        const { listingId, action } = await req.json(); // action: 'APPROVE' | 'REJECT'
+        const { listingId, reason } = await req.json();
 
         if (!listingId) return NextResponse.json({ error: "Missing listingId" }, { status: 400 });
+        if (!reason) return NextResponse.json({ error: "Missing reason" }, { status: 400 });
 
-        const database = db.read();
-        const listingIndex = database.guideListings.findIndex(l => l.id === listingId);
+        const listing = await prisma.guideListing.findUnique({
+            where: { id: listingId }
+        });
 
-        if (listingIndex === -1) return NextResponse.json({ error: "Listing not found" }, { status: 404 });
+        if (!listing) return NextResponse.json({ error: "Listing not found" }, { status: 404 });
 
-        const listing = database.guideListings[listingIndex];
+        const adminUser = await prisma.user.findUnique({
+            where: { email: session!.user.email! }
+        });
+        if (!adminUser) return NextResponse.json({ error: "Admin user not found" }, { status: 404 });
 
-        if (action === 'REJECT') {
-            listing.approvalStatus = 'REJECTED';
-            listing.active = false;
-        } else {
-            listing.approvalStatus = 'APPROVED';
-            listing.active = true;
+        // APPROVE only
+        await prisma.guideListing.update({
+            where: { id: listingId },
+            data: {
+                approvalStatus: 'APPROVED',
+                active: true
+            }
+        });
 
-            // MOCK EMAIL NOTIFICATION
-            console.log(`[EMAIL] To Guide: "İlanınız onaylandı. Görüntülemek için tıklayın." Link: /listings/${listing.id}`);
+        // Write audit log
+        await logAdminAction(
+            adminUser.id,
+            "approve_listing",
+            listingId,
+            reason,
+            { previousStatus: listing.approvalStatus }
+        );
 
-            // SMS PLACEHOLDER
-            // TODO: Implement SMS Gateway
-            // Text: "İlanınız yayında: https://umrebuldum.com/listings/${listing.id}"
-            console.log(`[SMS] (Future) To Guide: "İlanınız yayında: /listings/${listing.id}"`);
-        }
+        console.log(`[EMAIL] To Guide: "İlanınız onaylandı." Link: /listings/${listing.id}`);
 
-        database.guideListings[listingIndex] = listing;
-        db.write(database);
-
-        return NextResponse.json({ success: true, status: listing.approvalStatus });
+        return NextResponse.json({ success: true, status: 'APPROVED' });
 
     } catch (error) {
+        console.error("Admin approve error:", error);
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }

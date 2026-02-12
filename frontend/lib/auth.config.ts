@@ -39,7 +39,10 @@ export const authConfig = {
 
                         if (data.success) {
                             token.wp_user_id = data.user_id;
-                            token.role = data.role ?? null;
+                            // Only overwrite if WP has a role, otherwise keep local role (e.g. from registration)
+                            if (data.role) {
+                                token.role = data.role;
+                            }
 
                             // Fix: Check code for onboarding requirement
                             if (data.code === 'requires_onboarding') {

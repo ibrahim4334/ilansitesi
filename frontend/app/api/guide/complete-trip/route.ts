@@ -1,39 +1,70 @@
 
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api-guards";
+import { logAdminAction } from "@/lib/admin-audit";
 
+/**
+ * ADMIN-ONLY: Mark a trip as completed for a guide.
+ * Requires listingId. Idempotent — cannot complete same listing twice.
+ */
 export async function PUT(req: Request) {
     try {
         const session = await auth();
-        if (!session?.user?.email || (session.user.role !== 'GUIDE' && session.user.role !== 'ORGANIZATION')) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        const guard = requireAdmin(session);
+        if (guard) return guard;
+
+        const { listingId } = await req.json();
+        if (!listingId) {
+            return NextResponse.json({ error: "Missing listingId" }, { status: 400 });
         }
 
-        const database = db.read();
+        const listing = await prisma.guideListing.findUnique({
+            where: { id: listingId },
+            include: { guide: true }
+        });
+        if (!listing) {
+            return NextResponse.json({ error: "Listing not found" }, { status: 404 });
+        }
 
-        // Find user
-        const user = database.users.find((u: any) => u.email === session.user.email);
-        if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+        // Idempotency: check if already marked completed via urgencyTag
+        if (listing.urgencyTag === 'TRIP_COMPLETED') {
+            return NextResponse.json({ message: "Trip already marked as completed" }, { status: 200 });
+        }
 
-        // Find profile
-        const profile = database.guideProfiles.find(p => p.userId === user.id);
-        if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+        // Mark listing as completed + increment guide stats
+        await prisma.$transaction([
+            prisma.guideListing.update({
+                where: { id: listingId },
+                data: { urgencyTag: 'TRIP_COMPLETED' }
+            }),
+            prisma.guideProfile.update({
+                where: { userId: listing.guideId },
+                data: {
+                    trustScore: { increment: 1 },
+                    completedTrips: { increment: 1 }
+                }
+            })
+        ]);
 
-        // Initialize fields if undefined
-        if (profile.trustScore === undefined) profile.trustScore = 50;
-        if (profile.completedTrips === undefined) profile.completedTrips = 0;
-
-        // Increment
-        profile.trustScore += 1;
-        profile.completedTrips += 1;
-
-        db.write(database);
+        // Audit log
+        const adminUser = await prisma.user.findUnique({
+            where: { email: session!.user.email! }
+        });
+        if (adminUser) {
+            await logAdminAction(
+                adminUser.id,
+                "complete_trip",
+                listingId,
+                `Trip completed for listing: ${listing.title}`,
+                { guideId: listing.guideId }
+            );
+        }
 
         return NextResponse.json({
             message: "Trip completed recorded",
-            trustScore: profile.trustScore,
-            completedTrips: profile.completedTrips
+            listingId
         }, { status: 200 });
 
     } catch (error) {

@@ -1,7 +1,8 @@
 
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
+import { requireSupply } from "@/lib/api-guards";
 
 export async function POST() {
     return NextResponse.json({ error: "Deprecated URL. Please use Stripe Checkout." }, { status: 410 });
@@ -9,13 +10,17 @@ export async function POST() {
 
 export async function GET(req: Request) {
     const session = await auth();
-    if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const guard = requireSupply(session);
+    if (guard) return guard;
 
-    const database = db.read();
-    const user = database.users.find((u: any) => u.email === session.user.email);
+    const user = await prisma.user.findUnique({
+        where: { email: session.user.email }
+    });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    const profile = database.guideProfiles.find(p => p.userId === user.id);
-    // If no profile, 0 credits
+    const profile = await prisma.guideProfile.findUnique({
+        where: { userId: user.id }
+    });
+
     return NextResponse.json({ credits: profile?.credits || 0 });
 }

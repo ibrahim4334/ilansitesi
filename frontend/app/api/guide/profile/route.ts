@@ -1,24 +1,25 @@
 
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireAuth, requireSupply } from "@/lib/api-guards";
 
 export async function GET(req: Request) {
     try {
         const session = await auth();
-        if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        const authErr = requireAuth(session);
+        if (authErr) return authErr;
 
-        const database = db.read();
-        const user = database.users.find((u: any) => u.email === session.user.email);
+        const user = await prisma.user.findUnique({
+            where: { email: session!.user.email! }
+        });
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-        let profile = database.guideProfiles.find(p => p.userId === user.id);
-
-        if (!profile) {
-            // Return default placeholder (and create in DB for consistency?)
-            // If we don't create it here, we might have issues later.
-            // Let's create it.
-            profile = {
+        // Get or create profile
+        const profile = await prisma.guideProfile.upsert({
+            where: { userId: user.id },
+            update: {},
+            create: {
                 userId: user.id,
                 fullName: session.user.name || "",
                 phone: "",
@@ -32,15 +33,8 @@ export async function GET(req: Request) {
                 credits: 0,
                 package: "FREEMIUM",
                 tokens: 0
-            };
-            database.guideProfiles.push(profile);
-            db.write(database);
-        } else {
-            // Ensure migration defaults
-            if (!profile.package) profile.package = "FREEMIUM";
-            if (profile.tokens === undefined) profile.tokens = 0;
-            if (profile.credits === undefined) profile.credits = 0;
-        }
+            }
+        });
 
         return NextResponse.json(profile);
     } catch (error) {
@@ -51,22 +45,29 @@ export async function GET(req: Request) {
 export async function PUT(req: Request) {
     try {
         const session = await auth();
-        if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        if (session.user.role !== 'GUIDE') return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        const guard = requireSupply(session);
+        if (guard) return guard;
 
         const body = await req.json();
 
-        const database = db.read();
-        const user = database.users.find((u: any) => u.email === session.user.email);
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email }
+        });
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-        let profileIndex = database.guideProfiles.findIndex(p => p.userId === user.id);
-
-        if (profileIndex === -1) {
-            // Create
-            database.guideProfiles.push({
+        await prisma.guideProfile.upsert({
+            where: { userId: user.id },
+            update: {
+                fullName: body.fullName || undefined,
+                phone: body.phone || undefined,
+                city: body.city || undefined,
+                bio: body.bio || undefined,
+                photo: body.photo || undefined,
+                isDiyanet: typeof body.isDiyanet === 'boolean' ? body.isDiyanet : undefined
+            },
+            create: {
                 userId: user.id,
-                fullName: body.fullName || session.user.name,
+                fullName: body.fullName || session.user.name || "",
                 phone: body.phone || "",
                 city: body.city || "",
                 bio: body.bio || "",
@@ -78,22 +79,9 @@ export async function PUT(req: Request) {
                 credits: 0,
                 package: "FREEMIUM",
                 tokens: 0
-            });
-        } else {
-            // Update
-            const existing = database.guideProfiles[profileIndex];
-            database.guideProfiles[profileIndex] = {
-                ...existing,
-                fullName: body.fullName || existing.fullName,
-                phone: body.phone || existing.phone,
-                city: body.city || existing.city,
-                bio: body.bio || existing.bio,
-                photo: body.photo || existing.photo,
-                isDiyanet: typeof body.isDiyanet === 'boolean' ? body.isDiyanet : existing.isDiyanet
-            };
-        }
+            }
+        });
 
-        db.write(database);
         return NextResponse.json({ success: true });
 
     } catch (error) {

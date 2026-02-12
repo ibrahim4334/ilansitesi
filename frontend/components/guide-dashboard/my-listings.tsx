@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GuideListing } from "@/lib/db";
+import { GuideListing } from "@/lib/db-types";
 
 export function MyListings() {
     const [listings, setListings] = useState<GuideListing[]>([]);

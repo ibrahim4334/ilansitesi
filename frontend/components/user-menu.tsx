@@ -32,7 +32,7 @@ export function UserMenu() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full" suppressHydrationWarning>
                     <Avatar className="h-10 w-10">
                         <AvatarImage src={session.user.image || ""} alt={session.user.name || ""} />
                         <AvatarFallback>{getInitials(session.user.name || session.user.email)}</AvatarFallback>

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LayoutDashboard, FileText, MessageSquare, BarChart3, Wallet, Settings, Menu, X, Bell, Heart, User, Briefcase } from 'lucide-react';
+import { LayoutDashboard, FileText, MessageSquare, BarChart3, Wallet, Settings, Menu, X, Bell, Heart, User, Briefcase, History } from 'lucide-react';
 import { useState } from 'react';
 import { useSession } from "next-auth/react";
 
@@ -14,6 +14,7 @@ const organizerItems: NavItem[] = [
     { label: 'Ana Sayfa', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
     { label: 'İlanlarım', href: '/dashboard/listings', icon: <FileText className="w-5 h-5" />, badge: 12 },
     { label: 'Talepler', href: '/dashboard/requests', icon: <MessageSquare className="w-5 h-5" />, badge: 3 },
+    { label: 'Kredi Geçmişi', href: '/dashboard/credits', icon: <History className="w-5 h-5" /> },
     { label: 'Performans', href: '/dashboard/analytics', icon: <BarChart3 className="w-5 h-5" /> },
     { label: 'Gelir', href: '/dashboard/revenue', icon: <Wallet className="w-5 h-5" /> },
     { label: 'Mesajlar', href: '/dashboard/messages', icon: <MessageSquare className="w-5 h-5" />, badge: 5 },
@@ -31,7 +32,8 @@ const pilgrimItems: NavItem[] = [
 const guideItems: NavItem[] = [
     { label: 'Ana Sayfa', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
     { label: 'Profilim', href: '/dashboard/profile', icon: <User className="w-5 h-5" /> },
-    { label: 'Başvurularım', href: '/dashboard/applications', icon: <Briefcase className="w-5 h-5" /> },
+    { label: 'Umreci Adaylarını Bul', href: '/dashboard/applications', icon: <Briefcase className="w-5 h-5" /> },
+    { label: 'Kredi Geçmişi', href: '/dashboard/credits', icon: <History className="w-5 h-5" /> },
     { label: 'Mesajlar', href: '/dashboard/messages', icon: <MessageSquare className="w-5 h-5" /> },
     { label: 'Ayarlar', href: '/dashboard/settings', icon: <Settings className="w-5 h-5" /> },
 ];
@@ -108,7 +110,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     <span className="font-bold text-xl text-blue-600">Umre Buldum</span>
                     <p className="text-xs text-gray-500 mt-1">{panelTitle}</p>
                 </div>
-                <nav className="flex-1 p-4 space-y-1">
+                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                     {navItems.map((item) => (
                         <Link
                             key={item.href}

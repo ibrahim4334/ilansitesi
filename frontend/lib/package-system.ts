@@ -1,5 +1,5 @@
 
-import { GuidePackage, GuideProfile } from "./db";
+import type { GuidePackage, GuideProfile } from "./db-types";
 
 export const PACKAGES: Record<GuidePackage, {
     maxListings: number;
@@ -29,7 +29,7 @@ export const PACKAGES: Record<GuidePackage, {
     },
     PREMIUM: {
         maxListings: 5,
-        listingDurationDays: 365, // effectively unlimited or long term
+        listingDurationDays: 365,
         maxRequestsResponse: "UNLIMITED",
         posterQuality: "NORMAL",
         watermark: false,
@@ -73,13 +73,13 @@ export class PackageSystem {
         return PACKAGES[pkg] || PACKAGES.FREEMIUM;
     }
 
-    static canCreateListing(profile: GuideProfile, currentListingCount: number): boolean {
-        const limits = this.getLimits(profile.package);
+    static canCreateListing(profile: { package: string }, currentListingCount: number): boolean {
+        const limits = this.getLimits(profile.package as GuidePackage);
         return currentListingCount < limits.maxListings;
     }
 
-    static isPhoneVisible(profile: GuideProfile): boolean {
-        return this.getLimits(profile.package).phoneVisible;
+    static isPhoneVisible(profile: { package: string }): boolean {
+        return this.getLimits(profile.package as GuidePackage).phoneVisible;
     }
 
     static getPosterQuality(pkg: GuidePackage) {

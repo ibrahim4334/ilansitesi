@@ -1,91 +1,127 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Loader2, Sparkles, FileX } from 'lucide-react';
 import Link from 'next/link';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { ListingList } from '@/components/dashboard/ListingCard';
+import { CreditBalance } from '@/components/guide-dashboard/credit-balance';
+import useSWR from 'swr';
+import { useSession } from 'next-auth/react';
 
-const mockListings = [
-    {
-        id: '1',
-        title: 'Lüks Umre Turu - 15 Gün',
-        status: 'active' as const,
-        views: 2456,
-        rating: 4.8,
-        reviewCount: 23,
-        price: '$1,500',
-    },
-    {
-        id: '2',
-        title: 'Ramazan Umresi Özel Paket',
-        status: 'active' as const,
-        views: 1823,
-        rating: 4.9,
-        reviewCount: 45,
-        price: '$2,000',
-    },
-    {
-        id: '3',
-        title: 'Ekonomik Umre - 10 Gün',
-        status: 'active' as const,
-        views: 987,
-        rating: 4.5,
-        reviewCount: 12,
-        price: '$900',
-    },
-    {
-        id: '4',
-        title: 'Aile Umre Paketi',
-        status: 'draft' as const,
-        views: 0,
-        price: '$1,200',
-    },
-    {
-        id: '5',
-        title: 'VIP Umre Deneyimi',
-        status: 'pending' as const,
-        views: 0,
-        price: '$3,500',
-    },
-];
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const tabs = [
-    { id: 'all', label: 'Tümü', count: 5 },
-    { id: 'active', label: 'Aktif', count: 3 },
-    { id: 'draft', label: 'Taslak', count: 1 },
-    { id: 'pending', label: 'Beklemede', count: 1 },
-    { id: 'expired', label: 'Süresi Dolmuş', count: 0 },
+    { id: 'all', label: 'Tümü' },
+    { id: 'approved', label: 'Aktif' },
+    { id: 'pending', label: 'Beklemede' },
+    { id: 'rejected', label: 'Reddedilen' },
+    { id: 'draft', label: 'Taslak' },
 ];
 
+const MAX_FEATURED = 3;
+
 export default function ListingsPage() {
+    const { data: session } = useSession();
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
 
-    const filteredListings = mockListings.filter((listing) => {
-        if (activeTab !== 'all' && listing.status !== activeTab) return false;
+    const { data: rawListings, error, isLoading, mutate } = useSWR(
+        (session?.user as any)?.id ? `/api/listings?guideId=${(session.user as any).id}` : null,
+        fetcher
+    );
+
+    const listings = (rawListings || []).map((l: any) => ({
+        id: l.id,
+        title: l.title,
+        status: l.approvalStatus === 'PENDING' ? 'pending'
+            : l.approvalStatus === 'REJECTED' ? 'rejected'
+                : (l.active ? 'active' : 'draft'),
+        views: l.views || 0,
+        rating: l.rating,
+        reviewCount: l.reviewCount,
+        price: l.price ? `${l.price} ${l.pricing?.currency || 'SAR'}` : 'N/A',
+        approvalStatus: l.approvalStatus,
+        active: l.active,
+        isFeatured: l.isFeatured || false,
+        rejectionReason: l.rejectionReason || null,
+        thumbnail: l.posterImages?.[0] || l.image
+    }));
+
+    const featuredCount = listings.filter((l: any) => l.isFeatured && l.status === 'active').length;
+
+    const filteredListings = listings.filter((listing: any) => {
+        if (activeTab === 'approved' && listing.status !== 'active') return false;
+        if (activeTab === 'pending' && listing.status !== 'pending') return false;
+        if (activeTab === 'rejected' && listing.status !== 'rejected') return false;
+        if (activeTab === 'draft' && listing.status !== 'draft') return false;
         if (searchQuery && !listing.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
         return true;
     });
 
+    const getCount = (tabId: string) => {
+        if (!listings) return 0;
+        if (tabId === 'all') return listings.length;
+        if (tabId === 'approved') return listings.filter((l: any) => l.status === 'active').length;
+        if (tabId === 'pending') return listings.filter((l: any) => l.status === 'pending').length;
+        if (tabId === 'rejected') return listings.filter((l: any) => l.status === 'rejected').length;
+        if (tabId === 'draft') return listings.filter((l: any) => l.status === 'draft').length;
+        return 0;
+    };
+
     const handleAction = (action: string, listingId: string) => {
         console.log(`Action: ${action} on listing ${listingId}`);
-        // Implement actions
+        if (action === 'delete') {
+            // Call delete API and then mutate()
+        }
     };
+
+    if (isLoading) {
+        return (
+            <DashboardLayout>
+                <div className="p-4 lg:p-6 space-y-4">
+                    <div className="h-8 w-48 bg-gray-200 rounded-lg animate-pulse" />
+                    <div className="h-24 bg-gray-100 rounded-2xl animate-pulse" />
+                    <div className="flex gap-2">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="h-10 w-24 bg-gray-200 rounded-lg animate-pulse" />
+                        ))}
+                    </div>
+                    <div className="space-y-3">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="h-28 bg-gray-100 rounded-xl animate-pulse" />
+                        ))}
+                    </div>
+                </div>
+            </DashboardLayout>
+        );
+    }
 
     return (
         <DashboardLayout>
             <div className="p-4 lg:p-6 space-y-4">
+                {/* Credit Balance Hero */}
+                <CreditBalance />
+
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold text-gray-900">İlanlarım</h1>
-                    <Link
-                        href="/dashboard/listings/new"
-                        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700"
-                    >
-                        <Plus className="w-5 h-5" />
-                        <span className="hidden sm:inline">Yeni İlan</span>
-                    </Link>
+                    <div className="flex items-center gap-3">
+                        {/* Featured Counter */}
+                        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg text-sm">
+                            <Sparkles className="w-4 h-4 text-amber-600" />
+                            <span className="font-medium text-amber-800">
+                                Öne Çıkan: {featuredCount}/{MAX_FEATURED}
+                            </span>
+                        </div>
+                        <Link
+                            href="/dashboard/listings/new"
+                            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                        >
+                            <Plus className="w-5 h-5" />
+                            <span className="hidden sm:inline">Yeni İlan</span>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Search */}
@@ -102,32 +138,54 @@ export default function ListingsPage() {
 
                 {/* Tabs */}
                 <div className="flex gap-1 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === tab.id
-                                    ? 'bg-blue-600 text-white'
+                    {tabs.map((tab) => {
+                        const count = getCount(tab.id);
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === tab.id
+                                    ? tab.id === 'rejected' ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                        >
-                            {tab.label}
-                            {tab.count > 0 && (
-                                <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${activeTab === tab.id ? 'bg-blue-500' : 'bg-gray-200'
-                                    }`}>
-                                    {tab.count}
-                                </span>
-                            )}
-                        </button>
-                    ))}
+                                    }`}
+                            >
+                                {tab.label}
+                                {count > 0 && (
+                                    <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${activeTab === tab.id
+                                        ? tab.id === 'rejected' ? 'bg-red-500' : 'bg-blue-500'
+                                        : 'bg-gray-200'
+                                        }`}>
+                                        {count}
+                                    </span>
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
 
                 {/* Listings */}
                 {filteredListings.length > 0 ? (
                     <ListingList listings={filteredListings} onAction={handleAction} />
                 ) : (
-                    <div className="bg-white rounded-xl border p-8 text-center">
-                        <p className="text-gray-500">Bu kategoride ilan bulunamadı</p>
+                    <div className="bg-white rounded-xl border p-12 text-center">
+                        <FileX className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                        <h3 className="font-semibold text-gray-700">
+                            {activeTab === 'rejected' ? 'Reddedilen ilan yok' : 'Bu kategoride ilan bulunamadı'}
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                            {activeTab === 'all' && listings.length === 0
+                                ? 'Henüz ilan oluşturmadınız. İlk ilanınızı oluşturun!'
+                                : 'Farklı bir filtre deneyin.'}
+                        </p>
+                        {activeTab === 'all' && listings.length === 0 && (
+                            <Link
+                                href="/dashboard/listings/new"
+                                className="inline-flex items-center gap-2 mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                            >
+                                <Plus className="w-4 h-4" />
+                                İlk İlanı Oluştur
+                            </Link>
+                        )}
                     </div>
                 )}
             </div>

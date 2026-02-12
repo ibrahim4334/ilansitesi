@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye, MousePointer, MessageSquare, TrendingUp } from 'lucide-react';
+import { Eye, MousePointer, MessageSquare, TrendingUp, Loader2 } from 'lucide-react';
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -9,6 +9,7 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { StatCards } from '@/components/dashboard/StatCards';
 import { RequestList } from '@/components/dashboard/RequestCard';
 import { QuickActions } from '@/components/dashboard/QuickActions';
+import { CreditBalance } from '@/components/guide-dashboard/credit-balance';
 
 // Mock data - in real app, fetch from API
 const mockStats = [
@@ -49,19 +50,53 @@ const mockRequests = [
 
 // --- Sub-Dashboards ---
 
+import useSWR from 'swr';
+import { formatDistanceToNow } from 'date-fns';
+import { tr } from 'date-fns/locale';
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 function OrganizerDashboard({ userName }: { userName: string }) {
+    const { data, isLoading } = useSWR('/api/stats', fetcher);
+
+    if (isLoading) return (
+        <div className="p-4 lg:p-6 space-y-6">
+            <div className="h-8 w-64 bg-gray-200 rounded-lg animate-pulse" />
+            <div className="h-24 bg-gray-100 rounded-2xl animate-pulse" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-gray-100 rounded-xl animate-pulse" />)}
+            </div>
+        </div>
+    );
+
+    const stats = data?.stats || [];
+    const requests = (data?.recentRequests || []).map((r: any) => ({
+        ...r,
+        timeAgo: formatDistanceToNow(new Date(r.createdAt), { addSuffix: true, locale: tr })
+    }));
+
     return (
         <div className="p-4 lg:p-6 space-y-6">
             <div>
                 <h1 className="text-2xl font-bold text-gray-900">Merhaba, {userName || "Organizasyon"} 👋</h1>
                 <p className="text-gray-500 mt-1">Acente paneliniz ve bugünkü özetiniz.</p>
             </div>
-            <StatCards stats={mockStats} />
+            <CreditBalance />
+            <StatCards stats={stats} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                    <RequestList requests={requests} showViewAll={true} />
+                </div>
+                <div>
+                    <MyOffers />
+                </div>
+            </div>
             <QuickActions />
-            <RequestList requests={mockRequests} showViewAll={true} />
         </div>
     )
 }
+
+import { MyRequests } from "@/components/pilgrim-dashboard/my-requests";
 
 function PilgrimDashboard({ userName }: { userName: string }) {
     return (
@@ -72,40 +107,71 @@ function PilgrimDashboard({ userName }: { userName: string }) {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div className="p-6 bg-white rounded-xl border border-gray-100 shadow-sm">
-                    <h3 className="font-semibold text-lg mb-2">Talep Durumu</h3>
-                    <p className="text-sm text-gray-500">Henüz aktif bir tur talebiniz bulunmuyor.</p>
-                    <button className="mt-4 text-sm font-medium text-primary hover:underline">Yeni Talep Oluştur &rarr;</button>
+                <div className="col-span-1 md:col-span-2 lg:col-span-2 space-y-6">
+                    {/* Active Requests */}
+                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                        <MyRequests />
+                        <div className="mt-4 border-t pt-4">
+                            <button
+                                onClick={() => window.location.href = '/dashboard/requests/new'}
+                                className="w-full sm:w-auto text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                            >
+                                <span className="text-lg">+</span> Yeni Talep Oluştur
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div className="p-6 bg-white rounded-xl border border-gray-100 shadow-sm">
-                    <h3 className="font-semibold text-lg mb-2">Favorilerim</h3>
-                    <p className="text-sm text-gray-500">Favorilenmiş tur paketiniz yok.</p>
-                    <button className="mt-4 text-sm font-medium text-primary hover:underline">Turları İncele &rarr;</button>
+
+                <div className="col-span-1">
+                    <div className="p-6 bg-white rounded-xl border border-gray-100 shadow-sm sticky top-6">
+                        <h3 className="font-semibold text-lg mb-2">Favorilerim</h3>
+                        <p className="text-sm text-gray-500">Favorilenmiş tur paketiniz yok.</p>
+                        <button className="mt-4 text-sm font-medium text-primary hover:underline">Turları İncele &rarr;</button>
+                    </div>
                 </div>
             </div>
         </div>
     )
 }
 
-import { CreateListingForm } from "@/components/guide-dashboard/create-listing-form";
-import { MyListings } from "@/components/guide-dashboard/my-listings";
+import { MyOffers } from "@/components/guide-dashboard/my-offers";
 
 function GuideDashboard({ userName }: { userName: string }) {
+    const { data, isLoading } = useSWR('/api/stats', fetcher);
+
+    if (isLoading) return (
+        <div className="p-4 lg:p-6 space-y-6">
+            <div className="h-8 w-64 bg-gray-200 rounded-lg animate-pulse" />
+            <div className="h-24 bg-gray-100 rounded-2xl animate-pulse" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-gray-100 rounded-xl animate-pulse" />)}
+            </div>
+        </div>
+    );
+
+    const stats = data?.stats || [];
+    const requests = (data?.recentRequests || []).map((r: any) => ({
+        ...r,
+        timeAgo: formatDistanceToNow(new Date(r.createdAt), { addSuffix: true, locale: tr })
+    }));
+
     return (
         <div className="p-4 lg:p-6 space-y-6">
             <div>
                 <h1 className="text-2xl font-bold text-gray-900">Merhaba, {userName || "Rehber"} 🗺️</h1>
-                <p className="text-gray-500 mt-1">Rehberlik paneli.</p>
+                <p className="text-gray-500 mt-1">Rehberlik paneli ve bugünkü özetiniz.</p>
             </div>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-                <div>
-                    <CreateListingForm />
+            <CreditBalance />
+            <StatCards stats={stats} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                    <RequestList requests={requests} showViewAll={true} />
                 </div>
                 <div>
-                    <MyListings />
+                    <MyOffers />
                 </div>
             </div>
+            <QuickActions />
         </div>
     )
 }

@@ -1,6 +1,8 @@
 
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { requireAuth } from "@/lib/api-guards";
 
 // Simple HTML Template for PDF Print
 const generateHTML = (listing: any, guide: any) => `
@@ -48,22 +50,22 @@ const generateHTML = (listing: any, guide: any) => `
   <div class="price-box">
     <div class="price-row">
       <span>4 Kişilik Oda</span>
-      <span class="price-val">${listing.pricing?.quad || '-'} SAR</span>
+      <span class="price-val">${listing.pricingQuad || '-'} SAR</span>
     </div>
     <div class="price-row">
       <span>3 Kişilik Oda</span>
-      <span class="price-val">${listing.pricing?.triple || '-'} SAR</span>
+      <span class="price-val">${listing.pricingTriple || '-'} SAR</span>
     </div>
     <div class="price-row">
       <span>2 Kişilik Oda</span>
-      <span class="price-val">${listing.pricing?.double || '-'} SAR</span>
+      <span class="price-val">${listing.pricingDouble || '-'} SAR</span>
     </div>
   </div>
 
   <h2>Tur Programı</h2>
   <div class="timeline">
-    ${listing.tourPlan && listing.tourPlan.length > 0 ?
-        listing.tourPlan.map((d: any) => `
+    ${listing.tourDays && listing.tourDays.length > 0 ?
+    listing.tourDays.map((d: any) => `
         <div class="day">
           <div class="day-num">${d.day}. Gün</div>
           <div>
@@ -72,13 +74,13 @@ const generateHTML = (listing: any, guide: any) => `
           </div>
         </div>
       `).join('')
-        : '<p>Detaylı program girilmemiştir.</p>'
-    }
+    : '<p>Detaylı program girilmemiştir.</p>'
+  }
   </div>
 
   <h2>Hizmetler</h2>
   <ul>
-    ${listing.extraServices?.map((s: string) => `<li>${s}</li>`).join('') || '<li>Standart Hizmetler</li>'}
+    ${(listing.extraServices as string[])?.map((s: string) => `<li>${s}</li>`).join('') || '<li>Standart Hizmetler</li>'}
   </ul>
 
   <div class="footer">
@@ -94,39 +96,41 @@ const generateHTML = (listing: any, guide: any) => `
 `;
 
 export async function GET(req: Request) {
-    try {
-        const { searchParams } = new URL(req.url);
-        const id = searchParams.get('id');
+  try {
+    const session = await auth();
+    const guard = requireAuth(session);
+    if (guard) return guard;
 
-        if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
 
-        const database = db.read();
-        const listing = database.guideListings.find(l => l.id === id);
+    if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
 
-        if (!listing) return NextResponse.json({ error: "Not Found" }, { status: 404 });
+    const listing = await prisma.guideListing.findUnique({
+      where: { id },
+      include: {
+        guide: true,
+        tourDays: { orderBy: { day: 'asc' } }
+      }
+    });
 
-        const guide = database.guideProfiles.find(p => p.userId === listing.guideId);
+    if (!listing) return NextResponse.json({ error: "Not Found" }, { status: 404 });
 
-        // Access Control (Optional: Check if User has permission? Plan says "For paid listings... Users can download")
-        // We might check if Guide is Premium to generate FULL info, otherwise redacted?
-        // But the requirement says "For ALL PAID PACKAGES... Enable Downloadable Tour Plan".
-        // Example logic:
+    const guide = listing.guide;
 
-        if (!guide || (guide.package === 'FREEMIUM' && !listing.isFeatured)) {
-            // Maybe allow basic PDF but hide contacts? implementation plan says "No PDF" for Freemium.
-            // Let's enforce it.
-            return new NextResponse("Bu özellik sadece Premium rehber ilanlarında aktiftir.", { status: 403 });
-        }
-
-        const html = generateHTML(listing, guide);
-
-        return new NextResponse(html, {
-            headers: {
-                "Content-Type": "text/html; charset=utf-8",
-            }
-        });
-
-    } catch (error) {
-        return NextResponse.json({ error: "Internal Error" }, { status: 500 });
+    if (!guide || (guide.package === 'FREEMIUM' && !listing.isFeatured)) {
+      return new NextResponse("Bu özellik sadece Premium rehber ilanlarında aktiftir.", { status: 403 });
     }
+
+    const html = generateHTML({ ...listing, tourDays: listing.tourDays }, guide);
+
+    return new NextResponse(html, {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+      }
+    });
+
+  } catch (error) {
+    return NextResponse.json({ error: "Internal Error" }, { status: 500 });
+  }
 }

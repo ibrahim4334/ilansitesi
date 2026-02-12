@@ -51,7 +51,7 @@ export function HeroSection() {
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (isDiyanet) params.set("isDiyanet", "true");
 
-    router.push(`/search${params.toString() ? `?${params.toString()}` : ""}`);
+    router.push(`/tours${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
   return (

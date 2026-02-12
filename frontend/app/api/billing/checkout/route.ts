@@ -1,11 +1,11 @@
 
 import { auth } from "@/lib/auth";
-import { db, Transaction } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock_key', {
-    apiVersion: '2025-01-27.acacia', // Use latest or what is available
+    apiVersion: '2025-01-27.acacia' as any,
     typescript: true,
 });
 
@@ -19,14 +19,18 @@ export async function POST(req: Request) {
         const { packageId } = await req.json();
         if (!packageId) return NextResponse.json({ error: "Missing packageId" }, { status: 400 });
 
-        const database = db.read();
-
         // Find package
-        const creditPackage = database.creditPackages?.find(p => p.id === packageId);
-        // Fallback if not in DB yet (though it should be seeded)
+        const creditPackage = await prisma.creditPackage.findUnique({
+            where: { id: packageId }
+        });
         if (!creditPackage) {
             return NextResponse.json({ error: "Invalid package" }, { status: 400 });
         }
+
+        // Find user
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email }
+        });
 
         // Create Stripe Session
         const stripeSession = await stripe.checkout.sessions.create({
@@ -39,7 +43,7 @@ export async function POST(req: Request) {
                             name: creditPackage.name,
                             description: `${creditPackage.credits} Kredi`,
                         },
-                        unit_amount: creditPackage.priceTRY * 100, // Amount in cents (kurus)
+                        unit_amount: creditPackage.priceTRY * 100,
                     },
                     quantity: 1,
                 },
@@ -48,7 +52,7 @@ export async function POST(req: Request) {
             success_url: `${process.env.NEXTAUTH_URL}/dashboard/billing?success=true`,
             cancel_url: `${process.env.NEXTAUTH_URL}/dashboard/billing?canceled=true`,
             metadata: {
-                userId: session.user.id || "", // We might need to fetch user ID from DB if session doesn't have it fully populated, but usually session has it.
+                userId: user?.id || "",
                 userEmail: session.user.email,
                 role: session.user.role,
                 credits: creditPackage.credits.toString(),
@@ -57,24 +61,17 @@ export async function POST(req: Request) {
         });
 
         // Save Pending Transaction
-        // We really need the user ID from the DB to be safe involving future lookups
-        const user = database.users.find((u: any) => u.email === session.user.email);
-
-        const newTransaction: Transaction = {
-            id: crypto.randomUUID(),
-            userId: user?.id || session.user.id,
-            role: session.user.role,
-            credits: creditPackage.credits,
-            amountTRY: creditPackage.priceTRY,
-            provider: "stripe",
-            status: "pending",
-            sessionId: stripeSession.id,
-            createdAt: new Date().toISOString()
-        };
-
-        if (!database.transactions) database.transactions = [];
-        database.transactions.push(newTransaction);
-        db.write(database);
+        await prisma.transaction.create({
+            data: {
+                userId: user?.id || "",
+                role: session.user.role,
+                credits: creditPackage.credits,
+                amountTRY: creditPackage.priceTRY,
+                provider: "stripe",
+                status: "pending",
+                sessionId: stripeSession.id,
+            }
+        });
 
         return NextResponse.json({ url: stripeSession.url });
 

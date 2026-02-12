@@ -1,63 +1,55 @@
 
 import { auth } from "@/lib/auth";
-import { db, GuideListing, Pricing } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { PackageSystem } from "@/lib/package-system";
 
 export async function GET(req: Request) {
-    // Public endpoint to fetch listings
-    // Optional: ?guideId=... to filter
     try {
         const { searchParams } = new URL(req.url);
         const guideId = searchParams.get('guideId');
-
-        // Filters
-        // Filters
         const departureCity = searchParams.get('departureCity');
         const searchDate = searchParams.get('date');
-        const roomType = searchParams.get('roomType');
         const minPrice = searchParams.get('minPrice');
         const maxPrice = searchParams.get('maxPrice');
-        const isDiyanet = searchParams.get('isDiyanet');
+        const isDiyanetFilter = searchParams.get('isDiyanet');
 
-        const database = db.read();
         const now = new Date();
 
-        let listings = database.guideListings.filter(l => {
-            if (!l.active) return false;
-            if (l.approvalStatus !== 'APPROVED') return false;
+        // Build where clause
+        const where: any = {
+            active: true,
+            approvalStatus: 'APPROVED',
+            endDate: { gte: now }
+        };
 
-            // Check expiry
-            if (l.endDate) {
-                // Use string comparison for ISO dates YYYY-MM-DD
-                if (l.endDate < now.toISOString().split('T')[0]) return false;
-            }
-            return true;
+        if (guideId) where.guideId = guideId;
+        if (departureCity && departureCity !== 'all') {
+            where.departureCity = { equals: departureCity, mode: 'insensitive' as any };
+        }
+
+        if (isDiyanetFilter === 'true') {
+            where.guide = { isDiyanet: true };
+        }
+
+        let listings = await prisma.guideListing.findMany({
+            where,
+            include: {
+                guide: true,
+                tourDays: { orderBy: { day: 'asc' } }
+            },
+            orderBy: [
+                { isFeatured: 'desc' },
+                { createdAt: 'desc' }
+            ]
         });
 
-        if (guideId) {
-            listings = listings.filter(l => l.guideId === guideId);
-        }
-
-        if (departureCity && departureCity !== 'all') {
-            listings = listings.filter(l => l.departureCity.toLowerCase() === departureCity.toLowerCase());
-        }
-
-        // Date Logic: Range match (start <= search <= end)
+        // Date range filtering (start <= search <= end)
         if (searchDate) {
             listings = listings.filter(l => {
-                if (l.startDate && l.endDate) {
-                    return searchDate >= l.startDate && searchDate <= l.endDate;
-                }
-                return true;
-            });
-        }
-
-        if (isDiyanet === 'true') {
-            // We need to filter by guide's isDiyanet status.
-            listings = listings.filter(l => {
-                const p = database.guideProfiles.find(prof => prof.userId === l.guideId);
-                return p?.isDiyanet;
+                const start = l.startDate.toISOString().split('T')[0];
+                const end = l.endDate.toISOString().split('T')[0];
+                return searchDate >= start && searchDate <= end;
             });
         }
 
@@ -66,29 +58,59 @@ export async function GET(req: Request) {
             const min = minPrice ? parseFloat(minPrice) : 0;
             const max = maxPrice ? parseFloat(maxPrice) : Infinity;
             listings = listings.filter(l => {
-                let price = l.price || 0;
-                if (l.pricing) {
-                    const prices = [l.pricing.quad, l.pricing.triple, l.pricing.double].filter(p => p > 0);
-                    if (prices.length > 0) price = Math.min(...prices);
-                }
+                const prices = [l.pricingQuad, l.pricingTriple, l.pricingDouble].filter(p => p > 0);
+                const price = prices.length > 0 ? Math.min(...prices) : (l.price || 0);
                 return price >= min && price <= max;
             });
         }
 
         // Enrich with guide profile data
         const enrichedListings = listings.map(l => {
-            const profile = database.guideProfiles.find(p => p.userId === l.guideId);
-
-            // Check visibility rules
+            const profile = l.guide;
             const showPhone = profile ? PackageSystem.isPhoneVisible(profile) : false;
 
             return {
-                ...l,
+                id: l.id,
+                guideId: l.guideId,
+                title: l.title,
+                description: l.description,
+                city: l.city,
+                departureCity: l.departureCity,
+                meetingCity: l.meetingCity,
+                extraServices: l.extraServices,
+                hotelName: l.hotelName,
+                airline: l.airline,
+                pricing: {
+                    double: l.pricingDouble,
+                    triple: l.pricingTriple,
+                    quad: l.pricingQuad,
+                    currency: l.pricingCurrency
+                },
+                price: l.price,
+                quota: l.quota,
+                filled: l.filled,
+                active: l.active,
+                isFeatured: l.isFeatured,
+                startDate: l.startDate.toISOString().split('T')[0],
+                endDate: l.endDate.toISOString().split('T')[0],
+                totalDays: l.totalDays,
+                tourPlan: l.tourDays.map(d => ({
+                    day: d.day,
+                    city: d.city,
+                    title: d.title,
+                    description: d.description
+                })),
+                approvalStatus: l.approvalStatus,
+                urgencyTag: l.urgencyTag,
+                legalConsent: l.legalConsent,
+                consentTimestamp: l.consentTimestamp?.toISOString(),
+                image: l.image,
+                createdAt: l.createdAt.toISOString(),
                 guide: profile ? {
                     fullName: profile.fullName,
                     city: profile.city,
                     bio: profile.bio,
-                    phone: showPhone ? profile.phone : null, // Hide phone if not allowed
+                    phone: showPhone ? profile.phone : null,
                     isDiyanet: profile.isDiyanet,
                     photo: profile.photo,
                     trustScore: profile.trustScore || 50,
@@ -98,20 +120,9 @@ export async function GET(req: Request) {
             };
         });
 
-        // Sort: Featured first
-        // Sort: Featured first, then Newest (Start Date)
-        enrichedListings.sort((a, b) => {
-            if (a.isFeatured && !b.isFeatured) return -1;
-            if (!a.isFeatured && b.isFeatured) return 1;
-
-            // Secondary sort: Newest (createdAt Descending)
-            const dateA = new Date(a.createdAt || a.startDate || 0).getTime();
-            const dateB = new Date(b.createdAt || b.startDate || 0).getTime();
-            return dateB - dateA;
-        });
-
         return NextResponse.json(enrichedListings);
     } catch (error) {
+        console.error("Fetch listings error:", error);
         return NextResponse.json({ error: "Failed to fetch listings" }, { status: 500 });
     }
 }
@@ -133,49 +144,42 @@ export async function POST(req: Request) {
             extraServices,
             hotelName,
             airline,
-            // New / Normalized fields
-            pricing, // { double, triple, quad }
+            pricing,
             startDate,
             endDate,
             totalDays,
-            // Phase 10
             tourPlan,
             urgencyTag,
             legalConsent,
-            posterImages
         } = body;
 
         if (!title || !departureCity) return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         if (!legalConsent) return NextResponse.json({ error: "Yasal sorumluluk beyanı zorunludur." }, { status: 400 });
 
-        const database = db.read();
-        const user = database.users.find((u: any) => u.email === session.user.email);
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email }
+        });
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-        let profile = database.guideProfiles.find(p => p.userId === user.id);
-
-        // Auto-create profile if missing (Migration/Fallback)
-        if (!profile) {
-            profile = {
+        // Get or create profile
+        let profile = await prisma.guideProfile.upsert({
+            where: { userId: user.id },
+            update: {},
+            create: {
                 userId: user.id,
                 fullName: session.user.name || "Unknown Guide",
                 phone: "",
                 city: city || "",
-                bio: "",
-                photo: "",
-                isDiyanet: false,
-                quotaTarget: 30,
-                currentCount: 0,
-                isApproved: false,
                 credits: 0,
                 package: "FREEMIUM",
                 tokens: 0
-            };
-            database.guideProfiles.push(profile);
-        }
+            }
+        });
 
-        // 1. CHECK PACKAGE LIMITS
-        const currentListingsCount = database.guideListings.filter(l => l.guideId === user.id && l.active).length;
+        // Check package limits
+        const currentListingsCount = await prisma.guideListing.count({
+            where: { guideId: user.id, active: true }
+        });
         if (!PackageSystem.canCreateListing(profile, currentListingsCount)) {
             return NextResponse.json({
                 error: "Limit Reached",
@@ -184,55 +188,81 @@ export async function POST(req: Request) {
             }, { status: 403 });
         }
 
-        // 2. NORMALIZE DATA
-        const listingPricing: Pricing = pricing || {
-            double: 0,
-            triple: 0,
-            quad: body.price ? parseFloat(body.price) : 0, // Fallback to old price
-            currency: "SAR"
-        };
+        // Normalize pricing
+        const pDouble = pricing?.double || 0;
+        const pTriple = pricing?.triple || 0;
+        const pQuad = pricing?.quad || (body.price ? parseFloat(body.price) : 0);
         const basePrice = Math.min(
-            listingPricing.quad || Infinity,
-            listingPricing.triple || Infinity,
-            listingPricing.double || Infinity
+            pQuad || Infinity,
+            pTriple || Infinity,
+            pDouble || Infinity
         );
 
-        const newListing: GuideListing = {
-            id: crypto.randomUUID(),
-            guideId: user.id,
-            title,
-            description: description || "",
-            city: city || "",
-            departureCity,
-            meetingCity: meetingCity || undefined,
-            extraServices: Array.isArray(extraServices) ? extraServices : [],
-            hotelName: hotelName || undefined,
-            airline: airline || "THY", // Default
-            pricing: listingPricing,
-            price: basePrice === Infinity ? 0 : basePrice,
-            quota: quota ? parseInt(quota) : 30,
-            filled: 0,
-            active: true,
-            isFeatured: false, // Default false, admin/package logic can enable later
-            startDate: startDate || new Date().toISOString().split('T')[0],
-            endDate: endDate || new Date(Date.now() + 86400000 * 10).toISOString().split('T')[0],
-            totalDays: totalDays ? parseInt(totalDays) : 10,
-            // Phase 10
-            tourPlan: tourPlan || [],
-            posterImages: posterImages || [],
-            approvalStatus: 'PENDING',
-            urgencyTag: urgencyTag || "",
-            legalConsent: !!legalConsent,
-            consentTimestamp: new Date().toISOString(),
-            createdAt: new Date().toISOString()
-        };
+        const newListing = await prisma.guideListing.create({
+            data: {
+                guideId: user.id,
+                title,
+                description: description || "",
+                city: city || "",
+                departureCity,
+                meetingCity: meetingCity || null,
+                extraServices: Array.isArray(extraServices) ? extraServices : [],
+                hotelName: hotelName || null,
+                airline: airline || "THY",
+                pricingDouble: pDouble,
+                pricingTriple: pTriple,
+                pricingQuad: pQuad,
+                pricingCurrency: pricing?.currency || "SAR",
+                price: basePrice === Infinity ? 0 : basePrice,
+                quota: quota ? parseInt(quota) : 30,
+                filled: 0,
+                active: true,
+                isFeatured: false,
+                startDate: startDate ? new Date(startDate) : new Date(),
+                endDate: endDate ? new Date(endDate) : new Date(Date.now() + 86400000 * 10),
+                totalDays: totalDays ? parseInt(totalDays) : 10,
+                approvalStatus: 'PENDING',
+                urgencyTag: urgencyTag || null,
+                legalConsent: !!legalConsent,
+                consentTimestamp: new Date(),
+                // Create tour days if provided
+                tourDays: tourPlan && tourPlan.length > 0 ? {
+                    create: tourPlan.map((d: any) => ({
+                        day: d.day || 1,
+                        city: d.city || "",
+                        title: d.title || "",
+                        description: d.description || ""
+                    }))
+                } : undefined
+            },
+            include: {
+                tourDays: { orderBy: { day: 'asc' } }
+            }
+        });
 
-        database.guideListings.push(newListing);
-        db.write(database);
+        // Format response to match old API shape
+        const response = {
+            ...newListing,
+            pricing: {
+                double: newListing.pricingDouble,
+                triple: newListing.pricingTriple,
+                quad: newListing.pricingQuad,
+                currency: newListing.pricingCurrency
+            },
+            tourPlan: newListing.tourDays.map(d => ({
+                day: d.day,
+                city: d.city,
+                title: d.title,
+                description: d.description
+            })),
+            startDate: newListing.startDate.toISOString().split('T')[0],
+            endDate: newListing.endDate.toISOString().split('T')[0],
+            createdAt: newListing.createdAt.toISOString()
+        };
 
         return NextResponse.json({
             success: true,
-            listing: newListing,
+            listing: response,
             message: "İlanınız kontrol ediliyor."
         }, { status: 201 });
 

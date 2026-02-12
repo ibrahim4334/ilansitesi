@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TourCard } from "@/components/tour-card";
+import { ListingCard } from "@/components/listing-card";
 import { getFeaturedTours } from "@/lib/api";
 
 export async function FeaturedTours() {
@@ -10,6 +10,27 @@ export async function FeaturedTours() {
   if (!tours.length) {
     return null;
   }
+
+  // Map TourListItem to ListingCard props
+  const mappedTours = tours.map(tour => ({
+    id: tour.id.toString(),
+    title: tour.title,
+    city: "Mekke & Medine", // Default destination
+    departureCity: tour.departureCity || tour.departure_city,
+    startDate: new Date().toISOString(), // Mock start date for now
+    endDate: new Date().toISOString(), // Mock end date
+    totalDays: parseInt(tour.duration) || 10,
+    price: tour.price,
+    guide: {
+      fullName: tour.agencyName || tour.agency_name || "Acente",
+      city: tour.departureCity,
+      isDiyanet: false,
+      trustScore: tour.rating ? tour.rating * 20 : 100, // 5 scale to 100
+      package: "AGENCY"
+    },
+    isFeatured: true,
+    posterImages: [tour.thumbnail]
+  }));
 
   return (
     <section className="py-20 sm:py-28 bg-background">
@@ -32,8 +53,8 @@ export async function FeaturedTours() {
         </div>
 
         <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {tours.map((tour) => (
-            <TourCard key={tour.id} tour={tour} />
+          {mappedTours.map((tour) => (
+            <ListingCard key={tour.id} listing={tour} />
           ))}
         </div>
       </div>

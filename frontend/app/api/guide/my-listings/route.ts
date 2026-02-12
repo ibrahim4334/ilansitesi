@@ -1,21 +1,47 @@
 
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireSupply } from "@/lib/api-guards";
 
 export async function GET(req: Request) {
     try {
         const session = await auth();
-        if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        if (session.user.role !== 'GUIDE') return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        const guard = requireSupply(session);
+        if (guard) return guard;
 
-        const database = db.read();
-        const user = database.users.find((u: any) => u.email === session.user.email);
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email }
+        });
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-        const listings = database.guideListings.filter(l => l.guideId === user.id);
+        const listings = await prisma.guideListing.findMany({
+            where: { guideId: user.id },
+            include: { tourDays: { orderBy: { day: 'asc' } } },
+            orderBy: { createdAt: 'desc' }
+        });
 
-        return NextResponse.json(listings);
+        // Format to match old API shape
+        const formattedListings = listings.map(l => ({
+            ...l,
+            pricing: {
+                double: l.pricingDouble,
+                triple: l.pricingTriple,
+                quad: l.pricingQuad,
+                currency: l.pricingCurrency
+            },
+            tourPlan: l.tourDays.map(d => ({
+                day: d.day,
+                city: d.city,
+                title: d.title,
+                description: d.description
+            })),
+            startDate: l.startDate.toISOString().split('T')[0],
+            endDate: l.endDate.toISOString().split('T')[0],
+            createdAt: l.createdAt.toISOString()
+        }));
+
+        return NextResponse.json(formattedListings);
     } catch (error) {
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }

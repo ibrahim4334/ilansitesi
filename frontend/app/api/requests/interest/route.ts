@@ -1,107 +1,121 @@
-
 import { auth } from "@/lib/auth";
-import { db, RequestInterest } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireSupply } from "@/lib/api-guards";
+import { TokenService } from "@/lib/token-service";
 
 export async function POST(req: Request) {
     try {
         const session = await auth();
-        // Allow GUIDE or ORGANIZATION
-        if (!session?.user?.email || (session.user.role !== 'GUIDE' && session.user.role !== 'ORGANIZATION')) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const guard = requireSupply(session);
+        if (guard) return guard;
 
         const { requestId } = await req.json();
         if (!requestId) return NextResponse.json({ error: "Missing requestId" }, { status: 400 });
 
-        const database = db.read();
-
         // Verify request exists and is open
-        const request = database.umrahRequests.find(r => r.id === requestId);
+        const request = await prisma.umrahRequest.findUnique({
+            where: { id: requestId }
+        });
         if (!request) return NextResponse.json({ error: "Request not found" }, { status: 404 });
         if (request.status !== "open") return NextResponse.json({ error: "Request is closed" }, { status: 400 });
 
         // Check for duplicate interest
-        const existingInterest = database.requestInterests.find(
-            i => i.requestId === requestId && i.guideEmail === session.user?.email
-        );
+        const existingInterest = await prisma.requestInterest.findUnique({
+            where: {
+                requestId_guideEmail: {
+                    requestId,
+                    guideEmail: session!.user.email!
+                }
+            }
+        });
 
         if (existingInterest) {
             return NextResponse.json({ message: "Already expressed interest" }, { status: 200 });
         }
 
-
-        // TOKEN CHECK LOGIC
-        const user = database.users.find((u: any) => u.email === session.user.email);
+        // Find user
+        const user = await prisma.user.findUnique({
+            where: { email: session!.user.email! }
+        });
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-        let profile = database.guideProfiles.find(p => p.userId === user.id);
+        // Ensure profile exists
+        let profile = await prisma.guideProfile.findUnique({
+            where: { userId: user.id }
+        });
 
         if (!profile) {
-            // Auto-create/ensure profile
-            profile = {
-                userId: user.id,
-                fullName: session.user.name || "Unknown Guide",
-                phone: "",
-                city: "",
-                credits: 0,
-                tokens: 0, // Initial tokens
-                quotaTarget: 30,
-                currentCount: 0,
-                isApproved: false,
-                package: "FREEMIUM"
-            };
-            database.guideProfiles.push(profile);
+            profile = await prisma.guideProfile.create({
+                data: {
+                    userId: user.id,
+                    fullName: session!.user.name || "Unknown Guide",
+                    phone: "",
+                    city: "",
+                    credits: 0,
+                    tokens: 0,
+                    quotaTarget: 30,
+                    currentCount: 0,
+                    isApproved: false,
+                    package: "FREEMIUM"
+                }
+            });
         }
 
-        // Initialize tokens if undefined (migration)
-        if (profile.tokens === undefined) profile.tokens = 0;
+        // ─── Determine cost: GUIDE=5, ORG=10 ───
+        const cost = session!.user.role === 'ORGANIZATION'
+            ? TokenService.COST_ORG_INTEREST
+            : TokenService.COST_GUIDE_INTEREST;
 
-        const { TokenService } = require("@/lib/token-service"); // Dynamic import to avoid circular dep issues if any
-
-        const cost = TokenService.COST_CHAT_START; // Using Chat Start cost for Interest/Thread creation
-
-        if (!TokenService.hasBalance(profile, cost)) {
-            return NextResponse.json({ error: "INSUFFICIENT_CREDITS", message: "Yetersiz Token" }, { status: 402 }); // 402 Payment Required
-        }
-
-        // DEDUCT TOKENS
-        profile.tokens -= cost;
-        // Optimization: TokenService.deductTokens uses db.read/write internally, but we already have the db instance and reference.
-        // To verify consistency using the service is better but here we have the lock (conceptually).
-        // Let's just update the profile object here since we are about to write anyway.
-        // Or call TokenService.deductTokens? But that reads DB again.
-        // Let's update manually here for atomicity with the Thread creation in this same transaction.
-
-        console.log(`Deducted ${cost} tokens from ${user.id}. New balance: ${profile.tokens}`);
-
-        const newInterest: RequestInterest = {
-            requestId,
-            guideEmail: session.user.email,
-            createdAt: new Date().toISOString()
-        };
-
-        database.requestInterests.push(newInterest);
-
-        // Auto-create Chat Thread
-        const existingThread = database.chatThreads.find(
-            t => t.requestId === requestId && t.guideEmail === session.user.email
+        // ─── Deduct credits atomically (balance check inside $transaction) ───
+        const deductResult = await TokenService.deductCredits(
+            user.id,
+            cost,
+            `Express interest in request ${requestId}`,
+            requestId
         );
 
-        if (!existingThread) {
-            const newThread = {
-                id: crypto.randomUUID(),
-                requestId,
-                userEmail: request.userEmail,
-                guideEmail: session.user.email,
-                createdAt: new Date().toISOString()
-            };
-            database.chatThreads.push(newThread);
+        if (!deductResult.success) {
+            return NextResponse.json({
+                error: "INSUFFICIENT_CREDITS",
+                message: "Yetersiz Kredi",
+                balance: deductResult.newBalance
+            }, { status: 402 });
         }
 
-        db.write(database);
+        // ─── Create interest + chat thread atomically ───
+        await prisma.$transaction(async (tx) => {
+            await tx.requestInterest.create({
+                data: {
+                    requestId,
+                    guideEmail: session!.user!.email!,
+                }
+            });
 
-        return NextResponse.json({ message: "Interest recorded", tokensRemaining: profile.tokens }, { status: 201 });
+            // Auto-create chat thread (ONLY way chat threads are created)
+            const existingThread = await tx.chatThread.findUnique({
+                where: {
+                    requestId_guideEmail: {
+                        requestId,
+                        guideEmail: session!.user!.email!
+                    }
+                }
+            });
+
+            if (!existingThread) {
+                await tx.chatThread.create({
+                    data: {
+                        requestId,
+                        userEmail: request.userEmail,
+                        guideEmail: session!.user!.email!,
+                    }
+                });
+            }
+        });
+
+        console.log(`Deducted ${cost} credits from ${user.id} (${session!.user.role}). New balance: ${deductResult.newBalance}`);
+
+        return NextResponse.json({ message: "Interest recorded", creditsRemaining: deductResult.newBalance }, { status: 201 });
 
     } catch (error) {
         console.error("Interest error:", error);

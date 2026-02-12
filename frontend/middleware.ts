@@ -63,6 +63,10 @@ export default auth((req) => {
             }
 
             // ROLE PROTECTION RULES
+            // 0. /admin/* is ONLY for ADMIN
+            if (nextUrl.pathname.startsWith("/admin") && role !== "ADMIN") {
+                return NextResponse.redirect(new URL(rootPath, nextUrl));
+            }
             // 1. /guide/* is ONLY for GUIDE
             if (nextUrl.pathname.startsWith("/guide") && role !== "GUIDE") {
                 return NextResponse.redirect(new URL(rootPath, nextUrl));

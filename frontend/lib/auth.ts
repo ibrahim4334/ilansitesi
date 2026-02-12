@@ -3,8 +3,10 @@ import Google from "next-auth/providers/google"
 import Apple from "next-auth/providers/apple"
 import Facebook from "next-auth/providers/facebook"
 import Nodemailer from "next-auth/providers/nodemailer"
+import Credentials from "next-auth/providers/credentials"
 import { authConfig } from "./auth.config"
-import { LocalJSONAdapter } from "./local-adapter"
+import { PrismaAdapter } from "@auth/prisma-adapter"
+import { prisma } from "./prisma"
 
 // Extend session type
 declare module "next-auth" {
@@ -35,7 +37,7 @@ if (!process.env.AUTH_SECRET) {
 export const { handlers, signIn, signOut, auth } = NextAuth({
     ...authConfig,
     useSecureCookies: process.env.NODE_ENV === "production",
-    adapter: LocalJSONAdapter(),
+    adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
     providers: [
         Google,
@@ -66,5 +68,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 }
             },
         }),
+        Credentials({
+            name: "Credentials",
+            credentials: {
+                email: { label: "Email", type: "email" },
+                password: { label: "Password", type: "password" }
+            },
+            async authorize(credentials) {
+                if (!credentials?.email || !credentials?.password) return null;
+
+                const bcrypt = await import("bcryptjs");
+
+                const user = await prisma.user.findUnique({
+                    where: { email: credentials.email as string }
+                });
+
+                if (!user || !user.passwordHash) return null;
+
+                const isValid = await bcrypt.compare(credentials.password as string, user.passwordHash);
+
+                if (!isValid) return null;
+
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    image: user.image,
+                    role: user.role,
+                    requires_onboarding: !user.role
+                };
+            }
+        })
     ],
 })
