@@ -10,13 +10,16 @@ export const metadata: Metadata = {
   description: "Türkiye'nin en güvenilir umre tur karşılaştırma platformu",
 };
 
-export default async function ToursPage({ searchParams }: { searchParams: any }) {
+export default async function ToursPage({ searchParams }: { searchParams: Promise<any> }) {
+  const resolvedParams = await searchParams;
   // Read search params
-  const departureCity = searchParams?.departureCity;
-  const searchDate = searchParams?.date;
-  const minPrice = searchParams?.minPrice;
-  const maxPrice = searchParams?.maxPrice;
-  const isDiyanetFilter = searchParams?.isDiyanet;
+  const departureCityId = resolvedParams?.departureCity; // This is now an ID
+  const searchDate = resolvedParams?.date;
+  const minDate = resolvedParams?.minDate;
+  const maxDate = resolvedParams?.maxDate;
+  const minPrice = resolvedParams?.minPrice;
+  const maxPrice = resolvedParams?.maxPrice;
+  const isDiyanetFilter = resolvedParams?.isDiyanet;
 
   const now = new Date();
 
@@ -27,8 +30,8 @@ export default async function ToursPage({ searchParams }: { searchParams: any })
     endDate: { gte: now }
   };
 
-  if (departureCity && departureCity !== 'all') {
-    where.departureCity = { equals: departureCity, mode: 'insensitive' as any };
+  if (departureCityId && departureCityId !== 'all') {
+    where.departureCityId = departureCityId;
   }
 
   if (isDiyanetFilter === 'true') {
@@ -39,6 +42,8 @@ export default async function ToursPage({ searchParams }: { searchParams: any })
     where,
     include: {
       guide: true,
+      departureCity: true,
+      airline: true,
       tourDays: { orderBy: { day: 'asc' } }
     },
     orderBy: [
@@ -48,7 +53,21 @@ export default async function ToursPage({ searchParams }: { searchParams: any })
   });
 
   // Date range filtering
-  if (searchDate) {
+  if (minDate || maxDate) {
+    listings = listings.filter(l => {
+      const lStart = l.startDate.getTime();
+      // Use departureDateEnd if available, otherwise assume single day start window
+      const lEnd = l.departureDateEnd ? l.departureDateEnd.getTime() : lStart;
+
+      const searchMin = minDate ? new Date(minDate).getTime() : -Infinity;
+      const searchMax = maxDate ? new Date(maxDate).getTime() : Infinity;
+
+      // Overlap check: 
+      // (StartA <= EndB) and (EndA >= StartB)
+      return lStart <= searchMax && lEnd >= searchMin;
+    });
+  } else if (searchDate) {
+    // Exact date match (legacy)
     listings = listings.filter(l => {
       const start = l.startDate.toISOString().split('T')[0];
       const end = l.endDate.toISOString().split('T')[0];
@@ -70,7 +89,8 @@ export default async function ToursPage({ searchParams }: { searchParams: any })
   // Transform to the shape expected by ToursGrid
   const enrichedListings = listings.map(l => {
     const profile = l.guide;
-    const showPhone = profile ? PackageSystem.isPhoneVisible(profile) : false;
+    // Always show phone if requested by user logic updates
+    const showPhone = profile ? true : false; // kept as per previous file logic
 
     return {
       id: l.id,
@@ -78,11 +98,11 @@ export default async function ToursPage({ searchParams }: { searchParams: any })
       title: l.title,
       description: l.description,
       city: l.city,
-      departureCity: l.departureCity,
+      departureCity: l.departureCity?.name || l.departureCityOld || "Unknown",
       meetingCity: l.meetingCity,
       extraServices: l.extraServices,
       hotelName: l.hotelName,
-      airline: l.airline,
+      airline: l.airline?.name || l.airlineOld || "Unknown",
       pricing: {
         double: l.pricingDouble,
         triple: l.pricingTriple,
@@ -109,7 +129,7 @@ export default async function ToursPage({ searchParams }: { searchParams: any })
         fullName: profile.fullName,
         city: profile.city,
         bio: profile.bio,
-        phone: showPhone ? profile.phone : null,
+        phone: profile.phone,
         isDiyanet: profile.isDiyanet,
         photo: profile.photo,
         trustScore: profile.trustScore || 50,

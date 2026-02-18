@@ -8,80 +8,56 @@ export const authConfig = {
         async jwt({ token, user, account, trigger, session }) {
             // Handle client-side updates (e.g. update({ role: ... }))
             if (trigger === "update" && session) {
-                // Merge session updates into token
-                token = { ...token, ...session };
-            }
-
-            // Default role to null if missing
-            if (!token.role) token.role = null;
-
-            // Logic: On sign in (when user object is present), sync with WP
-            if (user) {
-                try {
-                    const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'http://localhost/umre/kurulum/umrebuldum';
-
-                    const payload = {
-                        email: user.email,
-                        name: user.name,
-                        provider: account?.provider,
-                    };
-
-                    // Note: fetch is available in Edge Runtime
-                    const res = await fetch(`${wpUrl}/wp-json/umrebuldum/v1/auth`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload),
-                    });
-
-                    if (res.ok) {
-                        const data = await res.json();
-                        console.log("WP Auth Data:", data); // Debug log
-
-                        if (data.success) {
-                            token.wp_user_id = data.user_id;
-                            // Only overwrite if WP has a role, otherwise keep local role (e.g. from registration)
-                            if (data.role) {
-                                token.role = data.role;
-                            }
-
-                            // Fix: Check code for onboarding requirement
-                            if (data.code === 'requires_onboarding') {
-                                token.requires_onboarding = true;
-                            } else {
-                                token.requires_onboarding = false;
-                            }
-                        }
-                    } else {
-                        console.error("WP Sync Response Not OK:", res.status);
-                    }
-                } catch (e) {
-                    console.error("WP Sync Failed:", e);
+                // Only apply known safe fields — never blindly spread
+                if (session.role) {
+                    token.role = session.role;
+                }
+                if (typeof session.requires_onboarding === "boolean") {
+                    token.requires_onboarding = session.requires_onboarding;
                 }
             }
+
+            // On sign-in: read role from the user object (set by authorize() or adapter)
+            if (user) {
+                token.role = (user as any).role || null;
+                token.requires_onboarding = !token.role;
+            }
+
+            // If token still has no role, try to read from DB (handles token refresh)
+            if (!token.role && token.email) {
+                try {
+                    const { prisma } = await import("@/lib/prisma");
+                    const dbUser = await prisma.user.findUnique({
+                        where: { email: token.email as string },
+                        select: { role: true }
+                    });
+                    if (dbUser?.role) {
+                        token.role = dbUser.role;
+                        token.requires_onboarding = false;
+                    }
+                } catch (e) {
+                    console.error("DB role lookup failed:", e);
+                }
+            }
+
+            if (!token.role) token.requires_onboarding = true;
+            if (token.role === "BANNED") token.requires_onboarding = false;
+
             return token;
         },
         async session({ session, token }) {
-            // Safe session construction
             if (session.user) {
-                // Persistent Role Logic
                 const role = (token.role as string) || null;
                 session.user.role = role || undefined;
-
-                // Onboarding Logic: True if explicit flag is true OR if Role is missing
-                const explicitFlag = (token.requires_onboarding as boolean);
-                session.user.requires_onboarding = explicitFlag === true || !role;
-
-                session.user.wp_user_id = (token.wp_user_id as number | string) ?? null;
-                // Ensure ID is set
-                // session.user.id = token.sub ?? session.user.id; 
+                session.user.requires_onboarding = !role;
+                if (token.sub) {
+                    (session.user as any).id = token.sub;
+                }
             }
             return session;
         },
-        authorized({ auth, request: nextUrl }) {
-            // Middleware logic can go here or remain in middleware.ts using auth() wrapper
-            // For now we just return true to let middleware handle redirection logic manually
-            // or implement specific checks here.
-            // Returning true means "allow access", false means "redirect to login"
+        authorized() {
+            // Let middleware.ts handle all redirect logic
             return true;
         },
         async redirect({ url, baseUrl }) {

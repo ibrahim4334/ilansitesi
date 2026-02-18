@@ -2,7 +2,6 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireSupply } from "@/lib/api-guards";
-import { logAdminAction } from "@/lib/admin-audit";
 
 /**
  * DELETE /api/guide/listing — Soft-delete a guide's own listing

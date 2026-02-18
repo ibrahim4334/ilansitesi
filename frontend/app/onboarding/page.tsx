@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { User, Map, Building2, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -36,18 +36,20 @@ export default function OnboardingPage() {
     const [selectedRole, setSelectedRole] = useState<string | null>(null)
     const [submitting, setSubmitting] = useState(false)
 
+    // If user already has a valid role, redirect to dashboard
     useEffect(() => {
-        // Updated check for normalized roles
+        if (status !== "authenticated") return;
         const userRole = session?.user?.role;
-        const hasValidRole = ["USER", "GUIDE", "ORGANIZATION"].includes(userRole || "");
+        const hasValidRole = ["USER", "GUIDE", "ORGANIZATION", "ADMIN"].includes(userRole || "");
 
-        if (session?.user?.requires_onboarding === false || hasValidRole) {
-            // Redirect based on role if already persistent
-            if (userRole === "GUIDE") router.replace("/guide/onboarding");
-            else if (userRole === "ORGANIZATION") router.replace("/org/onboarding");
-            else router.replace("/");
+        if (hasValidRole && session?.user?.requires_onboarding === false) {
+            if (userRole === "ADMIN") {
+                router.replace("/admin/dashboard");
+            } else {
+                router.replace("/dashboard");
+            }
         }
-    }, [session, router])
+    }, [session, status, router])
 
     // Redirect if not logged in
     useEffect(() => {
@@ -56,19 +58,12 @@ export default function OnboardingPage() {
         }
     }, [status, router])
 
-    // Redirect if already has role (optional, but good UX)
-    // useEffect(() => {
-    //   if (session?.user?.role) {
-    //      router.push("/")
-    //   }
-    // }, [session, router])
-
     const handleComplete = async () => {
         if (!selectedRole) return
 
         setSubmitting(true)
         try {
-            const res = await fetch('/api/set-role', {
+            const res = await fetch('/api/choose-role', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -78,32 +73,18 @@ export default function OnboardingPage() {
 
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
-                console.error("API Error Details:", errData);
                 throw new Error(errData.error || 'Profil güncellenemedi');
             }
 
-            // Trigger session update to refresh JWT from server (which now has role from WP/DB if we used it, but here we push it via update trigger logic if needed, OR we rely on re-fetch if backend source of truth changed)
-            // But wait, our set-role API updated the backend. 
-            // The NEXT_AUTH update below is still useful for immediate client-side reflection if we passed data, 
-            // BUT to be structurally correct with JWT Strategy as requested:
-
-            await fetch("/api/auth/session?update")
-
-            // We can also call update() to be doubly sure for client hook
+            // Update client-side session to reflect new role immediately
             await update({ role: selectedRole, requires_onboarding: false })
 
             toast.success("Rolünüz seçildi! Yönlendiriliyorsunuz...")
 
-            // Delay slightly for effect
+            // Full reload to ensure fresh JWT with new role
             setTimeout(() => {
-                if (selectedRole === "GUIDE") {
-                    router.push("/guide/onboarding")
-                } else if (selectedRole === "ORGANIZATION") {
-                    router.push("/org/onboarding")
-                } else {
-                    router.push("/")
-                }
-            }, 1000)
+                window.location.href = "/dashboard";
+            }, 800)
 
         } catch (error) {
             console.error(error)

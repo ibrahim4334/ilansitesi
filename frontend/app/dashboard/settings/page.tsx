@@ -8,11 +8,19 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { ChangePasswordForm } from "@/components/dashboard/ChangePasswordForm";
 
 export default function SettingsPage() {
     const { data: session } = useSession();
     const [notifications, setNotifications] = useState(true);
     const [marketingEmails, setMarketingEmails] = useState(false);
+    const [contactConsent, setContactConsent] = useState(session?.user?.contactConsent || false);
+
+    useEffect(() => {
+        if (session?.user?.contactConsent !== undefined) {
+            setContactConsent(session.user.contactConsent);
+        }
+    }, [session]);
 
     const handleSave = () => {
         toast.success("Ayarlar kaydedildi.");
@@ -89,9 +97,10 @@ export default function SettingsPage() {
                             <Switch
                                 id="contact-consent"
                                 onCheckedChange={(checked) => {
-                                    // Normally handled via state, here we'd call API
+                                    setContactConsent(checked);
                                     fetch('/api/user/settings', {
                                         method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({ contactConsent: checked })
                                     }).then(res => {
                                         if (res.ok) toast.success("Tercihiniz güncellendi.");
@@ -110,7 +119,7 @@ export default function SettingsPage() {
                         <CardDescription>Şifrenizi ve hesap güvenliğinizi yönetin.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Button variant="outline">Şifre Değiştir</Button>
+                        <ChangePasswordForm />
                     </CardContent>
                 </Card>
 

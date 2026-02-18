@@ -2,11 +2,13 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/api-guards";
 
 export async function GET(req: Request) {
     try {
         const session = await auth();
-        if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        const authErr = requireAuth(session);
+        if (authErr) return authErr;
 
         const role = session.user.role;
         const email = session.user.email;

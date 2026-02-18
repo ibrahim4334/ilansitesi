@@ -34,21 +34,27 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Already expressed interest" }, { status: 200 });
         }
 
-        // Find user
-        const user = await prisma.user.findUnique({
+        // Find guide user
+        const guideUser = await prisma.user.findUnique({
             where: { email: session!.user.email! }
         });
-        if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+        if (!guideUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-        // Ensure profile exists
+        // Find request owner
+        const requestOwner = await prisma.user.findUnique({
+            where: { email: request.userEmail }
+        });
+        if (!requestOwner) return NextResponse.json({ error: "Request owner not found" }, { status: 404 });
+
+        // Ensure guide profile exists
         let profile = await prisma.guideProfile.findUnique({
-            where: { userId: user.id }
+            where: { userId: guideUser.id }
         });
 
         if (!profile) {
             profile = await prisma.guideProfile.create({
                 data: {
-                    userId: user.id,
+                    userId: guideUser.id,
                     fullName: session!.user.name || "Unknown Guide",
                     phone: "",
                     city: "",
@@ -69,7 +75,7 @@ export async function POST(req: Request) {
 
         // ─── Deduct credits atomically (balance check inside $transaction) ───
         const deductResult = await TokenService.deductCredits(
-            user.id,
+            guideUser.id,
             cost,
             `Express interest in request ${requestId}`,
             requestId
@@ -83,7 +89,7 @@ export async function POST(req: Request) {
             }, { status: 402 });
         }
 
-        // ─── Create interest + chat thread atomically ───
+        // ─── Create interest + conversation atomically ───
         await prisma.$transaction(async (tx) => {
             await tx.requestInterest.create({
                 data: {
@@ -92,28 +98,28 @@ export async function POST(req: Request) {
                 }
             });
 
-            // Auto-create chat thread (ONLY way chat threads are created)
-            const existingThread = await tx.chatThread.findUnique({
+            // Auto-create conversation (ONLY way conversations are created)
+            const existingConvo = await tx.conversation.findUnique({
                 where: {
-                    requestId_guideEmail: {
+                    requestId_guideId: {
                         requestId,
-                        guideEmail: session!.user!.email!
+                        guideId: guideUser.id
                     }
                 }
             });
 
-            if (!existingThread) {
-                await tx.chatThread.create({
+            if (!existingConvo) {
+                await tx.conversation.create({
                     data: {
                         requestId,
-                        userEmail: request.userEmail,
-                        guideEmail: session!.user!.email!,
+                        guideId: guideUser.id,
+                        userId: requestOwner.id,
                     }
                 });
             }
         });
 
-        console.log(`Deducted ${cost} credits from ${user.id} (${session!.user.role}). New balance: ${deductResult.newBalance}`);
+        console.log(`Deducted ${cost} credits from ${guideUser.id} (${session!.user.role}). New balance: ${deductResult.newBalance}`);
 
         return NextResponse.json({ message: "Interest recorded", creditsRemaining: deductResult.newBalance }, { status: 201 });
 
@@ -122,3 +128,4 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
+

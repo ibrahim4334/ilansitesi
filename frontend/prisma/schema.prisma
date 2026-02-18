@@ -34,6 +34,11 @@ model User {
   guideProfile      GuideProfile?
   creditTransactions CreditTransaction[]
   stripeTransactions Transaction[]
+  
+  // Chat Relations
+  guideConversations Conversation[] @relation("GuideConversations")
+  userConversations  Conversation[] @relation("UserConversations")
+  messages           Message[]
 
   @@map("users")
 }
@@ -107,17 +112,49 @@ model GuideProfile {
   @@map("guide_profiles")
 }
 
+// ─── Reference Data Models ──────────────────────────────────────────────
+
+model DepartureCity {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  airport   String
+  priority  Boolean  @default(false)
+  listings  GuideListing[]
+
+  @@map("departure_cities")
+}
+
+model Airline {
+  id               String   @id @default(cuid())
+  name             String   @unique
+  isCharterFriendly Boolean @default(false)
+  listings         GuideListing[]
+
+  @@map("airlines")
+}
+
 model GuideListing {
   id              String   @id @default(cuid())
   guideId         String
   title           String
   description     String   @db.Text
   city            String   // Target city in SA
-  departureCity   String
+  
+  departureCityId String?
+  departureCity   DepartureCity? @relation(fields: [departureCityId], references: [id])
+  
+  // Legacy string field (keeping for safety during migration, but should be deprecated)
+  departureCityOld String? @map("departureCity")
+
   meetingCity     String?
   extraServices   Json     @default("[]") // String[]
   hotelName       String?
-  airline         String?
+  
+  airlineId       String?
+  airline         Airline? @relation(fields: [airlineId], references: [id])
+
+  // Legacy string field
+  airlineOld      String? @map("airline")
   // Pricing fields (flattened from the Pricing object)
   pricingDouble   Float    @default(0)
   pricingTriple   Float    @default(0)
@@ -130,7 +167,9 @@ model GuideListing {
   deletedAt       DateTime? // Soft-delete for guides
   isFeatured      Boolean  @default(false)
   startDate       DateTime
+  departureDateEnd DateTime?
   endDate         DateTime
+  returnDateEnd   DateTime?
   totalDays       Int      @default(10)
   approvalStatus  String   @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
   rejectionReason String?  @db.Text
@@ -172,12 +211,19 @@ model UmrahRequest {
   roomType      String    @default("4-kisilik") // "2-kisilik" | "3-kisilik" | "4-kisilik"
   budget        Float?
   note          String?   @db.Text
+  
+  // Contact Preferences
+  contactViaEmail Boolean @default(false)
+  contactViaPhone Boolean @default(false)
+  contactViaChat  Boolean @default(true)
+
   createdAt     DateTime  @default(now())
   status        String    @default("open") // "open" | "closed" | "deleted"
   deletedAt     DateTime? // Soft-delete timestamp
 
   interests RequestInterest[]
   favorites RequestFavorite[]
+  conversations Conversation[]
 
   @@index([userEmail])
   @@index([status])
@@ -210,32 +256,54 @@ model RequestFavorite {
   @@map("request_favorites")
 }
 
-model ChatThread {
-  id         String   @id @default(cuid())
-  requestId  String
-  userEmail  String
-  guideEmail String
-  createdAt  DateTime @default(now())
+model Conversation {
+  id            String    @id @default(cuid())
+  requestId     String
+  guideId       String
+  userId        String
+  createdAt     DateTime  @default(now())
+  lastMessageAt DateTime  @default(now())
+  
+  // Relations
+  request       UmrahRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  guide         User         @relation("GuideConversations", fields: [guideId], references: [id], onDelete: Cascade)
+  user          User         @relation("UserConversations", fields: [userId], references: [id], onDelete: Cascade)
+  messages      Message[]
 
-  messages ChatMessage[]
-
-  @@unique([requestId, guideEmail])
-  @@index([userEmail])
-  @@index([guideEmail])
-  @@map("chat_threads")
+  @@unique([requestId, guideId])
+  @@index([userId])
+  @@index([guideId])
+  @@map("conversations")
 }
 
-model ChatMessage {
-  id         String   @id @default(cuid())
-  threadId   String
-  senderRole String   // "USER" | "GUIDE" | "ORGANIZATION"
-  message    String   @db.Text
-  createdAt  DateTime @default(now())
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  role           String   // "USER" | "GUIDE" | "ORGANIZATION" | "ADMIN"
+  body           String   @db.Text
+  blocked        Boolean  @default(false)
+  createdAt      DateTime @default(now())
 
-  thread ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  moderationLogs ModerationLog[]
 
-  @@index([threadId])
-  @@map("chat_messages")
+  @@index([conversationId])
+  @@index([senderId])
+  @@map("messages")
+}
+
+model ModerationLog {
+  id        String   @id @default(cuid())
+  messageId String
+  reason    String
+  createdAt DateTime @default(now())
+
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@map("moderation_logs")
 }
 
 model CreditPackage {

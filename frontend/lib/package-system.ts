@@ -15,7 +15,7 @@ export const PACKAGES: Record<GuidePackage, {
     initialTokens: number;
 }> = {
     FREEMIUM: {
-        maxListings: 1,
+        maxListings: 999, // Allow free creation
         listingDurationDays: 30,
         maxRequestsResponse: 3,
         posterQuality: "LOW",

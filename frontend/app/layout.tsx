@@ -77,10 +77,10 @@ export default async function RootLayout({
 
   return (
     <html lang="tr" suppressHydrationWarning>
-      <body className={`${inter.className} font-sans antialiased`}>
+      <body className={`${inter.className} font-sans antialiased flex flex-col min-h-screen`}>
         <Providers session={session}>
           <Header />
-          <main className="min-h-screen">{children}</main>
+          <main className="flex-1 bg-gray-50">{children}</main>
           <Footer />
           <Analytics />
         </Providers>

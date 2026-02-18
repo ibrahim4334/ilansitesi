@@ -12,6 +12,7 @@ import { prisma } from "./prisma"
 declare module "next-auth" {
     interface Session {
         user: {
+            id?: string;
             role?: string;
             requires_onboarding?: boolean;
             wp_user_id?: number | string;
@@ -37,6 +38,7 @@ if (!process.env.AUTH_SECRET) {
 export const { handlers, signIn, signOut, auth } = NextAuth({
     ...authConfig,
     useSecureCookies: process.env.NODE_ENV === "production",
+    trustHost: true,
     adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
     providers: [

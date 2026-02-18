@@ -58,7 +58,7 @@ async function getListing(id: string) {
             fullName: guide.fullName,
             city: guide.city,
             bio: guide.bio,
-            phone: showPhone ? guide.phone : null,
+            phone: guide.phone,
             isDiyanet: guide.isDiyanet,
             photo: guide.photo,
             trustScore: guide.trustScore || 50,
@@ -68,8 +68,9 @@ async function getListing(id: string) {
     };
 }
 
-export default async function ListingPage({ params }: { params: { id: string } }) {
-    const listing = await getListing(params.id);
+export default async function ListingPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const listing = await getListing(id);
 
     if (!listing) {
         notFound();
@@ -225,44 +226,36 @@ export default async function ListingPage({ params }: { params: { id: string } }
                                 </div>
                             </div>
 
-                            {isPremium ? (
-                                <div className="space-y-4">
-                                    {listing.guide?.bio && (
-                                        <p className="text-sm text-gray-600 leading-relaxed border-b pb-4">
-                                            {listing.guide.bio}
-                                        </p>
-                                    )}
+                            <div className="space-y-4">
+                                {listing.guide?.bio && (
+                                    <p className="text-sm text-gray-600 leading-relaxed border-b pb-4">
+                                        {listing.guide.bio}
+                                    </p>
+                                )}
 
-                                    <div className="space-y-3">
-                                        {listing.guide?.phone && (
-                                            <>
-                                                <Button className="w-full bg-green-600 hover:bg-green-700 gap-2" asChild>
-                                                    <a href={`https://wa.me/${listing.guide.phone.replace(/\+/g, '').replace(/\s/g, '')}`} target="_blank">
-                                                        <MessageCircle className="w-4 h-4" /> WhatsApp
-                                                    </a>
-                                                </Button>
-                                                <Button variant="outline" className="w-full gap-2" asChild>
-                                                    <a href={`tel:${listing.guide.phone}`}>
-                                                        <Phone className="w-4 h-4" /> Ara
-                                                    </a>
-                                                </Button>
-                                            </>
-                                        )}
-                                        {/* PDF Download - Premium Feature */}
-                                        <Button variant="secondary" className="w-full gap-2 border" asChild>
-                                            <a href={`/api/listings/pdf?id=${listing.id}`} target="_blank" rel="noopener noreferrer">
-                                                <Calendar className="w-4 h-4" /> Tur Programını İndir (PDF)
-                                            </a>
-                                        </Button>
-                                    </div>
+                                <div className="space-y-3">
+                                    {listing.guide?.phone && (
+                                        <>
+                                            <Button className="w-full bg-green-600 hover:bg-green-700 gap-2" asChild>
+                                                <a href={`https://wa.me/${listing.guide.phone.replace(/\+/g, '').replace(/\s/g, '')}`} target="_blank">
+                                                    <MessageCircle className="w-4 h-4" /> WhatsApp
+                                                </a>
+                                            </Button>
+                                            <Button variant="outline" className="w-full gap-2" asChild>
+                                                <a href={`tel:${listing.guide.phone}`}>
+                                                    <Phone className="w-4 h-4" /> Ara
+                                                </a>
+                                            </Button>
+                                        </>
+                                    )}
+                                    {/* PDF Download */}
+                                    <Button variant="secondary" className="w-full gap-2 border" asChild>
+                                        <a href={`/api/listings/pdf?id=${listing.id}`} target="_blank" rel="noopener noreferrer">
+                                            <Calendar className="w-4 h-4" /> Tur Programını İndir (PDF)
+                                        </a>
+                                    </Button>
                                 </div>
-                            ) : (
-                                <div className="text-center p-4 bg-gray-50 rounded-lg border border-dashed text-sm text-gray-500">
-                                    <Info className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                                    <p>Rehber iletişim bilgileri bu tur paketi için görüntülenemiyor.</p>
-                                    <p className="mt-2 text-xs">Detaylar için platform üzerinden teklif isteyebilirsiniz.</p>
-                                </div>
-                            )}
+                            </div>
 
                             <div className="mt-6 pt-6 border-t space-y-3">
                                 <div className="flex justify-between text-sm">

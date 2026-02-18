@@ -2,12 +2,13 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireRole } from "@/lib/api-guards";
 
 export async function POST(req: Request) {
     try {
         const session = await auth();
-        if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        if (session.user.role !== 'USER') return NextResponse.json({ error: "Only USER can join" }, { status: 403 });
+        const guard = requireRole(session, 'USER');
+        if (guard) return guard;
 
         const body = await req.json();
         const { listingId } = body;

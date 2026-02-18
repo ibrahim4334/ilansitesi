@@ -151,9 +151,9 @@ export function ListingCard({ listing, onAction }: ListingCardProps) {
                 </Link>
                 <Link
                     href={`/dashboard/listings/${listing.id}/poster`}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg opacity-50 cursor-not-allowed pointer-events-none"
                 >
-                    <Image className="w-4 h-4" /> Afiş
+                    <Image className="w-4 h-4" /> Afiş (Yakında)
                 </Link>
                 <button
                     onClick={() => onAction?.(listing.status === 'active' ? 'hide' : 'show', listing.id)}

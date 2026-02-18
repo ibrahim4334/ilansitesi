@@ -3,7 +3,6 @@
 import { Eye, MousePointer, MessageSquare, TrendingUp, Loader2 } from 'lucide-react';
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { StatCards } from '@/components/dashboard/StatCards';
@@ -85,7 +84,20 @@ function OrganizerDashboard({ userName }: { userName: string }) {
             <StatCards stats={stats} />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
-                    <RequestList requests={requests} showViewAll={true} />
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-white p-6 rounded-xl border shadow-sm">
+                            <h3 className="font-semibold text-lg mb-2">Talep Havuzu</h3>
+                            <p className="text-gray-600 mb-4">
+                                Mevcut talepleri görmek ve teklif vermek için Talep Pazarı'nı ziyaret edin.
+                            </p>
+                            <button
+                                onClick={() => window.location.href = '/dashboard/market'}
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                            >
+                                Talep Pazarı'na Git
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <MyOffers />
@@ -126,7 +138,10 @@ function PilgrimDashboard({ userName }: { userName: string }) {
                     <div className="p-6 bg-white rounded-xl border border-gray-100 shadow-sm sticky top-6">
                         <h3 className="font-semibold text-lg mb-2">Favorilerim</h3>
                         <p className="text-sm text-gray-500">Favorilenmiş tur paketiniz yok.</p>
-                        <button className="mt-4 text-sm font-medium text-primary hover:underline">Turları İncele &rarr;</button>
+                        <button
+                            onClick={() => window.location.href = '/tours'}
+                            className="mt-4 text-sm font-medium text-primary hover:underline"
+                        >Turları İncele &rarr;</button>
                     </div>
                 </div>
             </div>
@@ -165,7 +180,20 @@ function GuideDashboard({ userName }: { userName: string }) {
             <StatCards stats={stats} />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
-                    <RequestList requests={requests} showViewAll={true} />
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-white p-6 rounded-xl border shadow-sm">
+                            <h3 className="font-semibold text-lg mb-2">Talep Havuzu</h3>
+                            <p className="text-gray-600 mb-4">
+                                Mevcut talepleri görmek ve teklif vermek için Talep Pazarı'nı ziyaret edin.
+                            </p>
+                            <button
+                                onClick={() => window.location.href = '/dashboard/market'}
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                            >
+                                Talep Pazarı'na Git
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <MyOffers />
@@ -182,15 +210,12 @@ export default function DashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            router.push('/login');
-        } else if (status === 'authenticated' && session?.user?.requires_onboarding) {
-            router.replace('/onboarding');
-        }
-    }, [status, session, router]);
+    if (status === 'loading') {
+        return <div className="flex h-screen items-center justify-center">Yükleniyor...</div>;
+    }
 
-    if (status === 'loading' || (status === 'authenticated' && session?.user?.requires_onboarding)) {
+    if (status === 'unauthenticated') {
+        router.push('/login');
         return <div className="flex h-screen items-center justify-center">Yükleniyor...</div>;
     }
 

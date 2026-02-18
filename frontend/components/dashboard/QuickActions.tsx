@@ -6,13 +6,14 @@ interface QuickAction {
     icon: React.ReactNode;
     href: string;
     color: string;
+    disabled?: boolean;
 }
 
 const defaultActions: QuickAction[] = [
     { label: 'Yeni İlan', icon: <Plus className="w-5 h-5" />, href: '/dashboard/listings/new', color: 'bg-blue-500 text-white' },
-    { label: 'Kampanya', icon: <Megaphone className="w-5 h-5" />, href: '/dashboard/campaigns', color: 'bg-purple-500 text-white' },
-    { label: 'Rapor İndir', icon: <FileDown className="w-5 h-5" />, href: '/dashboard/reports', color: 'bg-green-500 text-white' },
-    { label: 'Afiş Oluştur', icon: <Image className="w-5 h-5" />, href: '/dashboard/poster', color: 'bg-orange-500 text-white' },
+    { label: 'Kampanya (Yakında)', icon: <Megaphone className="w-5 h-5" />, href: '#', color: 'bg-purple-500 text-white', disabled: true },
+    { label: 'Rapor İndir (Yakında)', icon: <FileDown className="w-5 h-5" />, href: '#', color: 'bg-green-500 text-white', disabled: true },
+    { label: 'Afiş Oluştur (Yakında)', icon: <Image className="w-5 h-5" />, href: '#', color: 'bg-orange-500 text-white', disabled: true },
 ];
 
 interface QuickActionsProps {
@@ -26,12 +27,15 @@ export function QuickActions({ actions = defaultActions }: QuickActionsProps) {
                 <Link
                     key={index}
                     href={action.href}
-                    className={`${action.color} rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm`}
+                    className={`${action.color} rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm ${action.disabled ? 'opacity-50 pointer-events-none' : ''}`}
+                    aria-disabled={action.disabled}
+                    tabIndex={action.disabled ? -1 : undefined}
                 >
                     {action.icon}
-                    <span className="text-sm font-medium">{action.label}</span>
+                    <span className="text-sm font-medium text-center">{action.label}</span>
                 </Link>
             ))}
         </div>
     );
 }
+

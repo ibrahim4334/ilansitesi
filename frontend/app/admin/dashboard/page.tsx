@@ -12,6 +12,7 @@ import PendingListingsPanel from '@/components/admin/PendingListingsPanel';
 import UserRequestsPanel from '@/components/admin/UserRequestsPanel';
 import CreditManagementPanel from '@/components/admin/CreditManagementPanel';
 import BanPanel from '@/components/admin/BanPanel';
+import AdminMessagesPanel from '@/app/admin/messages/page'; // We will move the page content to a component or import it directly
 import AuditLogPanel from '@/components/admin/AuditLogPanel';
 
 const tabs = [
@@ -19,6 +20,7 @@ const tabs = [
     { id: 'requests', label: 'Kullanıcı Talepleri', icon: Users, desc: 'User Requests' },
     { id: 'credits', label: 'Kredi Yönetimi', icon: CreditCard, desc: 'Credits' },
     { id: 'ban', label: 'Ban Paneli', icon: Ban, desc: 'Ban Users' },
+    { id: 'messages', label: 'Mesaj Moderasyonu', icon: ClipboardList, desc: 'Message Moderation' }, // Replaced Audit icon or added new? Using ClipboardList for messages temporarily or find another
     { id: 'audit', label: 'İşlem Geçmişi', icon: ClipboardList, desc: 'Audit Logs' },
 ] as const;
 
@@ -85,8 +87,8 @@ export default function AdminDashboardPage() {
                                         key={tab.id}
                                         onClick={() => { setActiveTab(tab.id); setSidebarOpen(false); }}
                                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${isActive
-                                                ? 'bg-emerald-500/10 text-emerald-400 font-medium'
-                                                : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+                                            ? 'bg-emerald-500/10 text-emerald-400 font-medium'
+                                            : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
                                             }`}
                                     >
                                         <Icon className="w-5 h-5 flex-shrink-0" />
@@ -122,8 +124,8 @@ export default function AdminDashboardPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${isActive
-                                        ? 'bg-emerald-500/10 text-emerald-400 font-medium'
-                                        : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+                                    ? 'bg-emerald-500/10 text-emerald-400 font-medium'
+                                    : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
                                     }`}
                             >
                                 <Icon className="w-5 h-5 flex-shrink-0" />
@@ -165,6 +167,7 @@ export default function AdminDashboardPage() {
                     {activeTab === 'requests' && <UserRequestsPanel />}
                     {activeTab === 'credits' && <CreditManagementPanel />}
                     {activeTab === 'ban' && <BanPanel />}
+                    {activeTab === 'messages' && <AdminMessagesPanel />}
                     {activeTab === 'audit' && <AuditLogPanel />}
                 </div>
             </main>

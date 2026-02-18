@@ -82,6 +82,14 @@ export async function PUT(req: Request) {
             }
         });
 
+        // Sync phone to User model
+        if (body.phone) {
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { phone: body.phone }
+            });
+        }
+
         return NextResponse.json({ success: true });
 
     } catch (error) {

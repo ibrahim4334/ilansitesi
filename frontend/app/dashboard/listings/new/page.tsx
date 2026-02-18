@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,13 +19,7 @@ import { Plus, Trash2, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 
-const CITIES = [
-    "İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Konya", "Adana", "Gaziantep",
-];
-
 const SAUDI_CITIES = ["Mekke", "Medine", "Cidde", "Riyad"];
-
-const AIRLINES = ["THY", "Saudia", "Flynas", "Pegasus", "Emirates", "Qatar", "Diğer"];
 
 const URGENCY_TAGS = [
     { value: "NONE", label: "Yok" },
@@ -41,17 +35,24 @@ const EXTRA_SERVICES_OPTIONS = [
 export default function NewListingPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+
+    // Dynamic Data State
+    const [cities, setCities] = useState<any[]>([]);
+    const [airlines, setAirlines] = useState<any[]>([]);
+
     const [formData, setFormData] = useState({
         title: "",
         description: "",
         city: "", // Saudi city
-        departureCity: "",
+        departureCityId: "", // Changed from departureCity string
         meetingCity: "",
         hotelName: "",
-        airline: "THY",
+        airlineId: "", // Changed from airline string
         quota: "30",
         startDate: "",
+        departureDateEnd: "",
         endDate: "",
+        returnDateEnd: "",
         totalDays: 10,
         pricing: {
             double: "",
@@ -65,6 +66,24 @@ export default function NewListingPage() {
         legalConsent: false,
         image: "" // Added image field to formData
     });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [citiesRes, airlinesRes] = await Promise.all([
+                    fetch('/api/cities'),
+                    fetch('/api/airlines')
+                ]);
+
+                if (citiesRes.ok) setCities(await citiesRes.json());
+                if (airlinesRes.ok) setAirlines(await airlinesRes.json());
+            } catch (err) {
+                console.error("Failed to fetch form data", err);
+                toast.error("Form verileri yüklenirken hata oluştu.");
+            }
+        };
+        fetchData();
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -165,6 +184,7 @@ export default function NewListingPage() {
             }
 
             toast.success(data.message || "Tur başarıyla oluşturuldu!");
+            router.refresh();
             router.push("/dashboard/listings");
         } catch (error: any) {
             toast.error(error.message);
@@ -191,10 +211,14 @@ export default function NewListingPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <Label>Kalkış Şehri</Label>
-                            <Select onValueChange={(v) => handleSelectChange("departureCity", v)}>
+                            <Select onValueChange={(v) => handleSelectChange("departureCityId", v)}>
                                 <SelectTrigger><SelectValue placeholder="Seçiniz" /></SelectTrigger>
                                 <SelectContent>
-                                    {CITIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                    {cities.map((c: any) => (
+                                        <SelectItem key={c.id} value={c.id}>
+                                            {c.name} {c.priority ? '⭐' : ''}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -209,35 +233,15 @@ export default function NewListingPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-start space-x-2 p-4 bg-amber-50 rounded-lg border border-amber-100">
-                        <Checkbox
-                            id="pdfProgram"
-                            checked={formData.extraServices.includes("PDF_PROGRAM")}
-                            onCheckedChange={(c) => {
-                                if (c) handleServiceToggle("PDF_PROGRAM");
-                                else handleServiceToggle("PDF_PROGRAM");
-                            }}
-                        />
-                        <div className="grid gap-1.5 leading-none">
-                            <label
-                                htmlFor="pdfProgram"
-                                className="text-sm font-medium leading-none text-amber-900"
-                            >
-                                Tur Programı Oluşturulsun mu?
-                            </label>
-                            <p className="text-sm text-amber-700">
-                                İşaretlenirse, girdiğiniz tur programı otomatik olarak PDF formatına dönüştürülüp ilan sayfasında indirilebilir olarak sunulacaktır.
-                            </p>
-                        </div>
-                    </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <Label>Hava Yolu</Label>
-                            <Select onValueChange={(v) => handleSelectChange("airline", v)} defaultValue="THY">
+                            <Select onValueChange={(v) => handleSelectChange("airlineId", v)}>
                                 <SelectTrigger><SelectValue placeholder="Seçiniz" /></SelectTrigger>
                                 <SelectContent>
-                                    {AIRLINES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                    {airlines.map((a: any) => (
+                                        <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -252,27 +256,56 @@ export default function NewListingPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="md:col-span-2">
-                            <Label>Tur Tarih Aralığı</Label>
-                            <DatePickerWithRange
-                                className="w-full"
-                                date={{
-                                    from: formData.startDate ? new Date(formData.startDate) : undefined,
-                                    to: formData.endDate ? new Date(formData.endDate) : undefined
-                                }}
-                                setDate={(range) => {
-                                    setFormData(prev => ({
-                                        ...prev,
-                                        startDate: range?.from ? range.from.toISOString() : "",
-                                        endDate: range?.to ? range.to.toISOString() : ""
-                                    }))
-                                }}
-                            />
+                    <div className="space-y-4 border-t pt-4">
+                        <h3 className="font-medium">Tarih Planlaması</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <Label className="mb-1.5 block">Gidiş Tarih Aralığı (Tahmini)</Label>
+                                <DatePickerWithRange
+                                    className="w-full"
+                                    date={{
+                                        from: formData.startDate ? new Date(formData.startDate) : undefined,
+                                        to: formData.departureDateEnd ? new Date(formData.departureDateEnd) : undefined
+                                    }}
+                                    setDate={(range) => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            startDate: range?.from ? range.from.toISOString() : "",
+                                            departureDateEnd: range?.to ? range.to.toISOString() : ""
+                                        }))
+                                    }}
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Hangi tarihler arasında gidiş planlanıyor?</p>
+                            </div>
+                            <div>
+                                <Label className="mb-1.5 block">Dönüş Tarih Aralığı (Tahmini)</Label>
+                                <DatePickerWithRange
+                                    className="w-full"
+                                    date={{
+                                        from: formData.endDate ? new Date(formData.endDate) : undefined,
+                                        to: formData.returnDateEnd ? new Date(formData.returnDateEnd) : undefined
+                                    }}
+                                    setDate={(range) => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            endDate: range?.from ? range.from.toISOString() : "",
+                                            returnDateEnd: range?.to ? range.to.toISOString() : ""
+                                        }))
+                                    }}
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Hangi tarihler arasında dönüş planlanıyor?</p>
+                            </div>
                         </div>
                         <div>
-                            <Label>Toplam Gün</Label>
-                            <Input type="number" name="totalDays" value={formData.totalDays} onChange={(e) => setFormData({ ...formData, totalDays: parseInt(e.target.value) })} required />
+                            <Label>Toplam Gün Sayısı</Label>
+                            <Input
+                                type="number"
+                                name="totalDays"
+                                value={formData.totalDays}
+                                onChange={(e) => setFormData({ ...formData, totalDays: parseInt(e.target.value) })}
+                                required
+                                className="max-w-[150px]"
+                            />
                         </div>
                     </div>
                 </div>
@@ -314,52 +347,7 @@ export default function NewListingPage() {
                     </div>
                 </div>
 
-                {/* Tour Plan Builder */}
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center border-b pb-2">
-                        <h2 className="text-xl font-semibold">Tur Programı</h2>
-                        <Button type="button" size="sm" onClick={addTourDay} variant="secondary">
-                            <Plus className="w-4 h-4 mr-1" /> Gün Ekle
-                        </Button>
-                    </div>
 
-                    <div className="space-y-4">
-                        {formData.tourPlan.length === 0 && (
-                            <div className="text-center py-8 text-gray-500 border-2 border-dashed rounded-lg">
-                                Henüz tur programı eklenmedi.
-                            </div>
-                        )}
-                        {formData.tourPlan.map((day, index) => (
-                            <div key={index} className="flex gap-4 items-start p-4 bg-gray-50 rounded-lg border">
-                                <div className="min-w-[80px] font-bold text-amber-600 pt-2">
-                                    {day.day}. Gün
-                                </div>
-                                <div className="flex-1 space-y-2">
-                                    <Select value={day.city} onValueChange={(v) => updateTourDay(index, 'city', v)}>
-                                        <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="Mekke">Mekke</SelectItem>
-                                            <SelectItem value="Medine">Medine</SelectItem>
-                                            <SelectItem value="Cidde">Cidde</SelectItem>
-                                            <SelectItem value="Diğer">Diğer</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <Textarea
-                                        placeholder="Günün programı... (örn: Kabe ziyareti)"
-                                        value={day.description}
-                                        onChange={(e) => updateTourDay(index, 'description', e.target.value)}
-                                        className="bg-white min-h-[80px]"
-                                        maxLength={140}
-                                    />
-                                    <div className="text-xs text-right text-gray-400">{day.description.length}/140</div>
-                                </div>
-                                <Button type="button" variant="ghost" size="icon" onClick={() => removeTourDay(index)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
 
                 {/* Details */}
                 <div className="space-y-4">
@@ -378,6 +366,96 @@ export default function NewListingPage() {
                     </div>
                 </div>
 
+                <div className="flex items-start space-x-2 p-4 bg-purple-50 rounded-lg border border-purple-100 mb-4">
+                    <Checkbox
+                        id="irregularProgram"
+                        checked={formData.extraServices.includes("IRREGULAR_PROGRAM")}
+                        onCheckedChange={() => handleServiceToggle("IRREGULAR_PROGRAM")}
+                    />
+                    <div className="grid gap-1.5 leading-none">
+                        <label
+                            htmlFor="irregularProgram"
+                            className="text-sm font-medium leading-none text-purple-900"
+                        >
+                            Tur planını ilanda görülebilir yapın!
+                        </label>
+                        <p className="text-sm text-purple-700">
+                            İşaretlenirse, detaylı gün-gün program oluşturucu açılacaktır. Normal turlar için sadece genel açıklama yeterlidir.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex items-start space-x-2 p-4 bg-amber-50 rounded-lg border border-amber-100">
+                    <Checkbox
+                        id="pdfProgram"
+                        checked={formData.extraServices.includes("PDF_PROGRAM")}
+                        onCheckedChange={() => handleServiceToggle("PDF_PROGRAM")}
+                    />
+                    <div className="grid gap-1.5 leading-none">
+                        <label
+                            htmlFor="pdfProgram"
+                            className="text-sm font-medium leading-none text-amber-900"
+                        >
+                            Tur Programı PDF'e Dönüştürülsün mü?
+                        </label>
+                        <p className="text-sm text-amber-700">
+                            İşaretlenirse, program PDF olarak indirilebilir olur.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Tour Plan Builder - Only for Irregular Programs */}
+                {formData.extraServices.includes("IRREGULAR_PROGRAM") && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div className="flex justify-between items-center border-b pb-2">
+                            <div>
+                                <h2 className="text-xl font-semibold">Tur Programı</h2>
+                                <p className="text-sm text-gray-500">Gün gün program detaylarını giriniz.</p>
+                            </div>
+                            <Button type="button" size="sm" onClick={addTourDay} variant="secondary">
+                                <Plus className="w-4 h-4 mr-1" /> Gün Ekle
+                            </Button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {formData.tourPlan.length === 0 && (
+                                <div className="text-center py-8 text-gray-500 border-2 border-dashed rounded-lg">
+                                    Henüz tur programı eklenmedi.
+                                </div>
+                            )}
+                            {formData.tourPlan.map((day, index) => (
+                                <div key={index} className="flex gap-4 items-start p-4 bg-gray-50 rounded-lg border">
+                                    <div className="min-w-[80px] font-bold text-amber-600 pt-2">
+                                        {day.day}. Gün
+                                    </div>
+                                    <div className="flex-1 space-y-2">
+                                        <Select value={day.city} onValueChange={(v) => updateTourDay(index, 'city', v)}>
+                                            <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Mekke">Mekke</SelectItem>
+                                                <SelectItem value="Medine">Medine</SelectItem>
+                                                <SelectItem value="Cidde">Cidde</SelectItem>
+                                                <SelectItem value="Diğer">Diğer</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <Textarea
+                                            placeholder="Günün programı... (örn: Kabe ziyareti)"
+                                            value={day.description}
+                                            onChange={(e) => updateTourDay(index, 'description', e.target.value)}
+                                            className="bg-white min-h-[80px]"
+                                            maxLength={500}
+                                        />
+                                        <div className="text-xs text-right text-gray-400">{day.description.length}/500</div>
+                                    </div>
+                                    <Button type="button" variant="ghost" size="icon" onClick={() => removeTourDay(index)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Legal Consent */}
                 <div className="flex items-start space-x-2 p-4 bg-blue-50 rounded-lg border border-blue-100">
                     <Checkbox
@@ -393,7 +471,7 @@ export default function NewListingPage() {
                             Yasal Sorumluluk Beyanı
                         </label>
                         <p className="text-sm text-blue-700">
-                            Paylaştığım iletişim bilgilerinin ve tur detaylarının doğruluğundan tamamen sorumlu olduğumu kabul ediyorum.
+                            Paylaştığım iletişim bilgilerinin ve tur detaylarının doğruluğundan tamamen sorumlu olduğumu, iletişim bilgilerimin ilanda görüntülenebileceğini kabul ediyorum.
                         </p>
                     </div>
                 </div>

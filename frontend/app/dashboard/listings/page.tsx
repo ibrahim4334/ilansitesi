@@ -7,7 +7,6 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { ListingList } from '@/components/dashboard/ListingCard';
 import { CreditBalance } from '@/components/guide-dashboard/credit-balance';
 import useSWR from 'swr';
-import { useSession } from 'next-auth/react';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -22,12 +21,11 @@ const tabs = [
 const MAX_FEATURED = 3;
 
 export default function ListingsPage() {
-    const { data: session } = useSession();
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
 
     const { data: rawListings, error, isLoading, mutate } = useSWR(
-        (session?.user as any)?.id ? `/api/listings?guideId=${(session.user as any).id}` : null,
+        '/api/guide/my-listings',
         fetcher
     );
 
@@ -69,10 +67,59 @@ export default function ListingsPage() {
         return 0;
     };
 
-    const handleAction = (action: string, listingId: string) => {
-        console.log(`Action: ${action} on listing ${listingId}`);
+    const handleAction = async (action: string, listingId: string) => {
         if (action === 'delete') {
-            // Call delete API and then mutate()
+            if (!confirm('İlanı silmek istediğinize emin misiniz?')) return;
+            try {
+                const res = await fetch(`/api/listings/${listingId}`, { method: 'DELETE' });
+                if (res.ok) {
+                    mutate(); // Refresh list
+                    // toast.success('İlan silindi');
+                } else {
+                    alert('Silme işlemi başarısız.');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        } else if (action === 'hide' || action === 'show') {
+            try {
+                const active = action === 'show';
+                const res = await fetch(`/api/listings/${listingId}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ active })
+                });
+                if (res.ok) mutate();
+            } catch (e) {
+                console.error(e);
+            }
+        } else if (action === 'share') {
+            // Copy link
+            const url = `${window.location.origin}/tours/${listingId}`;
+            try {
+                await navigator.clipboard.writeText(url);
+                alert('Bağlantı kopyalandı!');
+            } catch (err) {
+                console.error('Copy failed', err);
+            }
+        } else if (action === 'feature') {
+            if (!confirm('Bu ilanı öne çıkarmak için kredi bakiyenizden düşülecektir. Onaylıyor musunuz?')) return;
+            try {
+                const res = await fetch('/api/guide/feature', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ listingId })
+                });
+                const json = await res.json();
+                if (res.ok) {
+                    alert('İlan öne çıkarıldı!');
+                    mutate();
+                } else {
+                    alert(json.message || 'Öne çıkarma başarısız.');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Bir hata oluştu.');
+            }
         }
     };
 

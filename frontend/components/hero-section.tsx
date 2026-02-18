@@ -15,10 +15,8 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-
-const CITIES = [
-  "İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Konya", "Adana", "Gaziantep",
-];
+import { DatePickerWithRange } from "@/components/ui/date-range-picker";
+import { DateRange } from "react-day-picker";
 
 const ROOM_TYPES = [
   { id: "2-kisilik", label: "2 Kişilik Oda" },
@@ -29,8 +27,9 @@ const ROOM_TYPES = [
 export function HeroSection() {
   const router = useRouter();
   const { data: session } = useSession();
+  const [cities, setCities] = useState<any[]>([]);
   const [city, setCity] = useState("");
-  const [date, setDate] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [roomType, setRoomType] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -39,13 +38,27 @@ export function HeroSection() {
 
   useEffect(() => {
     setMounted(true);
+    // Fetch cities
+    fetch('/api/cities')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setCities(data);
+      })
+      .catch(err => console.error("Failed to fetch cities", err));
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
-    if (city && city !== "all") params.set("departureCity", city);
-    if (date) params.set("date", date);
+    if (city && city !== "all") params.set("departureCity", city); // city is now ID
+
+    if (dateRange?.from) {
+      params.set("minDate", dateRange.from.toISOString().split('T')[0]);
+    }
+    if (dateRange?.to) {
+      params.set("maxDate", dateRange.to.toISOString().split('T')[0]);
+    }
+
     if (roomType) params.set("roomType", roomType);
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
@@ -117,8 +130,10 @@ export function HeroSection() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Tüm Şehirler</SelectItem>
-                      {CITIES.map((c) => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      {cities.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name} {c.priority ? '⭐' : ''}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -127,14 +142,12 @@ export function HeroSection() {
 
               {/* Date (3 cols) */}
               <div className="md:col-span-3">
-                <Label className="text-xs text-gray-500 font-medium ml-1 mb-1.5 block">Tarih</Label>
+                <Label className="text-xs text-gray-500 font-medium ml-1 mb-1.5 block">Tarih Aralığı</Label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 h-5 w-5 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none" />
-                  <Input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="h-12 w-full border-gray-200 bg-gray-50 pl-10 text-base focus:ring-amber-500"
+                  <DatePickerWithRange
+                    className="w-full"
+                    date={dateRange}
+                    setDate={setDateRange}
                   />
                 </div>
               </div>
