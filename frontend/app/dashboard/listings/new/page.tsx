@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Check } from "lucide-react";
+import { Plus, Trash2, Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 
@@ -199,288 +199,305 @@ export default function NewListingPage() {
 
             <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-xl border shadow-sm">
 
-                {/* Basic Info */}
-                <div className="space-y-4">
-                    <h2 className="text-xl font-semibold border-b pb-2">Temel Bilgiler</h2>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                    <div>
-                        <Label>Tur Başlığı</Label>
-                        <Input name="title" placeholder="Örn: 15 Günlük Ramazan Umresi" value={formData.title} onChange={handleChange} required />
-                    </div>
+                    {/* Left Column: Main Form */}
+                    <div className={`space-y-8 ${formData.extraServices.includes("IRREGULAR_PROGRAM") ? 'lg:col-span-7' : 'lg:col-span-12'}`}>
+                        {/* Basic Info */}
+                        <div className="space-y-4">
+                            <h2 className="text-xl font-semibold border-b pb-2">Temel Bilgiler</h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <Label>Kalkış Şehri</Label>
-                            <Select onValueChange={(v) => handleSelectChange("departureCityId", v)}>
-                                <SelectTrigger><SelectValue placeholder="Seçiniz" /></SelectTrigger>
-                                <SelectContent>
-                                    {cities.map((c: any) => (
-                                        <SelectItem key={c.id} value={c.id}>
-                                            {c.name} {c.priority ? '⭐' : ''}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <Label>Varış / Merkez Şehir</Label>
-                            <Select onValueChange={(v) => handleSelectChange("city", v)}>
-                                <SelectTrigger><SelectValue placeholder="Seçiniz" /></SelectTrigger>
-                                <SelectContent>
-                                    {SAUDI_CITIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <Label>Hava Yolu</Label>
-                            <Select onValueChange={(v) => handleSelectChange("airlineId", v)}>
-                                <SelectTrigger><SelectValue placeholder="Seçiniz" /></SelectTrigger>
-                                <SelectContent>
-                                    {airlines.map((a: any) => (
-                                        <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <Label>Aciliyet / Etiket</Label>
-                            <Select onValueChange={(v) => handleSelectChange("urgencyTag", v)}>
-                                <SelectTrigger><SelectValue placeholder="Yok" /></SelectTrigger>
-                                <SelectContent>
-                                    {URGENCY_TAGS.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4 border-t pt-4">
-                        <h3 className="font-medium">Tarih Planlaması</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <Label className="mb-1.5 block">Gidiş Tarih Aralığı (Tahmini)</Label>
-                                <DatePickerWithRange
-                                    className="w-full"
-                                    date={{
-                                        from: formData.startDate ? new Date(formData.startDate) : undefined,
-                                        to: formData.departureDateEnd ? new Date(formData.departureDateEnd) : undefined
-                                    }}
-                                    setDate={(range) => {
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            startDate: range?.from ? range.from.toISOString() : "",
-                                            departureDateEnd: range?.to ? range.to.toISOString() : ""
-                                        }))
-                                    }}
+                                <Label>Tur Başlığı</Label>
+                                <Input name="title" placeholder="Örn: 15 Günlük Ramazan Umresi" value={formData.title} onChange={handleChange} required />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <Label>Kalkış Şehri</Label>
+                                    <Select onValueChange={(v) => handleSelectChange("departureCityId", v)}>
+                                        <SelectTrigger><SelectValue placeholder="Seçiniz" /></SelectTrigger>
+                                        <SelectContent>
+                                            {cities.map((c: any) => (
+                                                <SelectItem key={c.id} value={c.id}>
+                                                    {c.name} {c.priority ? '⭐' : ''}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Label>Varış / Merkez Şehir</Label>
+                                    <Select onValueChange={(v) => handleSelectChange("city", v)}>
+                                        <SelectTrigger><SelectValue placeholder="Seçiniz" /></SelectTrigger>
+                                        <SelectContent>
+                                            {SAUDI_CITIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <Label>Hava Yolu</Label>
+                                    <Select onValueChange={(v) => handleSelectChange("airlineId", v)}>
+                                        <SelectTrigger><SelectValue placeholder="Seçiniz" /></SelectTrigger>
+                                        <SelectContent>
+                                            {airlines.map((a: any) => (
+                                                <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Label>Aciliyet / Etiket</Label>
+                                    <Select onValueChange={(v) => handleSelectChange("urgencyTag", v)}>
+                                        <SelectTrigger><SelectValue placeholder="Yok" /></SelectTrigger>
+                                        <SelectContent>
+                                            {URGENCY_TAGS.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 border-t pt-4">
+                                <h3 className="font-medium">Tarih Planlaması</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <Label className="mb-1.5 block">Gidiş Tarih Aralığı (Tahmini)</Label>
+                                        <DatePickerWithRange
+                                            className="w-full"
+                                            date={{
+                                                from: formData.startDate ? new Date(formData.startDate) : undefined,
+                                                to: formData.departureDateEnd ? new Date(formData.departureDateEnd) : undefined
+                                            }}
+                                            setDate={(range) => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    startDate: range?.from ? range.from.toISOString() : "",
+                                                    departureDateEnd: range?.to ? range.to.toISOString() : ""
+                                                }))
+                                            }}
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">Hangi tarihler arasında gidiş planlanıyor?</p>
+                                    </div>
+                                    <div>
+                                        <Label className="mb-1.5 block">Dönüş Tarih Aralığı (Tahmini)</Label>
+                                        <DatePickerWithRange
+                                            className="w-full"
+                                            date={{
+                                                from: formData.endDate ? new Date(formData.endDate) : undefined,
+                                                to: formData.returnDateEnd ? new Date(formData.returnDateEnd) : undefined
+                                            }}
+                                            setDate={(range) => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    endDate: range?.from ? range.from.toISOString() : "",
+                                                    returnDateEnd: range?.to ? range.to.toISOString() : ""
+                                                }))
+                                            }}
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">Hangi tarihler arasında dönüş planlanıyor?</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <Label>Toplam Gün Sayısı</Label>
+                                    <Input
+                                        type="number"
+                                        name="totalDays"
+                                        value={formData.totalDays}
+                                        onChange={(e) => setFormData({ ...formData, totalDays: parseInt(e.target.value) })}
+                                        required
+                                        className="max-w-[150px]"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Pricing */}
+                        <div className="space-y-4">
+                            <h2 className="text-xl font-semibold border-b pb-2">Fiyatlandırma (SAR)</h2>
+                            <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                    <Label>4 Kişilik Oda</Label>
+                                    <Input type="number" placeholder="4500" value={formData.pricing.quad} onChange={e => handlePriceChange('quad', e.target.value)} required />
+                                </div>
+                                <div>
+                                    <Label>3 Kişilik Oda</Label>
+                                    <Input type="number" placeholder="5000" value={formData.pricing.triple} onChange={e => handlePriceChange('triple', e.target.value)} required />
+                                </div>
+                                <div>
+                                    <Label>2 Kişilik Oda</Label>
+                                    <Input type="number" placeholder="6000" value={formData.pricing.double} onChange={e => handlePriceChange('double', e.target.value)} required />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Extra Services */}
+                        <div className="space-y-4">
+                            <h2 className="text-xl font-semibold border-b pb-2">Hizmetler</h2>
+                            <div className="flex flex-wrap gap-2">
+                                {EXTRA_SERVICES_OPTIONS.map(service => (
+                                    <Badge
+                                        key={service}
+                                        variant={formData.extraServices.includes(service) ? "default" : "outline"}
+                                        className={`cursor-pointer hover:bg-gray-200 ${formData.extraServices.includes(service) ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+                                        onClick={() => handleServiceToggle(service)}
+                                    >
+                                        {service}
+                                        {formData.extraServices.includes(service) && <Check className="w-3 h-3 ml-1" />}
+                                    </Badge>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Details */}
+                        <div className="space-y-4">
+                            <h2 className="text-xl font-semibold border-b pb-2">Diğer Detaylar</h2>
+                            <div>
+                                <Label>Kontenjan</Label>
+                                <Input type="number" name="quota" value={formData.quota} onChange={handleChange} required />
+                            </div>
+                            <div>
+                                <Label>Otel Adı</Label>
+                                <Input name="hotelName" placeholder="Örn: Hilton Makkah" value={formData.hotelName} onChange={handleChange} />
+                            </div>
+                            <div>
+                                <Label>Genel Açıklama</Label>
+                                <Textarea name="description" placeholder="Tur genel detayları..." className="h-32" value={formData.description} onChange={handleChange} />
+                            </div>
+                        </div>
+
+                        {/* Checkboxes Area - Reordered */}
+                        <div className="space-y-4">
+                            <div className="flex items-start space-x-2 p-4 bg-purple-50 rounded-lg border border-purple-100">
+                                <Checkbox
+                                    id="irregularProgram"
+                                    checked={formData.extraServices.includes("IRREGULAR_PROGRAM")}
+                                    onCheckedChange={() => handleServiceToggle("IRREGULAR_PROGRAM")}
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Hangi tarihler arasında gidiş planlanıyor?</p>
+                                <div className="grid gap-1.5 leading-none">
+                                    <label
+                                        htmlFor="irregularProgram"
+                                        className="text-sm font-medium leading-none text-purple-900"
+                                    >
+                                        Tur planını ilanda görülebilir yapın!
+                                    </label>
+                                    <p className="text-sm text-purple-700">
+                                        İşaretlenirse, detaylı gün-gün program oluşturucu <strong>sağ tarafta</strong> açılacaktır. Normal turlar için sadece genel açıklama yeterlidir.
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <Label className="mb-1.5 block">Dönüş Tarih Aralığı (Tahmini)</Label>
-                                <DatePickerWithRange
-                                    className="w-full"
-                                    date={{
-                                        from: formData.endDate ? new Date(formData.endDate) : undefined,
-                                        to: formData.returnDateEnd ? new Date(formData.returnDateEnd) : undefined
-                                    }}
-                                    setDate={(range) => {
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            endDate: range?.from ? range.from.toISOString() : "",
-                                            returnDateEnd: range?.to ? range.to.toISOString() : ""
-                                        }))
-                                    }}
+
+                            <div className="flex items-start space-x-2 p-4 bg-amber-50 rounded-lg border border-amber-100">
+                                <Checkbox
+                                    id="pdfProgram"
+                                    checked={formData.extraServices.includes("PDF_PROGRAM")}
+                                    onCheckedChange={() => handleServiceToggle("PDF_PROGRAM")}
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Hangi tarihler arasında dönüş planlanıyor?</p>
+                                <div className="grid gap-1.5 leading-none">
+                                    <label
+                                        htmlFor="pdfProgram"
+                                        className="text-sm font-medium leading-none text-amber-900"
+                                    >
+                                        Tur Programı PDF'e Dönüştürülsün mü?
+                                    </label>
+                                    <p className="text-sm text-amber-700">
+                                        İşaretlenirse, program PDF olarak indirilebilir olur.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Legal Consent */}
+                            <div className="flex items-start space-x-2 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                                <Checkbox
+                                    id="legalConsent"
+                                    checked={formData.legalConsent}
+                                    onCheckedChange={(c) => setFormData({ ...formData, legalConsent: c === true })}
+                                />
+                                <div className="grid gap-1.5 leading-none">
+                                    <label
+                                        htmlFor="legalConsent"
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-blue-900"
+                                    >
+                                        Yasal Sorumluluk Beyanı
+                                    </label>
+                                    <p className="text-sm text-blue-700">
+                                        Paylaştığım iletişim bilgilerinin ve tur detaylarının doğruluğundan tamamen sorumlu olduğumu, iletişim bilgilerimin ilanda görüntülenebileceğini kabul ediyorum.
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <Label>Toplam Gün Sayısı</Label>
-                            <Input
-                                type="number"
-                                name="totalDays"
-                                value={formData.totalDays}
-                                onChange={(e) => setFormData({ ...formData, totalDays: parseInt(e.target.value) })}
-                                required
-                                className="max-w-[150px]"
-                            />
-                        </div>
-                    </div>
-                </div>
 
-                {/* Pricing */}
-                <div className="space-y-4">
-                    <h2 className="text-xl font-semibold border-b pb-2">Fiyatlandırma (SAR)</h2>
-                    <div className="grid grid-cols-3 gap-4">
-                        <div>
-                            <Label>4 Kişilik Oda</Label>
-                            <Input type="number" placeholder="4500" value={formData.pricing.quad} onChange={e => handlePriceChange('quad', e.target.value)} required />
-                        </div>
-                        <div>
-                            <Label>3 Kişilik Oda</Label>
-                            <Input type="number" placeholder="5000" value={formData.pricing.triple} onChange={e => handlePriceChange('triple', e.target.value)} required />
-                        </div>
-                        <div>
-                            <Label>2 Kişilik Oda</Label>
-                            <Input type="number" placeholder="6000" value={formData.pricing.double} onChange={e => handlePriceChange('double', e.target.value)} required />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Extra Services */}
-                <div className="space-y-4">
-                    <h2 className="text-xl font-semibold border-b pb-2">Hizmetler</h2>
-                    <div className="flex flex-wrap gap-2">
-                        {EXTRA_SERVICES_OPTIONS.map(service => (
-                            <Badge
-                                key={service}
-                                variant={formData.extraServices.includes(service) ? "default" : "outline"}
-                                className={`cursor-pointer hover:bg-gray-200 ${formData.extraServices.includes(service) ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
-                                onClick={() => handleServiceToggle(service)}
-                            >
-                                {service}
-                                {formData.extraServices.includes(service) && <Check className="w-3 h-3 ml-1" />}
-                            </Badge>
-                        ))}
-                    </div>
-                </div>
-
-
-
-                {/* Details */}
-                <div className="space-y-4">
-                    <h2 className="text-xl font-semibold border-b pb-2">Diğer Detaylar</h2>
-                    <div>
-                        <Label>Kontenjan</Label>
-                        <Input type="number" name="quota" value={formData.quota} onChange={handleChange} required />
-                    </div>
-                    <div>
-                        <Label>Otel Adı</Label>
-                        <Input name="hotelName" placeholder="Örn: Hilton Makkah" value={formData.hotelName} onChange={handleChange} />
-                    </div>
-                    <div>
-                        <Label>Genel Açıklama</Label>
-                        <Textarea name="description" placeholder="Tur genel detayları..." className="h-32" value={formData.description} onChange={handleChange} />
-                    </div>
-                </div>
-
-                <div className="flex items-start space-x-2 p-4 bg-purple-50 rounded-lg border border-purple-100 mb-4">
-                    <Checkbox
-                        id="irregularProgram"
-                        checked={formData.extraServices.includes("IRREGULAR_PROGRAM")}
-                        onCheckedChange={() => handleServiceToggle("IRREGULAR_PROGRAM")}
-                    />
-                    <div className="grid gap-1.5 leading-none">
-                        <label
-                            htmlFor="irregularProgram"
-                            className="text-sm font-medium leading-none text-purple-900"
-                        >
-                            Tur planını ilanda görülebilir yapın!
-                        </label>
-                        <p className="text-sm text-purple-700">
-                            İşaretlenirse, detaylı gün-gün program oluşturucu açılacaktır. Normal turlar için sadece genel açıklama yeterlidir.
-                        </p>
-                    </div>
-                </div>
-
-                <div className="flex items-start space-x-2 p-4 bg-amber-50 rounded-lg border border-amber-100">
-                    <Checkbox
-                        id="pdfProgram"
-                        checked={formData.extraServices.includes("PDF_PROGRAM")}
-                        onCheckedChange={() => handleServiceToggle("PDF_PROGRAM")}
-                    />
-                    <div className="grid gap-1.5 leading-none">
-                        <label
-                            htmlFor="pdfProgram"
-                            className="text-sm font-medium leading-none text-amber-900"
-                        >
-                            Tur Programı PDF'e Dönüştürülsün mü?
-                        </label>
-                        <p className="text-sm text-amber-700">
-                            İşaretlenirse, program PDF olarak indirilebilir olur.
-                        </p>
-                    </div>
-                </div>
-
-                {/* Tour Plan Builder - Only for Irregular Programs */}
-                {formData.extraServices.includes("IRREGULAR_PROGRAM") && (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div className="flex justify-between items-center border-b pb-2">
-                            <div>
-                                <h2 className="text-xl font-semibold">Tur Programı</h2>
-                                <p className="text-sm text-gray-500">Gün gün program detaylarını giriniz.</p>
-                            </div>
-                            <Button type="button" size="sm" onClick={addTourDay} variant="secondary">
-                                <Plus className="w-4 h-4 mr-1" /> Gün Ekle
+                        <div className="flex justify-end gap-4 pt-4 border-t">
+                            <Button type="button" variant="outline" onClick={() => router.back()}>İptal</Button>
+                            <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+                                {loading ? "Oluşturuluyor..." : "İlanı Onaya Gönder"}
                             </Button>
                         </div>
+                    </div>
 
-                        <div className="space-y-4">
-                            {formData.tourPlan.length === 0 && (
-                                <div className="text-center py-8 text-gray-500 border-2 border-dashed rounded-lg">
-                                    Henüz tur programı eklenmedi.
+                    {/* Right Column: Tour Plan Builder (Only for Irregular Programs) */}
+                    {formData.extraServices.includes("IRREGULAR_PROGRAM") && (
+                        <div className="lg:col-span-5 sticky top-24 space-y-4 animate-in fade-in slide-in-from-right-4 duration-500 bg-gray-50/50 p-4 rounded-xl border border-dashed border-gray-200">
+                            <div className="flex justify-between items-center border-b pb-2 bg-white p-3 rounded-lg shadow-sm">
+                                <div>
+                                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-purple-600" />
+                                        Tur Programı
+                                    </h2>
+                                    <p className="text-xs text-gray-500">Gün gün program detaylarını giriniz.</p>
                                 </div>
-                            )}
-                            {formData.tourPlan.map((day, index) => (
-                                <div key={index} className="flex gap-4 items-start p-4 bg-gray-50 rounded-lg border">
-                                    <div className="min-w-[80px] font-bold text-amber-600 pt-2">
-                                        {day.day}. Gün
+                                <Button type="button" size="sm" onClick={addTourDay} variant="secondary" className="h-8">
+                                    <Plus className="w-3 h-3 mr-1" /> Gün Ekle
+                                </Button>
+                            </div>
+
+                            <div className="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2 custom-scrollbar">
+                                {formData.tourPlan.length === 0 && (
+                                    <div className="text-center py-12 text-gray-400 border-2 border-dashed rounded-lg bg-white">
+                                        <p className="text-sm">Henüz gün eklenmedi.</p>
+                                        <Button type="button" variant="link" onClick={addTourDay} className="text-purple-600">
+                                            + İlk Günü Ekle
+                                        </Button>
                                     </div>
-                                    <div className="flex-1 space-y-2">
-                                        <Select value={day.city} onValueChange={(v) => updateTourDay(index, 'city', v)}>
-                                            <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Mekke">Mekke</SelectItem>
-                                                <SelectItem value="Medine">Medine</SelectItem>
-                                                <SelectItem value="Cidde">Cidde</SelectItem>
-                                                <SelectItem value="Diğer">Diğer</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <Textarea
-                                            placeholder="Günün programı... (örn: Kabe ziyareti)"
-                                            value={day.description}
-                                            onChange={(e) => updateTourDay(index, 'description', e.target.value)}
-                                            className="bg-white min-h-[80px]"
-                                            maxLength={500}
-                                        />
-                                        <div className="text-xs text-right text-gray-400">{day.description.length}/500</div>
+                                )}
+                                {formData.tourPlan.map((day, index) => (
+                                    <div key={index} className="flex flex-col gap-2 p-3 bg-white rounded-lg border shadow-sm group hover:border-purple-200 transition-colors">
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-bold text-amber-600 text-sm bg-amber-50 px-2 py-0.5 rounded">
+                                                {day.day}. Gün
+                                            </span>
+                                            <Button type="button" variant="ghost" size="icon" onClick={() => removeTourDay(index)} className="h-6 w-6 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Trash2 className="w-3 h-3" />
+                                            </Button>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Select value={day.city} onValueChange={(v) => updateTourDay(index, 'city', v)}>
+                                                <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="Mekke">Mekke</SelectItem>
+                                                    <SelectItem value="Medine">Medine</SelectItem>
+                                                    <SelectItem value="Cidde">Cidde</SelectItem>
+                                                    <SelectItem value="Diğer">Diğer</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <Textarea
+                                                placeholder="Günün programı..."
+                                                value={day.description}
+                                                onChange={(e) => updateTourDay(index, 'description', e.target.value)}
+                                                className="min-h-[80px] text-sm resize-none focus:ring-purple-500"
+                                                maxLength={500}
+                                            />
+                                            <div className="text-[10px] text-right text-gray-400">{day.description.length}/500</div>
+                                        </div>
                                     </div>
-                                    <Button type="button" variant="ghost" size="icon" onClick={() => removeTourDay(index)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* Legal Consent */}
-                <div className="flex items-start space-x-2 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                    <Checkbox
-                        id="legalConsent"
-                        checked={formData.legalConsent}
-                        onCheckedChange={(c) => setFormData({ ...formData, legalConsent: c === true })}
-                    />
-                    <div className="grid gap-1.5 leading-none">
-                        <label
-                            htmlFor="legalConsent"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-blue-900"
-                        >
-                            Yasal Sorumluluk Beyanı
-                        </label>
-                        <p className="text-sm text-blue-700">
-                            Paylaştığım iletişim bilgilerinin ve tur detaylarının doğruluğundan tamamen sorumlu olduğumu, iletişim bilgilerimin ilanda görüntülenebileceğini kabul ediyorum.
-                        </p>
-                    </div>
-                </div>
-
-                <div className="flex justify-end gap-4 pt-4 border-t">
-                    <Button type="button" variant="outline" onClick={() => router.back()}>İptal</Button>
-                    <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700">
-                        {loading ? "Oluşturuluyor..." : "İlanı Onaya Gönder"}
-                    </Button>
                 </div>
 
             </form>

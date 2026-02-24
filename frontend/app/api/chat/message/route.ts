@@ -3,12 +3,19 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { containsProfanity } from "@/lib/bannedWords";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        // Global rate limit: 20 messages per minute per user
+        const rl = rateLimit(`msg:${session.user.id}`, 60_000, 20);
+        if (!rl.success) {
+            return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
         }
 
         // BANNED check

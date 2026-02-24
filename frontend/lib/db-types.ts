@@ -1,8 +1,22 @@
-// Type compatibility layer
-// Re-exports types for client components that previously imported from lib/db.ts
-// These match the shapes returned by API routes (not raw Prisma models)
+// ─── Type Compatibility Layer ───────────────────────────────────────────
+// Re-exports types for client components.
+// These match API response shapes (not raw Prisma models).
 
-export type GuidePackage = "FREEMIUM" | "PREMIUM" | "PROFESSIONAL" | "LEGEND";
+// ── Roles & Packages ────────────────────────────────────────────────────
+
+export type UserRole = "FREEMIUM" | "GUIDE" | "CORPORATE" | "ADMIN" | "BANNED";
+
+export type PackageType =
+    | "FREE" | "STARTER" | "PRO" | "LEGEND"
+    | "CORP_BASIC" | "CORP_PRO" | "CORP_ENTERPRISE";
+
+export type ListingType = "GUIDE_PROFILE" | "CORPORATE_TOUR";
+export type ListingStatus = "ACTIVE" | "EXPIRED" | "ARCHIVED" | "PENDING" | "REJECTED";
+export type DemandStatus = "OPEN" | "CLOSED" | "EXPIRED" | "DELETED";
+export type OfferStatus = "pending" | "accepted" | "rejected" | "expired";
+export type TokenType = "OFFER_SEND" | "DEMAND_UNLOCK" | "BOOST" | "REPUBLISH" | "PURCHASE" | "REFUND" | "ADMIN_GRANT" | "SUBSCRIPTION";
+
+// ── Data Interfaces ─────────────────────────────────────────────────────
 
 export interface Pricing {
     double: number;
@@ -18,13 +32,15 @@ export interface TourDay {
     description: string;
 }
 
-export interface GuideListing {
+export interface Listing {
     id: string;
-    guideId: string;
+    ownerId: string;
+    type: ListingType;
+    status: ListingStatus;
     title: string;
     description: string;
     city: string;
-    departureCity: string;
+    departureCity?: string | null;
     meetingCity?: string | null;
     extraServices: string[];
     hotelName?: string | null;
@@ -33,10 +49,11 @@ export interface GuideListing {
     price: number;
     quota: number;
     filled: number;
-    active: boolean;
     isFeatured?: boolean;
+    boostScore?: number;
     startDate: string;
     endDate: string;
+    expiresAt: string;
     totalDays: number;
     tourPlan?: TourDay[];
     approvalStatus: "PENDING" | "APPROVED" | "REJECTED";
@@ -46,50 +63,64 @@ export interface GuideListing {
     consentTimestamp?: string | null;
     image?: string | null;
     createdAt?: string;
+    guide?: UserProfile | null;
 }
 
-export interface UmrahRequest {
+export interface Demand {
     id: string;
-    userEmail: string;
+    createdBy: string;
     departureCity: string;
     peopleCount: number;
     dateRange: string;
-    roomType: "2-kisilik" | "3-kisilik" | "4-kisilik";
+    roomType: string;
     budget?: number | null;
     note?: string | null;
+    status: DemandStatus;
+    expiresAt: string;
     createdAt: string;
-    status: "open" | "closed";
 }
 
-export interface RequestInterest {
-    requestId: string;
-    guideEmail: string;
+export interface Offer {
+    id: string;
+    demandId: string;
+    guideId: string;
+    price: number;
+    currency: string;
+    message?: string | null;
+    status: OfferStatus;
+    expiresAt: string;
     createdAt: string;
+}
+
+export interface TokenTransaction {
+    id: string;
+    userId: string;
+    type: TokenType;
+    amount: number;
+    reason: string;
+    relatedId?: string | null;
+    createdAt: string;
+}
+
+export interface UserProfile {
+    id: string;
+    fullName?: string | null;
+    phone?: string | null;
+    city?: string | null;
+    bio?: string | null;
+    photo?: string | null;
+    isDiyanetVerified: boolean;
+    trustScore: number;
+    completedTrips: number;
+    role: UserRole;
+    packageType: PackageType;
+    tokenBalance: number;
 }
 
 export interface ChatMessage {
     id: string;
-    threadId: string;
-    senderRole: "USER" | "GUIDE" | "ORGANIZATION";
+    conversationId: string;
+    senderRole: "USER" | "GUIDE" | "CORPORATE";
     message: string;
     createdAt: string;
-}
-
-export interface GuideProfile {
-    userId: string;
-    fullName: string;
-    phone: string;
-    city: string;
-    bio?: string | null;
-    photo?: string | null;
-    isDiyanet?: boolean;
-    quotaTarget: number;
-    currentCount: number;
-    isApproved: boolean;
-    credits: number;
-    trustScore?: number;
-    completedTrips?: number;
-    package: GuidePackage;
-    packageExpiry?: string | null;
-    tokens: number;
 }

@@ -1,5 +1,5 @@
 // Prisma Schema for UmreBuldum Marketplace
-// MySQL provider — local development
+// MySQL provider — production-level redesign
 
 generator client {
   provider = "prisma-client-js"
@@ -13,33 +13,61 @@ datasource db {
 // ─── NextAuth Required Models ───────────────────────────────────────────
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  passwordHash  String?
-  role          String?   // "USER" | "GUIDE" | "ORGANIZATION" | "ADMIN" | "BANNED"
-  previousRole  String?   // Stored on ban for unban restoration
-  phone         String?
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String?   @unique
+  emailVerified      DateTime?
+  image              String?
+  passwordHash       String?
+  phone              String?
+
+  // ── Role & Package ──────────────────────────────────────────
+  role               String    @default("FREEMIUM") // "FREEMIUM" | "GUIDE" | "CORPORATE" | "ADMIN" | "BANNED"
+  previousRole       String?                        // Stored on ban for unban restoration
+  packageType        String    @default("FREE")     // "FREE" | "STARTER" | "PRO" | "LEGEND" | "CORP_BASIC" | "CORP_PRO" | "CORP_ENTERPRISE"
+  packageExpiry      DateTime?
+  tokenBalance       Int       @default(0)          // Cached ledger sum (source: TokenTransaction)
+
+  // ── Verification ───────────────────────────────────────────
+  isDiyanetVerified  Boolean   @default(false)
+  isApproved         Boolean   @default(false)
+  isVerified         Boolean   @default(false)
+  contactConsent     Boolean   @default(false)
   verificationCode   String?
   verificationExpiry DateTime?
-  isVerified    Boolean   @default(false)
-  contactConsent Boolean  @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
 
-  accounts          Account[]
-  sessions          Session[]
-  guideProfile      GuideProfile?
-  creditTransactions CreditTransaction[]
-  stripeTransactions Transaction[]
-  
-  // Chat Relations
-  guideConversations Conversation[] @relation("GuideConversations")
-  userConversations  Conversation[] @relation("UserConversations")
+  // ── Profile (ex-GuideProfile fields) ───────────────────────
+  fullName           String?
+  city               String?
+  bio                String?   @db.Text
+  photo              String?
+  trustScore         Int       @default(50)
+  completedTrips     Int       @default(0)
+
+  // ── Chat Mute ──────────────────────────────────────────────
+  isMuted            Boolean   @default(false)
+  mutedUntil         DateTime?
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // ── Relations ──────────────────────────────────────────────
+  accounts           Account[]
+  sessions           Session[]
+  listings           Listing[]
+  demands            Demand[]
+  offers             Offer[]
+  tokenTransactions  TokenTransaction[]
+  stripeTransactions StripeTransaction[]
+  guideConversations Conversation[]     @relation("GuideConversations")
+  userConversations  Conversation[]     @relation("UserConversations")
   messages           Message[]
+  diyanetApplications DiyanetApplication[]
+  reviewsReceived    Review[]           @relation("GuideReviews")
+  reviewsGiven       Review[]           @relation("UserReviews")
 
+  @@index([role])
+  @@index([role, packageType])
   @@map("users")
 }
 
@@ -83,43 +111,88 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-// ─── Business Models ────────────────────────────────────────────────────
+// ─── Core Business Models ───────────────────────────────────────────────
 
-model GuideProfile {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  fullName       String
-  phone          String   @default("")
-  city           String   @default("İstanbul")
-  bio            String?  @db.Text
-  photo          String?
-  isDiyanet      Boolean  @default(false)
-  quotaTarget    Int      @default(100)
-  currentCount   Int      @default(0)
-  isApproved     Boolean  @default(false)
-  credits        Int      @default(0)
-  trustScore     Int      @default(50)
-  completedTrips Int      @default(0)
-  package        String   @default("FREEMIUM") // "FREEMIUM" | "PREMIUM" | "PROFESSIONAL" | "LEGEND"
-  packageExpiry  DateTime?
-  tokens         Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+model Listing {
+  id              String    @id @default(cuid())
+  ownerId         String
+  type            String    // "GUIDE_PROFILE" | "CORPORATE_TOUR"
+  status          String    @default("ACTIVE") // "ACTIVE" | "EXPIRED" | "ARCHIVED" | "PENDING" | "REJECTED"
 
-  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  listings GuideListing[]
+  // ── Content ────────────────────────────────────────────────
+  title           String
+  description     String    @db.Text
+  city            String
+  departureCityId String?
+  departureCity   DepartureCity? @relation(fields: [departureCityId], references: [id])
+  meetingCity     String?
+  extraServices   Json      @default("[]")
+  hotelName       String?
+  airlineId       String?
+  airline         Airline?  @relation(fields: [airlineId], references: [id])
 
-  @@map("guide_profiles")
+  // ── Pricing ────────────────────────────────────────────────
+  pricingDouble   Float     @default(0)
+  pricingTriple   Float     @default(0)
+  pricingQuad     Float     @default(0)
+  pricingCurrency String    @default("SAR")
+  price           Float     @default(0)   // Computed min price for filtering
+
+  // ── Capacity ───────────────────────────────────────────────
+  quota           Int       @default(30)
+  filled          Int       @default(0)
+
+  // ── Timing ─────────────────────────────────────────────────
+  startDate       DateTime
+  endDate         DateTime
+  departureDateEnd DateTime?
+  returnDateEnd    DateTime?
+  totalDays       Int       @default(10)
+  expiresAt       DateTime                 // Auto-set: now() + PACKAGE_LIMITS[pkg].listingDays
+
+  // ── Boost ──────────────────────────────────────────────────
+  isFeatured      Boolean   @default(false)
+  featuredUntil   DateTime?
+  boostScore      Int       @default(0)    // Extra ranking points from BOOST token spend
+
+  // ── Moderation ─────────────────────────────────────────────
+  approvalStatus  String    @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
+  rejectionReason String?   @db.Text
+  urgencyTag      String?
+  legalConsent    Boolean   @default(false)
+  consentTimestamp DateTime?
+  image           String?
+
+  // ── Soft Delete ────────────────────────────────────────────
+  deletedAt       DateTime?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // ── Relations ──────────────────────────────────────────────
+  owner           User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  tourDays        TourDay[]
+
+  @@index([ownerId])
+  @@index([ownerId, status])                       // "Benim ilanlarım"
+  @@index([status, type])                          // Marketplace filter
+  @@index([status, type, expiresAt])               // Cron expiration with type
+  @@index([status, type, departureCityId])         // City filter
+  @@index([status, isFeatured, updatedAt])         // Sort ordering
+  @@index([expiresAt, status])                     // Cron query
+  @@index([featuredUntil])                         // Featured expire cron
+  @@index([price])                                 // Price filter
+  @@map("listings")
 }
 
-// ─── Reference Data Models ──────────────────────────────────────────────
+// ─── Reference Data ─────────────────────────────────────────────────────
 
 model DepartureCity {
   id        String   @id @default(cuid())
   name      String   @unique
   airport   String
   priority  Boolean  @default(false)
-  listings  GuideListing[]
+  listings  Listing[]
 
   @@map("departure_cities")
 }
@@ -128,169 +201,140 @@ model Airline {
   id               String   @id @default(cuid())
   name             String   @unique
   isCharterFriendly Boolean @default(false)
-  listings         GuideListing[]
+  listings         Listing[]
 
   @@map("airlines")
-}
-
-model GuideListing {
-  id              String   @id @default(cuid())
-  guideId         String
-  title           String
-  description     String   @db.Text
-  city            String   // Target city in SA
-  
-  departureCityId String?
-  departureCity   DepartureCity? @relation(fields: [departureCityId], references: [id])
-  
-  // Legacy string field (keeping for safety during migration, but should be deprecated)
-  departureCityOld String? @map("departureCity")
-
-  meetingCity     String?
-  extraServices   Json     @default("[]") // String[]
-  hotelName       String?
-  
-  airlineId       String?
-  airline         Airline? @relation(fields: [airlineId], references: [id])
-
-  // Legacy string field
-  airlineOld      String? @map("airline")
-  // Pricing fields (flattened from the Pricing object)
-  pricingDouble   Float    @default(0)
-  pricingTriple   Float    @default(0)
-  pricingQuad     Float    @default(0)
-  pricingCurrency String   @default("SAR")
-  price           Float    @default(0) // Legacy backward-compat lowest price
-  quota           Int      @default(30)
-  filled          Int      @default(0)
-  active          Boolean  @default(true)
-  deletedAt       DateTime? // Soft-delete for guides
-  isFeatured      Boolean  @default(false)
-  startDate       DateTime
-  departureDateEnd DateTime?
-  endDate         DateTime
-  returnDateEnd   DateTime?
-  totalDays       Int      @default(10)
-  approvalStatus  String   @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
-  rejectionReason String?  @db.Text
-  urgencyTag      String?
-  legalConsent    Boolean  @default(false)
-  consentTimestamp DateTime?
-  image           String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  guide    GuideProfile @relation(fields: [guideId], references: [userId], onDelete: Cascade)
-  tourDays TourDay[]
-
-  @@index([guideId])
-  @@index([approvalStatus, active])
-  @@map("guide_listings")
 }
 
 model TourDay {
   id          String @id @default(cuid())
   listingId   String
   day         Int
-  city        String // "Mekke" | "Medine" | "Cidde" | "Diğer"
+  city        String
   title       String @default("")
   description String @db.Text
 
-  listing GuideListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@index([listingId])
   @@map("tour_days")
 }
 
-model UmrahRequest {
-  id            String    @id @default(cuid())
-  userEmail     String
-  departureCity String
-  peopleCount   Int
-  dateRange     String
-  roomType      String    @default("4-kisilik") // "2-kisilik" | "3-kisilik" | "4-kisilik"
-  budget        Float?
-  note          String?   @db.Text
-  
-  // Contact Preferences
-  contactViaEmail Boolean @default(false)
-  contactViaPhone Boolean @default(false)
-  contactViaChat  Boolean @default(true)
+// ─── Demand (ex-UmrahRequest) ───────────────────────────────────────────
 
-  createdAt     DateTime  @default(now())
-  status        String    @default("open") // "open" | "closed" | "deleted"
-  deletedAt     DateTime? // Soft-delete timestamp
+model Demand {
+  id              String    @id @default(cuid())
+  createdBy       String
+  status          String    @default("OPEN") // "OPEN" | "CLOSED" | "EXPIRED" | "DELETED"
 
-  interests RequestInterest[]
-  favorites RequestFavorite[]
-  conversations Conversation[]
+  // ── Content ────────────────────────────────────────────────
+  departureCity   String
+  peopleCount     Int
+  dateRange       String
+  roomType        String    @default("4-kisilik")
+  budget          Float?
+  note            String?   @db.Text
 
-  @@index([userEmail])
+  // ── Contact Preferences ────────────────────────────────────
+  contactViaEmail Boolean   @default(false)
+  contactViaPhone Boolean   @default(false)
+  contactViaChat  Boolean   @default(true)
+
+  // ── Timing ─────────────────────────────────────────────────
+  expiresAt       DateTime                   // Auto-set: now() + 30 days
+  deletedAt       DateTime?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // ── Relations ──────────────────────────────────────────────
+  creator         User           @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  offers          Offer[]
+  favorites       DemandFavorite[]
+  conversations   Conversation[]
+  reviews         Review[]       @relation("DemandReviews")
+
+  @@index([createdBy])
   @@index([status])
-  @@map("umrah_requests")
+  @@index([status, createdAt])                    // Market sort
+  @@index([expiresAt, status])                    // Cron expiration
+  @@map("demands")
 }
 
-model RequestInterest {
-  id         String   @id @default(cuid())
-  requestId  String
-  guideEmail String
-  threadId   String?
-  createdAt  DateTime @default(now())
+model Offer {
+  id            String    @id @default(cuid())
+  demandId      String
+  guideId       String
+  price         Float
+  currency      String    @default("SAR")
+  message       String?   @db.Text
+  status        String    @default("pending")  // "pending" | "accepted" | "rejected" | "expired"
+  expiresAt     DateTime                       // 48 hours from creation
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  request UmrahRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  demand        Demand    @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  guide         User      @relation(fields: [guideId], references: [id], onDelete: Cascade)
 
-  @@unique([requestId, guideEmail])
-  @@index([guideEmail])
-  @@map("request_interests")
+  @@unique([guideId, demandId])                // 1 offer per guide per demand
+  @@index([demandId, status])                  // "Bu talebe gelen teklifler"
+  @@index([guideId, createdAt])                // "Gönderdiğim teklifler"
+  @@index([expiresAt, status])                 // Cron expiration
+  @@map("offers")
 }
 
-model RequestFavorite {
+model DemandFavorite {
   id        String   @id @default(cuid())
-  requestId String
-  userId    String   // The guide/org who favorited
+  demandId  String
+  userId    String
   createdAt DateTime @default(now())
 
-  request UmrahRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  demand Demand @relation(fields: [demandId], references: [id], onDelete: Cascade)
 
-  @@unique([requestId, userId])
-  @@map("request_favorites")
+  @@unique([demandId, userId])
+  @@map("demand_favorites")
 }
+
+// ─── Messaging ──────────────────────────────────────────────────────────
 
 model Conversation {
   id            String    @id @default(cuid())
-  requestId     String
+  demandId      String
   guideId       String
   userId        String
   createdAt     DateTime  @default(now())
   lastMessageAt DateTime  @default(now())
-  
-  // Relations
-  request       UmrahRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  guide         User         @relation("GuideConversations", fields: [guideId], references: [id], onDelete: Cascade)
-  user          User         @relation("UserConversations", fields: [userId], references: [id], onDelete: Cascade)
+
+  demand        Demand    @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  guide         User      @relation("GuideConversations", fields: [guideId], references: [id], onDelete: Cascade)
+  user          User      @relation("UserConversations", fields: [userId], references: [id], onDelete: Cascade)
   messages      Message[]
 
-  @@unique([requestId, guideId])
+  @@unique([demandId, guideId])
   @@index([userId])
   @@index([guideId])
+  @@index([lastMessageAt])
   @@map("conversations")
 }
 
 model Message {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   conversationId String
   senderId       String
-  role           String   // "USER" | "GUIDE" | "ORGANIZATION" | "ADMIN"
-  body           String   @db.Text
-  blocked        Boolean  @default(false)
-  createdAt      DateTime @default(now())
+  role           String    // "USER" | "GUIDE" | "CORPORATE" | "ADMIN"
+  body           String    @db.Text
+  blocked        Boolean   @default(false)
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
 
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
   moderationLogs ModerationLog[]
 
   @@index([conversationId])
+  @@index([conversationId, createdAt])         // Cursor pagination
   @@index([senderId])
+  @@index([senderId, createdAt])               // Daily rate-limit count
   @@map("messages")
 }
 
@@ -306,6 +350,44 @@ model ModerationLog {
   @@map("moderation_logs")
 }
 
+model ChatMuteLog {
+  id         String    @id @default(cuid())
+  adminId    String
+  userId     String
+  muted      Boolean
+  mutedUntil DateTime?
+  reason     String    @db.Text
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@index([adminId])
+  @@map("chat_mute_logs")
+}
+
+// ─── Token Economy ──────────────────────────────────────────────────────
+
+model TokenTransaction {
+  id             String   @id @default(cuid())
+  userId         String
+  type           String   // "OFFER_SEND" | "DEMAND_UNLOCK" | "BOOST" | "REPUBLISH" | "PURCHASE" | "REFUND" | "ADMIN_GRANT" | "SUBSCRIPTION"
+  amount         Int      // positive = grant, negative = spend
+  reason         String   @db.Text
+  relatedId      String?  // demandId, listingId, stripeSessionId
+  idempotencyKey String?  @unique
+  createdAt      DateTime @default(now())
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, createdAt])                    // Balance + history
+  @@index([userId, type])                         // "Bugün kaç teklif gönderdi?"
+  @@index([type, createdAt])                      // Audit by type
+  @@index([relatedId])                            // Idempotency lookups
+  @@map("token_transactions")
+}
+
+// ─── Payment ────────────────────────────────────────────────────────────
+
 model CreditPackage {
   id       String @id @default(cuid())
   name     String
@@ -315,48 +397,46 @@ model CreditPackage {
   @@map("credit_packages")
 }
 
-model Transaction {
-  id        String   @id @default(cuid())
+model StripeTransaction {
+  id        String    @id @default(cuid())
   userId    String
   role      String
   credits   Int
   amountTRY Float
-  provider  String   @default("stripe")
-  status    String   @default("pending") // "pending" | "completed"
-  sessionId String?  // Stripe Session ID
-  createdAt DateTime @default(now())
+  provider  String    @default("stripe")
+  status    String    @default("pending") // "pending" | "completed" | "refunded"
+  sessionId String?
+  refundedAt DateTime?
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([sessionId])
-  @@map("transactions")
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@unique([sessionId])
+  @@map("stripe_transactions")
 }
 
-// ─── Credit Ledger (Source of Truth) ────────────────────────────────────
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  eventId     String   @unique
+  eventType   String
+  processedAt DateTime @default(now())
+  status      String   @default("processed")
+  error       String?  @db.Text
 
-model CreditTransaction {
-  id        String   @id @default(cuid())
-  userId    String
-  amount    Int      // positive = purchase/refund/admin-grant, negative = spend
-  type      String   // "purchase" | "spend" | "refund" | "admin"
-  reason    String   @db.Text
-  relatedId String?  // listingId, requestId, stripeSessionId, etc.
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([type])
-  @@map("credit_transactions")
+  @@index([processedAt])
+  @@index([status])
+  @@map("webhook_events")
 }
 
-// ─── Admin Audit Log (Mandatory) ────────────────────────────────────────
+// ─── Admin ──────────────────────────────────────────────────────────────
 
 model AdminAuditLog {
   id        String   @id @default(cuid())
   adminId   String
-  action    String   // "approve_listing" | "reject_listing" | "adjust_credits" | "ban_user" | "delete_request"
+  action    String
   targetId  String
   reason    String   @db.Text
   metadata  Json?
@@ -364,5 +444,80 @@ model AdminAuditLog {
 
   @@index([adminId])
   @@index([targetId])
+  @@index([createdAt])
+  @@index([action])
   @@map("admin_audit_logs")
+}
+
+// ─── Diyanet Badge Verification ─────────────────────────────────────────
+
+model DiyanetApplication {
+  id              String    @id @default(cuid())
+  userId          String
+  status          String    @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED" | "REVOKED"
+
+  // ── Documents ──────────────────────────────────────────────
+  idDocumentUrl   String    @db.Text            // Kimlik fotoğrafı URL
+  certificateUrl  String    @db.Text            // Diyanet belgesi URL
+  contactEmail    String                        // İletişim e-postası
+  note            String?   @db.Text            // Başvuru notu
+
+  // ── Admin Review ───────────────────────────────────────────
+  reviewedBy      String?                       // Admin userId
+  reviewedAt      DateTime?
+  rejectionReason String?   @db.Text
+  revokedReason   String?   @db.Text
+
+  // ── Package Snapshot ───────────────────────────────────────
+  packageAtApply  String                        // Başvuru anındaki paket
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])                             // Admin: "Bekleyen başvurular"
+  @@index([status, createdAt])                  // Admin: sıralı liste
+  @@map("diyanet_applications")
+}
+
+// ─── Reviews ────────────────────────────────────────────────────────────
+
+model Review {
+  id                    String    @id @default(cuid())
+  guideId               String
+  reviewerUserId        String
+  requestId             String
+
+  ratingCommunication   Int
+  ratingKnowledge       Int
+  ratingOrganization    Int
+  ratingTimeManagement  Int
+  overallRating         Decimal   @db.Decimal(2, 1)
+
+  positiveTags          Json      @default("[]")
+  negativeTags          Json      @default("[]")
+  comment               String?   @db.VarChar(500)
+  status                String    @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
+  isVerified            Boolean   @default(true)
+
+  ipHash                String?
+  userAgentHash         String?
+
+  createdAt             DateTime  @default(now())
+  approvedAt            DateTime?
+  deletedAt             DateTime?
+
+  guide                 User      @relation("GuideReviews", fields: [guideId], references: [id], onDelete: Cascade)
+  reviewer              User      @relation("UserReviews", fields: [reviewerUserId], references: [id], onDelete: Cascade)
+  request               Demand    @relation("DemandReviews", fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, reviewerUserId])
+  @@index([guideId])
+  @@index([reviewerUserId])
+  @@index([requestId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("reviews")
 }

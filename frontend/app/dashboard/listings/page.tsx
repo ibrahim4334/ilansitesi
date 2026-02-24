@@ -7,6 +7,7 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { ListingList } from '@/components/dashboard/ListingCard';
 import { CreditBalance } from '@/components/guide-dashboard/credit-balance';
 import useSWR from 'swr';
+import { useSession } from 'next-auth/react';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -21,6 +22,7 @@ const tabs = [
 const MAX_FEATURED = 3;
 
 export default function ListingsPage() {
+    const { data: session } = useSession();
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -212,7 +214,7 @@ export default function ListingsPage() {
 
                 {/* Listings */}
                 {filteredListings.length > 0 ? (
-                    <ListingList listings={filteredListings} onAction={handleAction} />
+                    <ListingList listings={filteredListings} onAction={handleAction} guideImage={session?.user?.image} />
                 ) : (
                     <div className="bg-white rounded-xl border p-12 text-center">
                         <FileX className="w-12 h-12 text-gray-300 mx-auto mb-3" />

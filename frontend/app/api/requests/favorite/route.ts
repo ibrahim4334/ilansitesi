@@ -2,12 +2,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
-import { requireAuth } from '@/lib/api-guards';
+import { requireRole } from '@/lib/api-guards';
 
 export async function POST(req: Request) {
     const session = await auth();
-    const authErr = requireAuth(session);
+    // VULN-4 fix: only USERs can favorite requests
+    const authErr = requireRole(session, 'USER');
     if (authErr) return authErr;
+
+    // requireRole guarantees session is non-null, user.email is set
+    const userEmail = session!.user.email!;
 
     try {
         const { requestId } = await req.json();
@@ -17,7 +21,7 @@ export async function POST(req: Request) {
             where: {
                 requestId_userId: {
                     requestId,
-                    userId: session.user.email
+                    userId: userEmail
                 }
             }
         });
@@ -33,7 +37,7 @@ export async function POST(req: Request) {
             await prisma.requestFavorite.create({
                 data: {
                     requestId,
-                    userId: session.user.email
+                    userId: userEmail
                 }
             });
             return NextResponse.json({ favorited: true });
@@ -45,11 +49,15 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
     const session = await auth();
-    const authErr = requireAuth(session);
+    // VULN-4 fix: only USERs can read their own favorites
+    const authErr = requireRole(session, 'USER');
     if (authErr) return authErr;
 
+    // requireRole guarantees session is non-null, user.email is set
+    const userEmail = session!.user.email!;
+
     const favorites = await prisma.requestFavorite.findMany({
-        where: { userId: session.user.email },
+        where: { userId: userEmail },
         select: { requestId: true }
     });
 

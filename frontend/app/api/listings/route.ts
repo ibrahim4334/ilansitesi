@@ -4,6 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { PackageSystem } from "@/lib/package-system";
 import { requireSupply } from "@/lib/api-guards";
+import { rateLimit } from "@/lib/rate-limit";
+import { getRoleConfig } from "@/lib/role-config";
+import { safeErrorMessage } from "@/lib/safe-error";
+import { calculateListingScore } from "@/lib/listing-ranking";
+import type { GuidePackage } from "@/lib/db-types";
 
 export async function GET(req: Request) {
     try {
@@ -19,10 +24,12 @@ export async function GET(req: Request) {
 
         const now = new Date();
 
-        // Build where clause
+        // Build where clause — query-level expiration filter
         const where: any = {
-            active: true,
+            status: 'ACTIVE',
             approvalStatus: 'APPROVED',
+            deletedAt: null,
+            expiresAt: { gt: now },      // Only non-expired
             endDate: { gte: now }
         };
 
@@ -128,7 +135,8 @@ export async function GET(req: Request) {
                     fullName: profile.fullName,
                     city: profile.city,
                     bio: profile.bio,
-                    phone: profile.phone,
+                    // phone deliberately omitted from list view — exposed only on detail page
+                    // after PackageSystem.isPhoneVisible() check
                     isDiyanet: profile.isDiyanet,
                     photo: profile.photo,
                     trustScore: profile.trustScore || 50,
@@ -138,10 +146,32 @@ export async function GET(req: Request) {
             };
         });
 
-        return NextResponse.json(enrichedListings);
+        // Calculate ranking scores and sort
+        const scoredListings = enrichedListings.map(l => ({
+            ...l,
+            _score: calculateListingScore(
+                {
+                    isFeatured: l.isFeatured || false,
+                    featuredUntil: null, // raw data not included in enriched, handled by query sort
+                    updatedAt: new Date(l.createdAt || Date.now()),
+                    filled: l.filled || 0,
+                    quota: l.quota || 30,
+                },
+                {
+                    trustScore: l.guide?.trustScore || 50,
+                    completedTrips: l.guide?.completedTrips || 0,
+                    isDiyanet: l.guide?.isDiyanet || false,
+                    priorityRanking: l.guide?.package ? PackageSystem.getLimits(l.guide.package as GuidePackage).priorityRanking : false,
+                },
+            ),
+        }));
+
+        scoredListings.sort((a, b) => (b._score || 0) - (a._score || 0));
+
+        return NextResponse.json(scoredListings);
     } catch (error) {
         console.error("Fetch listings error:", error);
-        return NextResponse.json({ error: "Failed to fetch listings", details: String(error) }, { status: 500 });
+        return NextResponse.json({ error: safeErrorMessage(error, "Failed to fetch listings") }, { status: 500 });
     }
 }
 
@@ -174,6 +204,29 @@ export async function POST(req: Request) {
         // Validation
         if (!title || !departureCityId) return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         if (!legalConsent) return NextResponse.json({ error: "Yasal sorumluluk beyanı zorunludur." }, { status: 400 });
+
+        // Rate limit: 5 listings per 5 minutes
+        const rl = rateLimit(`listing:${session!.user.email}`, 300_000, 5);
+        if (!rl.success) {
+            return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+        }
+
+        // Bounds validation
+        if (pricing?.double && (pricing.double < 0 || pricing.double > 1_000_000)) {
+            return NextResponse.json({ error: "Invalid price range" }, { status: 400 });
+        }
+        if (pricing?.triple && (pricing.triple < 0 || pricing.triple > 1_000_000)) {
+            return NextResponse.json({ error: "Invalid price range" }, { status: 400 });
+        }
+        if (pricing?.quad && (pricing.quad < 0 || pricing.quad > 1_000_000)) {
+            return NextResponse.json({ error: "Invalid price range" }, { status: 400 });
+        }
+        if (quota && (parseInt(quota) < 1 || parseInt(quota) > 500)) {
+            return NextResponse.json({ error: "Invalid quota (1-500)" }, { status: 400 });
+        }
+        if (totalDays && (parseInt(totalDays) < 1 || parseInt(totalDays) > 60)) {
+            return NextResponse.json({ error: "Invalid totalDays (1-60)" }, { status: 400 });
+        }
 
         const user = await prisma.user.findUnique({
             where: { email: session!.user.email! }
@@ -209,6 +262,16 @@ export async function POST(req: Request) {
         const currentListingsCount = await prisma.guideListing.count({
             where: { guideId: user.id, active: true }
         });
+        // Check ROLE_CONFIG cap (hard architectural limit)
+        const roleConfig = getRoleConfig(session!.user.role);
+        if (currentListingsCount >= roleConfig.maxActiveListings) {
+            return NextResponse.json({
+                error: "Listing limit reached",
+                message: `Rolünüz için maksimum ${roleConfig.maxActiveListings} aktif ilan oluşturabilirsiniz.`,
+                code: "ROLE_LIMIT_REACHED"
+            }, { status: 403 });
+        }
+        // Check package limits (business layer — may be more restrictive)
         if (!PackageSystem.canCreateListing(profile, currentListingsCount)) {
             return NextResponse.json({
                 error: "Limit Reached",
@@ -257,6 +320,13 @@ export async function POST(req: Request) {
                 endDate: endDate ? new Date(endDate) : new Date(Date.now() + 86400000 * 10),
                 returnDateEnd: body.returnDateEnd ? new Date(body.returnDateEnd) : null,
                 totalDays: totalDays ? parseInt(totalDays) : 10,
+                // Auto-set expiration based on package
+                expiresAt: (() => {
+                    const days = PackageSystem.getListingDuration(profile.package as GuidePackage);
+                    const exp = new Date();
+                    exp.setDate(exp.getDate() + days);
+                    return exp;
+                })(),
                 approvalStatus: 'PENDING',
                 urgencyTag: urgencyTag || null,
                 legalConsent: !!legalConsent,
@@ -304,6 +374,6 @@ export async function POST(req: Request) {
 
     } catch (error) {
         console.error("Create listing error:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: safeErrorMessage(error) }, { status: 500 });
     }
 }

@@ -19,7 +19,7 @@ export default auth((req) => {
 
     const publicRoutes = [
         "/", "/login", "/register", "/about", "/contact", "/faq",
-        "/terms", "/privacy", "/help", "/api/dev-login-link",
+        "/terms", "/privacy", "/help",
         "/auth/verify"
     ];
     const isPublicRoute = publicRoutes.includes(nextUrl.pathname);

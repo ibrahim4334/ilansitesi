@@ -30,6 +30,7 @@ export default function CreditManagementPanel() {
     const [adjustAmount, setAdjustAmount] = useState('');
     const [adjustReason, setAdjustReason] = useState('');
     const [adjusting, setAdjusting] = useState(false);
+    const [refunding, setRefunding] = useState<string | null>(null);
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     const shouldFetch = searchedEmail.length > 0;
@@ -72,6 +73,27 @@ export default function CreditManagementPanel() {
             setFeedback({ type: 'error', message: err.message });
         } finally {
             setAdjusting(false);
+        }
+    }
+
+    async function handleRefund(tx: CreditTx) {
+        if (!confirm('Bu işlemi iptal edip ücret iadesi yapmak istediğinize emin misiniz?')) return;
+        setRefunding(tx.id);
+        setFeedback(null);
+        try {
+            const res = await fetch('/api/admin/refund', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transactionId: tx.id, reason: 'Admin manuel iade' }),
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || 'İade başarısız');
+            setFeedback({ type: 'success', message: result.message });
+            mutate();
+        } catch (err: any) {
+            setFeedback({ type: 'error', message: err.message });
+        } finally {
+            setRefunding(null);
         }
     }
 
@@ -207,6 +229,7 @@ export default function CreditManagementPanel() {
                                             <th className="px-4 py-3 text-left font-medium">Tip</th>
                                             <th className="px-4 py-3 text-left font-medium">Miktar</th>
                                             <th className="px-4 py-3 text-left font-medium">Sebep</th>
+                                            <th className="px-4 py-3 text-right font-medium">İşlem</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-800">
@@ -229,6 +252,17 @@ export default function CreditManagementPanel() {
                                                 </td>
                                                 <td className="px-4 py-3 text-gray-400 text-xs max-w-xs truncate">
                                                     {tx.reason}
+                                                </td>
+                                                <td className="px-4 py-3 text-right">
+                                                    {tx.type === 'spend' && (
+                                                        <button
+                                                            onClick={() => handleRefund(tx)}
+                                                            disabled={refunding === tx.id}
+                                                            className="text-xs px-2 py-1 bg-red-600/20 hover:bg-red-600/40 text-red-400 rounded transition whitespace-nowrap"
+                                                        >
+                                                            {refunding === tx.id ? 'İade ediliyor...' : 'İade Et'}
+                                                        </button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}

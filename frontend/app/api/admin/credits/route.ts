@@ -45,6 +45,8 @@ export async function GET(req: Request) {
                 role: user.role,
                 guideName: user.guideProfile?.fullName,
                 package: user.guideProfile?.package,
+                isMuted: user.isMuted,
+                mutedUntil: user.mutedUntil,
             },
             balance,
             transactions,

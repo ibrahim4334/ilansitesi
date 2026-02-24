@@ -39,25 +39,6 @@ export default function UserRequestsPage() {
     const activeCount = requests.filter(r => r.status === 'open').length;
     const limitReached = activeCount >= MAX_ACTIVE_REQUESTS;
 
-    const handleClose = async (requestId: string) => {
-        if (!confirm("Talebi kapatmak istediğinize emin misiniz?")) return;
-        try {
-            const res = await fetch(`/api/requests/${requestId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'closed' })
-            });
-            if (res.ok) {
-                setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'closed' } : r));
-                toast.success("Talep kapatıldı");
-            } else {
-                const data = await res.json();
-                toast.error(data.error || "Bir hata oluştu");
-            }
-        } catch (e) {
-            toast.error("Hata oluştu");
-        }
-    };
 
     const handleDelete = async (requestId: string) => {
         if (!confirm("Talebi silmek istediğinize emin misiniz?")) return;
@@ -135,8 +116,8 @@ export default function UserRequestsPage() {
                                     <div className="flex items-center gap-2 mb-1">
                                         <h3 className="font-bold text-lg text-gray-900">{req.departureCity} Çıkışlı</h3>
                                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${req.status === 'open' ? 'bg-green-100 text-green-700' :
-                                                req.status === 'closed' ? 'bg-gray-100 text-gray-600' :
-                                                    'bg-red-100 text-red-600'
+                                            req.status === 'closed' ? 'bg-gray-100 text-gray-600' :
+                                                'bg-red-100 text-red-600'
                                             }`}>
                                             {req.status === 'open' ? 'Aktif' : req.status === 'closed' ? 'Kapalı' : 'Silindi'}
                                         </span>
@@ -176,19 +157,9 @@ export default function UserRequestsPage() {
 
                             <div className="mt-4 pt-4 border-t flex justify-end gap-2">
                                 {req.status === 'open' && (
-                                    <>
-                                        <Link href={`/dashboard/requests/${req.id}/edit`}>
-                                            <Button variant="outline" size="sm">Düzenle</Button>
-                                        </Link>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleClose(req.id)}
-                                        >
-                                            <X className="w-3 h-3 mr-1" />
-                                            Kapat
-                                        </Button>
-                                    </>
+                                    <Link href={`/dashboard/requests/${req.id}/edit`}>
+                                        <Button variant="outline" size="sm">Düzenle</Button>
+                                    </Link>
                                 )}
                                 <Button
                                     variant="destructive"

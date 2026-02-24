@@ -1,7 +1,10 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { requireAuth } from "@/lib/api-guards"
 import { TokenService } from "@/lib/token-service"
+import { getRoleConfig } from "@/lib/role-config"
+import { safeErrorMessage } from "@/lib/safe-error"
 
 /**
  * POST /api/choose-role
@@ -10,9 +13,8 @@ import { TokenService } from "@/lib/token-service"
  */
 export async function POST(req: Request) {
     const session = await auth()
-    if (!session?.user?.email) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const guard = requireAuth(session)
+    if (guard) return guard
 
     try {
         const { role } = await req.json()
@@ -21,9 +23,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid role" }, { status: 400 })
         }
 
-        // Find the user
+        // Find the user — email guaranteed non-null after requireAuth
         const user = await prisma.user.findUnique({
-            where: { email: session.user.email }
+            where: { email: session!.user.email! }
         })
 
         if (!user) {
@@ -36,7 +38,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true, role: user.role })
         }
 
-        // Update role in a transaction (with profile creation for GUIDE/ORG)
+        // Step 1: Set role + create profile in one transaction
         await prisma.$transaction(async (tx) => {
             await tx.user.update({
                 where: { id: user.id },
@@ -58,28 +60,32 @@ export async function POST(req: Request) {
                             quotaTarget: 100,
                             currentCount: 0,
                             isApproved: false,
-                            credits: 30,
+                            credits: 0, // TokenService will set the real value
                             package: "FREEMIUM",
                             tokens: 0
-                        }
-                    })
-
-                    await tx.creditTransaction.create({
-                        data: {
-                            userId: user.id,
-                            amount: 30,
-                            type: "admin",
-                            reason: "Initial signup credits",
                         }
                     })
                 }
             }
         })
 
+        // Step 2: Grant onboarding bonus via TokenService (idempotent)
+        const config = getRoleConfig(role)
+        if (config.onboardingBonus > 0) {
+            await TokenService.grantCredits(
+                user.id,
+                config.onboardingBonus,
+                "admin",
+                "Initial signup credits",
+                undefined,
+                `onboarding:${user.id}` // idempotent — safe on retry
+            )
+        }
+
         return NextResponse.json({ success: true, role })
 
     } catch (error) {
         console.error("Choose Role Error:", error)
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+        return NextResponse.json({ error: safeErrorMessage(error) }, { status: 500 })
     }
 }

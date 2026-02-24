@@ -3,9 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Search, MapPin, Calendar, Check, CreditCard, Building, BadgeCheck } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -13,27 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { DatePickerWithRange } from "@/components/ui/date-range-picker";
-import { DateRange } from "react-day-picker";
-
-const ROOM_TYPES = [
-  { id: "2-kisilik", label: "2 Kişilik Oda" },
-  { id: "3-kisilik", label: "3 Kişilik Oda" },
-  { id: "4-kisilik", label: "4 Kişilik Oda" },
-];
+import { DatePicker } from "@/components/ui/date-picker";
 
 export function HeroSection() {
   const router = useRouter();
   const { data: session } = useSession();
   const [cities, setCities] = useState<any[]>([]);
   const [city, setCity] = useState("");
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [roomType, setRoomType] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [isDiyanet, setIsDiyanet] = useState(false);
+  const [date, setDate] = useState<Date | undefined>();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -50,19 +37,14 @@ export function HeroSection() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
-    if (city && city !== "all") params.set("departureCity", city); // city is now ID
+    if (city && city !== "all") params.set("departureCity", city);
 
-    if (dateRange?.from) {
-      params.set("minDate", dateRange.from.toISOString().split('T')[0]);
+    if (date) {
+      // Add timezone offset correction or just use YYYY-MM-DD
+      // Using locale string to strict YYYY-MM-DD format to avoid TZ issues
+      const offsetDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+      params.set("date", offsetDate.toISOString().split('T')[0]);
     }
-    if (dateRange?.to) {
-      params.set("maxDate", dateRange.to.toISOString().split('T')[0]);
-    }
-
-    if (roomType) params.set("roomType", roomType);
-    if (minPrice) params.set("minPrice", minPrice);
-    if (maxPrice) params.set("maxPrice", maxPrice);
-    if (isDiyanet) params.set("isDiyanet", "true");
 
     router.push(`/tours${params.toString() ? `?${params.toString()}` : ""}`);
   };
@@ -116,11 +98,11 @@ export function HeroSection() {
         {mounted ? (
           <form
             onSubmit={handleSearch}
-            className="mx-auto max-w-6xl rounded-3xl bg-white p-6 shadow-2xl backdrop-blur-sm/90"
+            className="mx-auto max-w-4xl rounded-3xl bg-white p-6 shadow-2xl backdrop-blur-sm/90"
           >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-              {/* Departure City (3 cols) */}
-              <div className="md:col-span-3">
+              {/* Departure City (5 cols) */}
+              <div className="md:col-span-5">
                 <Label className="text-xs text-gray-500 font-medium ml-1 mb-1.5 block">Kalkış Yeri</Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 h-5 w-5 top-1/2 -translate-y-1/2 text-gray-400 z-10 pointer-events-none" />
@@ -140,42 +122,16 @@ export function HeroSection() {
                 </div>
               </div>
 
-              {/* Date (3 cols) */}
-              <div className="md:col-span-3">
-                <Label className="text-xs text-gray-500 font-medium ml-1 mb-1.5 block">Tarih Aralığı</Label>
+              {/* Date (5 cols) */}
+              <div className="md:col-span-5">
+                <Label className="text-xs text-gray-500 font-medium ml-1 mb-1.5 block">Tarih</Label>
                 <div className="relative">
-                  <DatePickerWithRange
-                    className="w-full"
-                    date={dateRange}
-                    setDate={setDateRange}
+                  <DatePicker
+                    className="w-full h-12 bg-gray-50 border-gray-200"
+                    date={date}
+                    setDate={setDate}
+                    placeholder="Gidiş Tarihi"
                   />
-                </div>
-              </div>
-
-              {/* Budget / Price (4 cols) */}
-              <div className="md:col-span-4">
-                <Label className="text-xs text-gray-500 font-medium ml-1 mb-1.5 block">Bütçe Aralığı (SAR)</Label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Min</span>
-                    <Input
-                      type="number"
-                      placeholder="SAR"
-                      value={minPrice}
-                      onChange={e => setMinPrice(e.target.value)}
-                      className="h-12 pl-10 bg-gray-50 border-gray-200"
-                    />
-                  </div>
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Max</span>
-                    <Input
-                      type="number"
-                      placeholder="SAR"
-                      value={maxPrice}
-                      onChange={e => setMaxPrice(e.target.value)}
-                      className="h-12 pl-10 bg-gray-50 border-gray-200"
-                    />
-                  </div>
                 </div>
               </div>
 

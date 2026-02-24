@@ -2,14 +2,16 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { requireAuth, requireSupply } from "@/lib/api-guards";
+import { requireSupply } from "@/lib/api-guards";
 
 export async function GET(req: Request) {
     try {
         const session = await auth();
-        const authErr = requireAuth(session);
+        // VULN-7 fix: GuideProfile data is only for GUIDE/ORG — USERs have no profile to read
+        const authErr = requireSupply(session);
         if (authErr) return authErr;
 
+        // email guaranteed non-null after requireSupply guard
         const user = await prisma.user.findUnique({
             where: { email: session!.user.email! }
         });
@@ -21,7 +23,7 @@ export async function GET(req: Request) {
             update: {},
             create: {
                 userId: user.id,
-                fullName: session.user.name || "",
+                fullName: session!.user.name || "",
                 phone: "",
                 city: "",
                 bio: "",
@@ -50,8 +52,9 @@ export async function PUT(req: Request) {
 
         const body = await req.json();
 
+        // email guaranteed non-null after requireSupply guard
         const user = await prisma.user.findUnique({
-            where: { email: session.user.email }
+            where: { email: session!.user.email! }
         });
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
@@ -67,7 +70,7 @@ export async function PUT(req: Request) {
             },
             create: {
                 userId: user.id,
-                fullName: body.fullName || session.user.name || "",
+                fullName: body.fullName || session!.user.name || "",
                 phone: body.phone || "",
                 city: body.city || "",
                 bio: body.bio || "",

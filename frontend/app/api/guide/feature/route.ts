@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireSupply } from "@/lib/api-guards";
 import { TokenService } from "@/lib/token-service";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
     try {
@@ -12,6 +13,12 @@ export async function POST(req: Request) {
 
         const { listingId } = await req.json();
         if (!listingId) return NextResponse.json({ error: "Missing listingId" }, { status: 400 });
+
+        // Rate limit: 3 feature requests per minute
+        const rl = rateLimit(`feature:${session!.user.email}`, 60_000, 3);
+        if (!rl.success) {
+            return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+        }
 
         const user = await prisma.user.findUnique({
             where: { email: session!.user.email! }
@@ -49,32 +56,83 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Only approved listings can be featured" }, { status: 400 });
         }
 
-        // ─── Deduct credits atomically (balance check inside $transaction) ───
+        // ─── Atomic: deduct credits AND set isFeatured in single transaction ───
         const cost = TokenService.COST_FEATURE;
-        const deductResult = await TokenService.deductCredits(
-            user.id,
-            cost,
-            `Feature listing: ${listing.title}`,
-            listingId
-        );
+        const idempotencyKey = `feature:${user.id}:${listingId}`;
+        try {
+            const newBalance = await prisma.$transaction(async (tx) => {
+                // (1) Idempotency check — if already processed, return cached balance
+                const existingLedger = await tx.creditTransaction.findUnique({
+                    where: { idempotencyKey }
+                });
+                if (existingLedger) {
+                    const bal = await tx.creditTransaction.aggregate({
+                        where: { userId: user.id },
+                        _sum: { amount: true }
+                    });
+                    return bal._sum.amount || 0;
+                }
 
-        if (!deductResult.success) {
+                // (2) Row-level lock to prevent concurrent double-spend
+                const [balanceRow] = await tx.$queryRaw<[{ balance: number }]>`
+                    SELECT COALESCE(SUM(amount), 0) AS balance
+                    FROM credit_transactions
+                    WHERE userId = ${user.id}
+                    FOR UPDATE
+                `;
+                const currentBalance = Number(balanceRow.balance);
+
+                // (3) Strict non-negative guard
+                if (currentBalance - cost < 0) {
+                    throw new Error('INSUFFICIENT_CREDITS');
+                }
+
+                // (4) Write deduction to ledger
+                await tx.creditTransaction.create({
+                    data: {
+                        userId: user.id,
+                        amount: -cost,
+                        type: "spend",
+                        reason: `Feature listing: ${listing.title}`,
+                        relatedId: listingId,
+                        idempotencyKey,
+                    }
+                });
+
+                // (5) Update GuideProfile cache
+                const updated = await tx.guideProfile.update({
+                    where: { userId: user.id },
+                    data: { credits: { decrement: cost } }
+                });
+
+                // (6) Feature the listing inside the same transaction
+                await tx.guideListing.update({
+                    where: { id: listingId },
+                    data: { isFeatured: true }
+                });
+
+                return Math.max(0, updated.credits);
+            }, {
+                isolationLevel: 'Serializable',
+                timeout: 10000,
+            });
+
             return NextResponse.json({
-                error: "INSUFFICIENT_CREDITS",
-                message: "Yetersiz Kredi",
-                balance: deductResult.newBalance
-            }, { status: 402 });
+                message: "Listing featured successfully",
+                credits: newBalance
+            }, { status: 200 });
+
+        } catch (error: any) {
+            if (error.message === 'INSUFFICIENT_CREDITS') {
+                const balance = await TokenService.getBalance(user.id);
+                return NextResponse.json({
+                    error: "INSUFFICIENT_CREDITS",
+                    message: "Yetersiz Kredi",
+                    balance
+                }, { status: 402 });
+            }
+            throw error;
         }
-
-        await prisma.guideListing.update({
-            where: { id: listingId },
-            data: { isFeatured: true }
-        });
-
-        return NextResponse.json({
-            message: "Listing featured successfully",
-            credits: deductResult.newBalance
-        }, { status: 200 });
 
     } catch (error) {
         console.error("Feature listing error:", error);

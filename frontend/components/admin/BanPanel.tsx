@@ -5,12 +5,16 @@ import { Search, Ban as BanIcon, Loader2, AlertTriangle, ShieldAlert } from 'luc
 
 export default function BanPanel() {
     const [searchEmail, setSearchEmail] = useState('');
-    const [user, setUser] = useState<{ id: string; name: string | null; email: string; role: string | null } | null>(null);
+    const [user, setUser] = useState<{ id: string; name: string | null; email: string; role: string | null; isMuted?: boolean; mutedUntil?: string | null } | null>(null);
     const [searching, setSearching] = useState(false);
     const [searchError, setSearchError] = useState('');
     const [banReason, setBanReason] = useState('');
     const [banning, setBanning] = useState(false);
     const [banModal, setBanModal] = useState(false);
+    const [muteModal, setMuteModal] = useState(false);
+    const [muteReason, setMuteReason] = useState('');
+    const [muteDuration, setMuteDuration] = useState('24h');
+    const [muting, setMuting] = useState(false);
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     async function handleSearch(e: React.FormEvent) {
@@ -52,6 +56,47 @@ export default function BanPanel() {
             setFeedback({ type: 'error', message: err.message });
         } finally {
             setBanning(false);
+        }
+    }
+
+    async function handleMute(isUnmute = false) {
+        if (!user || (!isUnmute && !muteReason.trim())) return;
+        setMuting(true);
+        setFeedback(null);
+        try {
+            if (isUnmute) {
+                const res = await fetch('/api/admin/mute', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id, reason: 'Admin unmuted' }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Unmute işlemi başarısız');
+                setFeedback({ type: 'success', message: `${user.email} kullanıcısının susturulması kaldırıldı.` });
+                setUser({ ...user, isMuted: false, mutedUntil: null });
+            } else {
+                let mutedUntil;
+                if (muteDuration === '24h') {
+                    const d = new Date();
+                    d.setHours(d.getHours() + 24);
+                    mutedUntil = d.toISOString();
+                }
+                const res = await fetch('/api/admin/mute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id, reason: muteReason.trim(), mutedUntil }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Mute işlemi başarısız');
+                setFeedback({ type: 'success', message: `${user.email} kullanıcısı susturuldu.` });
+                setMuteModal(false);
+                setMuteReason('');
+                setUser({ ...user, isMuted: true, mutedUntil });
+            }
+        } catch (err: any) {
+            setFeedback({ type: 'error', message: err.message });
+        } finally {
+            setMuting(false);
         }
     }
 
@@ -105,13 +150,31 @@ export default function BanPanel() {
                             </span>
                         </div>
                         {user.role !== 'BANNED' && user.role !== 'ADMIN' ? (
-                            <button
-                                onClick={() => setBanModal(true)}
-                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
-                            >
-                                <BanIcon className="w-4 h-4" />
-                                Banla
-                            </button>
+                            <div className="flex gap-2">
+                                {user.isMuted ? (
+                                    <button
+                                        onClick={() => handleMute(true)}
+                                        disabled={muting}
+                                        className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+                                    >
+                                        {muting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Susturmayı Kaldır'}
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setMuteModal(true)}
+                                        className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors"
+                                    >
+                                        Sustur
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => setBanModal(true)}
+                                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
+                                >
+                                    <BanIcon className="w-4 h-4" />
+                                    Banla
+                                </button>
+                            </div>
                         ) : user.role === 'BANNED' ? (
                             <span className="px-4 py-2 bg-red-500/10 text-red-400 rounded-lg text-sm font-medium">
                                 Zaten Banlı
@@ -171,6 +234,67 @@ export default function BanPanel() {
                             >
                                 {banning && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                                 Banla
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Mute Modal */}
+            {muteModal && user && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/70" onClick={() => { setMuteModal(false); setMuteReason(''); }} />
+                    <div className="relative bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 bg-orange-500/10 rounded-full flex items-center justify-center">
+                                <AlertTriangle className="w-5 h-5 text-orange-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white">Kullanıcıyı Sustur</h3>
+                                <p className="text-sm text-gray-400">{user.email}</p>
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                                    Süre
+                                </label>
+                                <select
+                                    value={muteDuration}
+                                    onChange={(e) => setMuteDuration(e.target.value)}
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                                >
+                                    <option value="24h">24 Saat (Geçici)</option>
+                                    <option value="permanent">Kalıcı</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                                    Sebep <span className="text-red-400">*</span>
+                                </label>
+                                <textarea
+                                    value={muteReason}
+                                    onChange={(e) => setMuteReason(e.target.value)}
+                                    placeholder="Susturma sebebini yazınız..."
+                                    rows={3}
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-2 mt-6">
+                            <button
+                                onClick={() => { setMuteModal(false); setMuteReason(''); }}
+                                className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 transition-colors"
+                            >
+                                İptal
+                            </button>
+                            <button
+                                onClick={() => handleMute(false)}
+                                disabled={!muteReason.trim() || muting}
+                                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-600/50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
+                            >
+                                {muting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                                Sustur
                             </button>
                         </div>
                     </div>

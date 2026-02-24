@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { withSerializableRetry } from "./with-retry";
 
 // ─── Credit Economy Constants ───────────────────────────────────────────
 
@@ -26,30 +27,55 @@ export class TokenService {
     }
 
     /**
-     * Deduct credits atomically:
-     * Balance check AND deduction happen inside the SAME $transaction.
-     * Uses ledger SUM (source of truth), NOT cache.
+     * Deduct credits atomically and idempotently.
+     *
+     * Safety guarantees:
+     * 1. Idempotency: if `idempotencyKey` was already used, return success with no-op.
+     * 2. Row-level lock: uses SELECT SUM ... FOR UPDATE to lock all rows for this userId,
+     *    preventing concurrent transactions from reading stale balances.
+     * 3. Strict non-negative balance: rejects if balance - cost < 0.
+     * 4. All writes (ledger + cache) happen inside a single $transaction.
      */
     static async deductCredits(
         userId: string,
         cost: number,
         reason: string,
-        relatedId?: string
-    ): Promise<{ success: boolean; newBalance: number }> {
+        relatedId?: string,
+        idempotencyKey?: string
+    ): Promise<{ success: boolean; newBalance: number; idempotent?: boolean }> {
         try {
-            const result = await prisma.$transaction(async (tx) => {
-                // 1. Check balance from ledger INSIDE transaction
-                const balanceResult = await tx.creditTransaction.aggregate({
-                    where: { userId },
-                    _sum: { amount: true }
-                });
-                const currentBalance = balanceResult._sum.amount || 0;
+            const result = await withSerializableRetry(() => prisma.$transaction(async (tx) => {
+                // ── (1) Idempotency check: if key exists, return cached result ──
+                if (idempotencyKey) {
+                    const existing = await tx.creditTransaction.findUnique({
+                        where: { idempotencyKey }
+                    });
+                    if (existing) {
+                        // Already processed — compute current balance and return
+                        const bal = await tx.creditTransaction.aggregate({
+                            where: { userId },
+                            _sum: { amount: true }
+                        });
+                        return { newBalance: bal._sum.amount || 0, idempotent: true };
+                    }
+                }
 
-                if (currentBalance < cost) {
+                // ── (2) Row-level lock via raw SQL (MySQL SELECT FOR UPDATE) ──
+                // This prevents parallel transactions from reading the same pre-deduction balance.
+                const [balanceRow] = await tx.$queryRaw<[{ balance: number }]>`
+                    SELECT COALESCE(SUM(amount), 0) AS balance
+                    FROM credit_transactions
+                    WHERE userId = ${userId}
+                    FOR UPDATE
+                `;
+                const currentBalance = Number(balanceRow.balance);
+
+                // ── (3) Strict non-negative guard ──
+                if (currentBalance - cost < 0) {
                     throw new Error('INSUFFICIENT_CREDITS');
                 }
 
-                // 2. Write to ledger (source of truth)
+                // ── (4) Write to ledger ──
                 await tx.creditTransaction.create({
                     data: {
                         userId,
@@ -57,24 +83,44 @@ export class TokenService {
                         type: "spend",
                         reason,
                         relatedId: relatedId || null,
+                        idempotencyKey: idempotencyKey || null,
                     }
                 });
 
-                // 3. Update cache on GuideProfile
+                // ── (5) Update GuideProfile cache ──
                 const updatedProfile = await tx.guideProfile.update({
                     where: { userId },
                     data: { credits: { decrement: cost } }
                 });
 
-                return updatedProfile.credits;
-            });
+                // ── (6) Safety: ensure cache never goes below 0 ──
+                if (updatedProfile.credits < 0) {
+                    await tx.guideProfile.update({
+                        where: { userId },
+                        data: { credits: 0 }
+                    });
+                    return { newBalance: 0, idempotent: false };
+                }
 
-            console.log(`[CreditService] Deducted ${cost} from ${userId}: ${reason}. New balance: ${result}`);
-            return { success: true, newBalance: result };
+                return { newBalance: updatedProfile.credits, idempotent: false };
+            }, {
+                // Use SERIALIZABLE isolation for maximum safety in concurrent deduction scenarios
+                isolationLevel: 'Serializable',
+                timeout: 10000,
+            }));
+
+            console.log(`[CreditService] Deducted ${cost} from ${userId}: ${reason}. New balance: ${result.newBalance}${result.idempotent ? ' (idempotent no-op)' : ''}`);
+            return { success: true, newBalance: result.newBalance, idempotent: result.idempotent };
+
         } catch (error: any) {
             if (error.message === 'INSUFFICIENT_CREDITS') {
                 const balance = await this.getBalance(userId);
                 return { success: false, newBalance: balance };
+            }
+            // P2002 = unique constraint violation → idempotency key collision (parallel race both passed check)
+            if (error.code === 'P2002') {
+                const balance = await this.getBalance(userId);
+                return { success: true, newBalance: balance, idempotent: true };
             }
             throw error;
         }
@@ -90,21 +136,37 @@ export class TokenService {
         amount: number,
         type: "purchase" | "refund" | "admin",
         reason: string,
-        relatedId?: string
+        relatedId?: string,
+        idempotencyKey?: string
     ): Promise<number> {
-        const result = await prisma.$transaction(async (tx) => {
-            // 1. Write to ledger
+        const result = await withSerializableRetry(() => prisma.$transaction(async (tx) => {
+            // Idempotency check
+            if (idempotencyKey) {
+                const existing = await tx.creditTransaction.findUnique({
+                    where: { idempotencyKey }
+                });
+                if (existing) {
+                    const bal = await tx.creditTransaction.aggregate({
+                        where: { userId },
+                        _sum: { amount: true }
+                    });
+                    return bal._sum.amount || 0;
+                }
+            }
+
+            // Write to ledger
             await tx.creditTransaction.create({
                 data: {
                     userId,
-                    amount, // positive
+                    amount,
                     type,
                     reason,
                     relatedId: relatedId || null,
+                    idempotencyKey: idempotencyKey || null,
                 }
             });
 
-            // 2. Update cache
+            // Update cache
             const updatedProfile = await tx.guideProfile.upsert({
                 where: { userId },
                 update: { credits: { increment: amount } },
@@ -120,7 +182,7 @@ export class TokenService {
             });
 
             return updatedProfile.credits;
-        });
+        }));
 
         console.log(`[CreditService] Granted ${amount} to ${userId} (${type}): ${reason}. New balance: ${result}`);
         return result;

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { PackageSystem } from "@/lib/package-system";
 import { HeroSection } from "@/components/hero-section";
 import { ToursGrid } from "@/components/tours-grid";
+import { ToursSort } from "@/components/tours-sort";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -38,6 +39,30 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
     where.guide = { isDiyanet: true };
   }
 
+  // Sorting logic
+  const sortParam = resolvedParams?.sort || 'recommended';
+  const orderBy: any[] = [];
+
+  switch (sortParam) {
+    case 'price_asc':
+      orderBy.push({ price: 'asc' });
+      break;
+    case 'price_desc':
+      orderBy.push({ price: 'desc' });
+      break;
+    case 'date_asc':
+      orderBy.push({ startDate: 'asc' });
+      break;
+    case 'date_desc':
+      orderBy.push({ startDate: 'desc' });
+      break;
+    case 'recommended':
+    default:
+      orderBy.push({ isFeatured: 'desc' });
+      orderBy.push({ createdAt: 'desc' });
+      break;
+  }
+
   let listings = await prisma.guideListing.findMany({
     where,
     include: {
@@ -46,10 +71,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
       airline: true,
       tourDays: { orderBy: { day: 'asc' } }
     },
-    orderBy: [
-      { isFeatured: 'desc' },
-      { createdAt: 'desc' }
-    ]
+    orderBy
   });
 
   // Date range filtering
@@ -67,11 +89,13 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
       return lStart <= searchMax && lEnd >= searchMin;
     });
   } else if (searchDate) {
-    // Exact date match (legacy)
+    // Check if the search date falls WITHIN the tour range
+    // tour.startDate <= searchDate <= tour.endDate
     listings = listings.filter(l => {
-      const start = l.startDate.toISOString().split('T')[0];
-      const end = l.endDate.toISOString().split('T')[0];
-      return searchDate >= start && searchDate <= end;
+      const sDate = new Date(searchDate).getTime();
+      const tStart = l.startDate.getTime();
+      const tEnd = l.endDate.getTime();
+      return sDate >= tStart && sDate <= tEnd;
     });
   }
 
@@ -142,7 +166,13 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
   return (
     <main className="min-h-screen">
       <HeroSection />
-      <ToursGrid listings={enrichedListings} />
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Bulunan Turlar ({enrichedListings.length})</h2>
+          <ToursSort />
+        </div>
+        <ToursGrid listings={enrichedListings} />
+      </div>
     </main>
   );
 }

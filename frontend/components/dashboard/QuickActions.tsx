@@ -12,8 +12,8 @@ interface QuickAction {
 const defaultActions: QuickAction[] = [
     { label: 'Yeni İlan', icon: <Plus className="w-5 h-5" />, href: '/dashboard/listings/new', color: 'bg-blue-500 text-white' },
     { label: 'Kampanya (Yakında)', icon: <Megaphone className="w-5 h-5" />, href: '#', color: 'bg-purple-500 text-white', disabled: true },
-    { label: 'Rapor İndir (Yakında)', icon: <FileDown className="w-5 h-5" />, href: '#', color: 'bg-green-500 text-white', disabled: true },
-    { label: 'Afiş Oluştur (Yakında)', icon: <Image className="w-5 h-5" />, href: '#', color: 'bg-orange-500 text-white', disabled: true },
+    { label: 'Rapor İndir', icon: <FileDown className="w-5 h-5" />, href: '/dashboard/listings', color: 'bg-green-500 text-white' },
+    { label: 'Afiş Oluştur', icon: <Image className="w-5 h-5" />, href: '/dashboard/listings', color: 'bg-orange-500 text-white' },
 ];
 
 interface QuickActionsProps {

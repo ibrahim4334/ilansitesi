@@ -1,5 +1,7 @@
 import Link from 'next/link';
-import { Eye, MoreVertical, Edit, Image, EyeOff, Trash2, Share2, Star, AlertCircle, Sparkles } from 'lucide-react';
+import { MoreHorizontal, Star, Share2, Trash2, Edit, Eye, EyeOff, LayoutTemplate, Download, Image, Sparkles, MoreVertical, AlertCircle } from 'lucide-react';
+import { PosterGenerator } from './poster-generator';
+import { generatePDF } from './pdf-generator';
 import { useState } from 'react';
 
 interface Listing {
@@ -19,9 +21,10 @@ interface Listing {
 interface ListingCardProps {
     listing: Listing;
     onAction?: (action: string, listingId: string) => void;
+    guideImage?: string | null;
 }
 
-export function ListingCard({ listing, onAction }: ListingCardProps) {
+export function ListingCard({ listing, onAction, guideImage }: ListingCardProps) {
     const [menuOpen, setMenuOpen] = useState(false);
 
     const statusConfig: Record<string, { label: string; color: string }> = {
@@ -35,15 +38,21 @@ export function ListingCard({ listing, onAction }: ListingCardProps) {
     const status = statusConfig[listing.status] || statusConfig.draft;
 
     return (
-        <div className="bg-white rounded-xl border overflow-hidden hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-xl border overflow-hidden hover:shadow-md transition-shadow relative">
             <div className="flex gap-3 p-3">
                 {/* Thumbnail */}
-                <div className="w-20 h-20 rounded-lg bg-gray-200 flex-shrink-0 overflow-hidden relative">
+                <div className="w-20 h-20 rounded-lg bg-gray-200 flex-shrink-0 overflow-hidden relative group">
                     {listing.thumbnail ? (
                         <img src={listing.thumbnail} alt="" className="w-full h-full object-cover" />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
                             <Image className="w-8 h-8" />
+                        </div>
+                    )}
+                    {/* Guide Avatar Overlay */}
+                    {guideImage && (
+                        <div className="absolute bottom-0 right-0 w-8 h-8 rounded-tl-lg bg-white p-0.5">
+                            <img src={guideImage} alt="Guide" className="w-full h-full rounded-md object-cover border border-gray-200" />
                         </div>
                     )}
                     {listing.isFeatured && (
@@ -98,6 +107,12 @@ export function ListingCard({ listing, onAction }: ListingCardProps) {
                                         >
                                             <Share2 className="w-4 h-4" /> Paylaş
                                         </button>
+                                        <button
+                                            onClick={() => { generatePDF(listing); setMenuOpen(false); }}
+                                            className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
+                                        >
+                                            <Download className="w-4 h-4" /> PDF İndir
+                                        </button>
                                         <hr className="my-1" />
                                         <button
                                             onClick={() => { onAction?.('delete', listing.id); setMenuOpen(false); }}
@@ -149,12 +164,7 @@ export function ListingCard({ listing, onAction }: ListingCardProps) {
                 >
                     <Edit className="w-4 h-4" /> Düzenle
                 </Link>
-                <Link
-                    href={`/dashboard/listings/${listing.id}/poster`}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg opacity-50 cursor-not-allowed pointer-events-none"
-                >
-                    <Image className="w-4 h-4" /> Afiş (Yakında)
-                </Link>
+                <PosterGenerator listing={listing} />
                 <button
                     onClick={() => onAction?.(listing.status === 'active' ? 'hide' : 'show', listing.id)}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
@@ -162,20 +172,21 @@ export function ListingCard({ listing, onAction }: ListingCardProps) {
                     <EyeOff className="w-4 h-4" /> {listing.status === 'active' ? 'Gizle' : 'Göster'}
                 </button>
             </div>
-        </div>
+        </div >
     );
 }
 
 interface ListingListProps {
     listings: Listing[];
     onAction?: (action: string, listingId: string) => void;
+    guideImage?: string | null;
 }
 
-export function ListingList({ listings, onAction }: ListingListProps) {
+export function ListingList({ listings, onAction, guideImage }: ListingListProps) {
     return (
         <div className="space-y-3">
             {listings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} onAction={onAction} />
+                <ListingCard key={listing.id} listing={listing} onAction={onAction} guideImage={guideImage} />
             ))}
         </div>
     );

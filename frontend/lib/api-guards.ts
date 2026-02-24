@@ -56,8 +56,13 @@ export function requireSupply(session: Session): NextResponse | null {
 }
 
 /**
- * Check credit balance from CreditTransaction ledger.
- * Returns 402 if insufficient credits.
+ * @deprecated TOCTOU RISK — This check is NOT lock-safe:
+ *   Two parallel requests can both pass this guard, then both call deductCredits().
+ *   Use TokenService.deductCredits() directly instead — it uses SELECT FOR UPDATE
+ *   inside a SERIALIZABLE transaction for atomic balance checking.
+ *
+ * This function remains for backward-compat read-only balance display (e.g. UI hints).
+ * NEVER rely on this as a pre-deduction guard.
  */
 export async function requireCredits(userId: string, amount: number): Promise<NextResponse | null> {
     const result = await prisma.creditTransaction.aggregate({

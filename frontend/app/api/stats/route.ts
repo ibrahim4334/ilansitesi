@@ -2,11 +2,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
-import { requireAuth } from '@/lib/api-guards';
+import { requireSupply } from '@/lib/api-guards';
 
 export async function GET() {
     const session = await auth();
-    const authErr = requireAuth(session);
+    // VULN-3 fix: only GUIDE or ORGANIZATION should see request stats/marketplace data
+    const authErr = requireSupply(session);
     if (authErr) return authErr;
 
     const totalRequests = await prisma.umrahRequest.count();

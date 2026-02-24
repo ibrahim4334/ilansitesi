@@ -19,7 +19,16 @@ import { Loader2 } from "lucide-react";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 
-const CITIES = ["İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Konya", "Diğer"];
+const CITIES = [
+    "Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Aksaray", "Amasya", "Ankara", "Antalya", "Ardahan", "Artvin",
+    "Aydın", "Balıkesir", "Bartın", "Batman", "Bayburt", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur",
+    "Bursa", "Çanakkale", "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Düzce", "Edirne", "Elazığ", "Erzincan",
+    "Erzurum", "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Iğdır", "Isparta", "İstanbul",
+    "İzmir", "Kahramanmaraş", "Karabük", "Karaman", "Kars", "Kastamonu", "Kayseri", "Kırıkkale", "Kırklareli", "Kırşehir",
+    "Kilis", "Kocaeli", "Konya", "Kütahya", "Malatya", "Manisa", "Mardin", "Mersin", "Muğla", "Muş",
+    "Nevşehir", "Niğde", "Ordu", "Osmaniye", "Rize", "Sakarya", "Samsun", "Siirt", "Sinop", "Sivas",
+    "Şanlıurfa", "Şırnak", "Tekirdağ", "Tokat", "Trabzon", "Tunceli", "Uşak", "Van", "Yalova", "Yozgat", "Zonguldak"
+];
 const ROOM_TYPES = [
     { value: "2-kisilik", label: "2 Kişilik Oda" },
     { value: "3-kisilik", label: "3 Kişilik Oda" },
@@ -211,11 +220,11 @@ export default function EditRequestPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Kişi Başı Bütçe (Opsiyonel)</Label>
+                            <Label>Kişi Başı Bütçe (SAR) (Opsiyonel)</Label>
                             <Input
                                 type="number"
                                 name="budget"
-                                placeholder="Örn: 50000"
+                                placeholder="Örn: 5000 SAR"
                                 value={formData.budget}
                                 onChange={handleChange}
                             />

@@ -8,12 +8,27 @@ export const authConfig = {
         async jwt({ token, user, account, trigger, session }) {
             // Handle client-side updates (e.g. update({ role: ... }))
             if (trigger === "update" && session) {
-                // Only apply known safe fields — never blindly spread
-                if (session.role) {
-                    token.role = session.role;
-                }
+                // SECURITY: Never accept role from client-side updates.
+                // Only allow safe fields (e.g., requires_onboarding flag).
                 if (typeof session.requires_onboarding === "boolean") {
                     token.requires_onboarding = session.requires_onboarding;
+                }
+                // Role changes MUST go through /api/set-role or /api/choose-role.
+                // Re-read role from DB to ensure it's authoritative.
+                if (token.email) {
+                    try {
+                        const { prisma } = await import("@/lib/prisma");
+                        const dbUser = await prisma.user.findUnique({
+                            where: { email: token.email as string },
+                            select: { role: true }
+                        });
+                        if (dbUser?.role) {
+                            token.role = dbUser.role;
+                            token.requires_onboarding = false;
+                        }
+                    } catch (e) {
+                        console.error("DB role refresh failed:", e);
+                    }
                 }
             }
 

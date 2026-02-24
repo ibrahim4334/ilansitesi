@@ -10,10 +10,12 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { Camera, ExternalLink, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function DashboardProfilePage() {
     const { data: session } = useSession();
+    const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -89,6 +91,10 @@ export default function DashboardProfilePage() {
             });
             if (res.ok) {
                 toast.success('Profil güncellendi.');
+                // Redirect to public profile
+                if (session?.user?.id) {
+                    router.push(`/guides/${session.user.id}`);
+                }
             } else {
                 toast.error('Hata oluştu.');
             }

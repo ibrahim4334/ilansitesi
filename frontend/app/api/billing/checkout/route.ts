@@ -1,82 +1,92 @@
-
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
+import { requireSupply } from "@/lib/api-guards";
+import { PaymentService } from "@/lib/payment-service";
+import { rateLimit } from "@/lib/rate-limit";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock_key', {
-    apiVersion: '2025-01-27.acacia' as any,
-    typescript: true,
-});
-
+/**
+ * POST /api/billing/checkout
+ *
+ * Creates a Stripe Checkout session for credit purchase.
+ * Delegates entirely to PaymentService.createCheckoutSession() which enforces:
+ *
+ * 1. Pending-session guard   — if user already has an open session < 10min, return its URL
+ *                               (prevents duplicate charges from button spam)
+ * 2. DB-first ordering       — Transaction row created BEFORE Stripe API call
+ *                               (if Stripe fails, row is marked "failed" by reconciler)
+ * 3. Stripe idempotency key  — "checkout:userId:packageId:txId" prevents Stripe-side
+ *                               duplicate charges on network retry
+ * 4. Audit trail             — every attempt creates a Transaction row regardless of outcome
+ *
+ * Rate limit: 3 attempts per minute per user (prevents brute-force package probing).
+ */
 export async function POST(req: Request) {
     try {
         const session = await auth();
-        if (!session?.user?.email || (session.user.role !== 'GUIDE' && session.user.role !== 'ORGANIZATION')) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+        // Only GUIDE and ORGANIZATION roles can purchase credits
+        const guard = requireSupply(session);
+        if (guard) return guard;
+
+        // Rate limit: 3 checkout initiations per minute per user
+        const userId = session!.user.email!;
+        const rl = rateLimit(`checkout:${userId}`, 60_000, 3);
+        if (!rl.success) {
+            return NextResponse.json(
+                { error: "Too many requests. Please wait before trying again." },
+                {
+                    status: 429,
+                    headers: { "Retry-After": "60" },
+                }
+            );
         }
 
-        const { packageId } = await req.json();
-        if (!packageId) return NextResponse.json({ error: "Missing packageId" }, { status: 400 });
+        const body = await req.json();
+        const { packageId } = body;
 
-        // Find package
-        const creditPackage = await prisma.creditPackage.findUnique({
-            where: { id: packageId }
+        if (!packageId || typeof packageId !== "string") {
+            return NextResponse.json({ error: "Missing or invalid packageId" }, { status: 400 });
+        }
+
+        const baseUrl = process.env.NEXTAUTH_URL;
+        if (!baseUrl) {
+            console.error("[Checkout] NEXTAUTH_URL environment variable not set");
+            return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+        }
+
+        // Find the user's DB id from session email
+        const { prisma } = await import("@/lib/prisma");
+        const user = await prisma.user.findUnique({
+            where: { email: session!.user.email! },
+            select: { id: true },
         });
-        if (!creditPackage) {
+        if (!user) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+
+        console.log(`[Checkout] Initiating for user ${user.id}, package ${packageId}`);
+
+        // Delegate to PaymentService — all idempotency, ordering, and guard logic is there
+        const result = await PaymentService.createCheckoutSession(
+            user.id,
+            packageId,
+            `${baseUrl}/dashboard/billing?success=true`,
+            `${baseUrl}/dashboard/billing?canceled=true`
+        );
+
+        console.log(`[Checkout] Session created: ${result.sessionId} for user ${user.id}`);
+        return NextResponse.json({ url: result.url, sessionId: result.sessionId });
+
+    } catch (err: any) {
+        // Surface friendly errors from PaymentService guards
+        if (err.message === "PACKAGE_NOT_FOUND") {
             return NextResponse.json({ error: "Invalid package" }, { status: 400 });
         }
+        if (err.message === "USER_NOT_FOUND") {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
 
-        // Find user
-        const user = await prisma.user.findUnique({
-            where: { email: session.user.email }
-        });
-
-        // Create Stripe Session
-        const stripeSession = await stripe.checkout.sessions.create({
-            payment_method_types: ["card"],
-            line_items: [
-                {
-                    price_data: {
-                        currency: "try",
-                        product_data: {
-                            name: creditPackage.name,
-                            description: `${creditPackage.credits} Kredi`,
-                        },
-                        unit_amount: creditPackage.priceTRY * 100,
-                    },
-                    quantity: 1,
-                },
-            ],
-            mode: "payment",
-            success_url: `${process.env.NEXTAUTH_URL}/dashboard/billing?success=true`,
-            cancel_url: `${process.env.NEXTAUTH_URL}/dashboard/billing?canceled=true`,
-            metadata: {
-                userId: user?.id || "",
-                userEmail: session.user.email,
-                role: session.user.role,
-                credits: creditPackage.credits.toString(),
-                packageId: creditPackage.id
-            },
-        });
-
-        // Save Pending Transaction
-        await prisma.transaction.create({
-            data: {
-                userId: user?.id || "",
-                role: session.user.role,
-                credits: creditPackage.credits,
-                amountTRY: creditPackage.priceTRY,
-                provider: "stripe",
-                status: "pending",
-                sessionId: stripeSession.id,
-            }
-        });
-
-        return NextResponse.json({ url: stripeSession.url });
-
-    } catch (error) {
-        console.error("Stripe Checkout Error:", error);
+        console.error("[Checkout] Unexpected error:", err.message);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }

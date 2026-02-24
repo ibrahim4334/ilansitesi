@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Check, CreditCard } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 interface CreditPackage {
     id: string;
@@ -14,13 +15,24 @@ interface CreditPackage {
 }
 
 export function CreditPackages() {
-    // Hardcoded for now as they are static in DB logic too, or we could fetch them
-    // matching what we seeded in db.ts
-    const packages: CreditPackage[] = [
+    const { data: session } = useSession();
+    const role = session?.user?.role;
+
+    // Guide Packages (Standard)
+    const guidePackages: CreditPackage[] = [
         { id: "pkg_starter", name: "Başlangıç Paketi", credits: 10, priceTRY: 299 },
         { id: "pkg_pro", name: "Pro Paket", credits: 30, priceTRY: 799 },
         { id: "pkg_agency", name: "Ajans Paketi", credits: 100, priceTRY: 1999 }
     ];
+
+    // Organization Packages (Corporate - distinct rates/volume)
+    const organizationPackages: CreditPackage[] = [
+        { id: "org_starter", name: "Kurumsal Başlangıç", credits: 50, priceTRY: 1250 },
+        { id: "org_growth", name: "Büyüme Paketi", credits: 200, priceTRY: 4500 },
+        { id: "org_enterprise", name: "Holding Paketi", credits: 1000, priceTRY: 20000 }
+    ];
+
+    const packages = role === 'ORGANIZATION' ? organizationPackages : guidePackages;
 
     const [loading, setLoading] = useState<string | null>(null);
 
@@ -57,7 +69,7 @@ export function CreditPackages() {
         <div className="grid gap-6 md:grid-cols-3">
             {packages.map((pkg) => (
                 <div key={pkg.id} className="relative flex flex-col justify-between rounded-xl border bg-white p-6 shadow-sm transition-all hover:shadow-md">
-                    {pkg.id === 'pkg_pro' && (
+                    {(pkg.id === 'pkg_pro' || pkg.id === 'org_growth') && (
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-sm">
                             En Popüler
                         </div>
@@ -70,18 +82,14 @@ export function CreditPackages() {
                             <span className="ml-1 text-sm font-medium text-gray-500">Kredi</span>
                         </div>
                         <p className="mt-1 text-sm text-gray-500">
-                            {pkg.priceTRY} ₺ ({Math.round(pkg.priceTRY / pkg.credits)} ₺/kredi)
+                            {pkg.priceTRY.toLocaleString('tr-TR')} ₺ ({Math.round(pkg.priceTRY / pkg.credits)} ₺/kredi)
                         </p>
                     </div>
 
                     <ul className="mb-6 space-y-2 text-sm text-gray-600">
                         <li className="flex items-center gap-2">
                             <Check className="h-4 w-4 text-green-500" />
-                            <span>{pkg.credits} Teklif Hakkı (Rehber)</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-green-500" />
-                            <span>veya {Math.floor(pkg.credits / 2)} Teklif (Organizasyon)</span>
+                            <span>{pkg.credits} Teklif Hakkı</span>
                         </li>
                         <li className="flex items-center gap-2">
                             <Check className="h-4 w-4 text-green-500" />
@@ -91,12 +99,18 @@ export function CreditPackages() {
                             <Check className="h-4 w-4 text-green-500" />
                             <span>Süresiz Kullanım</span>
                         </li>
+                        {role === 'ORGANIZATION' && (
+                            <li className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-blue-500" />
+                                <span>Kurumsal Fatura</span>
+                            </li>
+                        )}
                     </ul>
 
                     <Button
                         onClick={() => handleBuy(pkg)}
                         disabled={loading !== null}
-                        className={`w-full ${pkg.id === 'pkg_pro' ? 'bg-primary hover:bg-primary/90' : 'bg-gray-900 hover:bg-gray-800 text-white'}`}
+                        className={`w-full ${pkg.id === 'pkg_pro' || pkg.id === 'org_growth' ? 'bg-primary hover:bg-primary/90' : 'bg-gray-900 hover:bg-gray-800 text-white'}`}
                     >
                         {loading === pkg.id ? (
                             "İşleniyor..."
