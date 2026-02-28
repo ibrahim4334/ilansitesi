@@ -25,7 +25,7 @@ interface ListingCardProps {
             fullName: string;
             city?: string; // Guide base city
             photo?: string;
-            isDiyanet: boolean;
+            isIdentityVerified: boolean;
             trustScore: number;
             package: string;
         };
@@ -49,13 +49,13 @@ export function ListingCard({ listing }: ListingCardProps) {
         'ERKEN_REZERVASYON': 'Erken Rezervasyon'
     };
 
-    const isDiyanet = listing.guide?.isDiyanet;
+    const isIdentityVerified = listing.guide?.isIdentityVerified;
 
     // Aesthetic Rules
-    const accentColor = isDiyanet ? "text-teal-600" : "text-cyan-600";
-    const badgeColor = isDiyanet ? "bg-teal-50 text-teal-700 border-teal-200" : "bg-cyan-50 text-cyan-700 border-cyan-200";
-    const cardBorder = isDiyanet ? "hover:border-teal-300" : "hover:border-cyan-300";
-    const buttonClass = isDiyanet ? "bg-teal-600 hover:bg-teal-700" : "bg-cyan-600 hover:bg-cyan-700";
+    const accentColor = isIdentityVerified ? "text-teal-600" : "text-cyan-600";
+    const badgeColor = isIdentityVerified ? "bg-teal-50 text-teal-700 border-teal-200" : "bg-cyan-50 text-cyan-700 border-cyan-200";
+    const cardBorder = isIdentityVerified ? "hover:border-teal-300" : "hover:border-cyan-300";
+    const buttonClass = isIdentityVerified ? "bg-teal-600 hover:bg-teal-700" : "bg-cyan-600 hover:bg-cyan-700";
 
     return (
         <Link href={`/listings/${listing.id}`} className="block h-full">
@@ -77,9 +77,9 @@ export function ListingCard({ listing }: ListingCardProps) {
                                 <Star className="w-3 h-3 mr-1 fill-white" /> Öne Çıkan
                             </Badge>
                         )}
-                        {isDiyanet && (
+                        {isIdentityVerified && (
                             <Badge className="bg-white/95 text-teal-700 hover:bg-white backdrop-blur-sm shadow-sm border-0">
-                                <ShieldCheck className="w-3 h-3 mr-1" /> Diyanet Onaylı
+                                <ShieldCheck className="w-3 h-3 mr-1" /> Kimlik Onaylı
                             </Badge>
                         )}
                         {listing.urgencyTag && (

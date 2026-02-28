@@ -3,6 +3,7 @@
 
 import { CreditBalance } from "@/components/guide-dashboard/credit-balance";
 import { CreditPackages } from "@/components/dashboard/credit-packages";
+import { AutoReplenishSettings } from "@/components/dashboard/auto-replenish-settings";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -32,6 +33,11 @@ function BillingContent() {
             <div className="mb-10">
                 <h2 className="text-xl font-semibold mb-4">Mevcut Bakiye</h2>
                 <CreditBalance />
+            </div>
+
+            <div className="mb-10">
+                <h2 className="text-xl font-semibold mb-4">Otomatik Yükleme Ayarları</h2>
+                <AutoReplenishSettings />
             </div>
 
             <div>

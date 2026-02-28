@@ -2,7 +2,6 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import { requireAuth } from "@/lib/api-guards"
-import { TokenService } from "@/lib/token-service"
 import { getRoleConfig } from "@/lib/role-config"
 import { safeErrorMessage } from "@/lib/safe-error"
 
@@ -46,41 +45,19 @@ export async function POST(req: Request) {
             })
 
             if (role === 'GUIDE' || role === 'ORGANIZATION') {
-                const existing = await tx.guideProfile.findUnique({
-                    where: { userId: user.id }
+                // Initialize profile fields on User directly
+                await tx.user.update({
+                    where: { id: user.id },
+                    data: {
+                        fullName: user.name || "Kullanıcı",
+                        city: "İstanbul"
+                    }
                 })
-
-                if (!existing) {
-                    await tx.guideProfile.create({
-                        data: {
-                            userId: user.id,
-                            fullName: user.name || "Kullanıcı",
-                            phone: user.phone || "",
-                            city: "İstanbul",
-                            quotaTarget: 100,
-                            currentCount: 0,
-                            isApproved: false,
-                            credits: 0, // TokenService will set the real value
-                            package: "FREEMIUM",
-                            tokens: 0
-                        }
-                    })
-                }
             }
         })
 
-        // Step 2: Grant onboarding bonus via TokenService (idempotent)
-        const config = getRoleConfig(role)
-        if (config.onboardingBonus > 0) {
-            await TokenService.grantCredits(
-                user.id,
-                config.onboardingBonus,
-                "admin",
-                "Initial signup credits",
-                undefined,
-                `onboarding:${user.id}` // idempotent — safe on retry
-            )
-        }
+        // Note: Tokens are no longer granted here to prevent Freemium Abuse.
+        // Guides must complete their profiles and use /api/onboarding/claim-tokens
 
         return NextResponse.json({ success: true, role })
 

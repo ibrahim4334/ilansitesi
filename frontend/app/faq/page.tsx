@@ -25,7 +25,7 @@ export default function FAQPage() {
                 <AccordionItem value="item-1">
                     <AccordionTrigger>Umrebuldum üzerinden rezervasyon yapmak güvenli mi?</AccordionTrigger>
                     <AccordionContent>
-                        Evet. Platformumuzda listelenen tüm acenteler Diyanet İşleri Başkanlığı ve TÜRSAB onaylı, lisanslı kuruluşlardır. Ödemeleriniz güvenli ödeme altyapısı ile korunmaktadır.
+                        Evet. Platformumuzda listelenen tüm acenteler kapsamlı doğrulama süreçleri ve TÜRSAB onaylı, lisanslı kuruluşlardır. Ödemeleriniz güvenli ödeme altyapısı ile korunmaktadır.
                     </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-2">

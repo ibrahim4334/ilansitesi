@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     template: "%s | Umrebuldum",
   },
   description:
-    "Diyanet onaylı acentelerden güvenilir Umre turlarını keşfedin. Fiyatları karşılaştırın, yorumları okuyun ve huzurla rezervasyon yapın.",
+    "kimlik onaylı acentelerden güvenilir Umre turlarını keşfedin. Fiyatları karşılaştırın, yorumları okuyun ve huzurla rezervasyon yapın.",
   keywords: [
     "Umre",
     "Umre turu",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     "Kabe",
     "İslami seyahat",
     "Türkiye Umre turları",
-    "Diyanet onaylı",
+    "kimlik onaylı",
   ],
   authors: [{ name: "Umrebuldum" }],
   creator: "Umrebuldum",
@@ -36,13 +36,13 @@ export const metadata: Metadata = {
     siteName: "Umrebuldum",
     title: "Umrebuldum - Güvenilir Umre Turları",
     description:
-      "Diyanet onaylı acentelerden güvenilir Umre turlarını keşfedin. Fiyatları karşılaştırın ve huzurla rezervasyon yapın.",
+      "kimlik onaylı acentelerden güvenilir Umre turlarını keşfedin. Fiyatları karşılaştırın ve huzurla rezervasyon yapın.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Umrebuldum - Güvenilir Umre Turları",
     description:
-      "Diyanet onaylı acentelerden güvenilir Umre turlarını keşfedin. Fiyatları karşılaştırın ve huzurla rezervasyon yapın.",
+      "kimlik onaylı acentelerden güvenilir Umre turlarını keşfedin. Fiyatları karşılaştırın ve huzurla rezervasyon yapın.",
   },
   robots: {
     index: true,

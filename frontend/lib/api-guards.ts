@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 
 // ─── Server-Side API Guards ─────────────────────────────────────────────
 // Every guard returns a NextResponse error OR null. 
@@ -55,28 +54,6 @@ export function requireSupply(session: Session): NextResponse | null {
     return requireRole(session, "GUIDE", "ORGANIZATION");
 }
 
-/**
- * @deprecated TOCTOU RISK — This check is NOT lock-safe:
- *   Two parallel requests can both pass this guard, then both call deductCredits().
- *   Use TokenService.deductCredits() directly instead — it uses SELECT FOR UPDATE
- *   inside a SERIALIZABLE transaction for atomic balance checking.
- *
- * This function remains for backward-compat read-only balance display (e.g. UI hints).
- * NEVER rely on this as a pre-deduction guard.
- */
-export async function requireCredits(userId: string, amount: number): Promise<NextResponse | null> {
-    const result = await prisma.creditTransaction.aggregate({
-        where: { userId },
-        _sum: { amount: true }
-    });
-
-    const balance = result._sum.amount || 0;
-
-    if (balance < amount) {
-        return NextResponse.json(
-            { error: "INSUFFICIENT_CREDITS", message: "Yetersiz Kredi", balance },
-            { status: 402 }
-        );
-    }
-    return null;
-}
+// NOTE: requireCredits() has been REMOVED.
+// It was a TOCTOU-vulnerable pre-check that read from the legacy credit_transactions table.
+// All balance checks are now done atomically INSIDE spendToken() / grantToken() transactions.

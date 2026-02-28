@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import * as bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { grantToken } from "@/src/modules/tokens/application/grant-token.usecase";
+import { AuthRateLimit } from "@/lib/auth-rate-limit";
 
 // Validation Schema
 const registerSchema = z.object({
@@ -19,6 +21,8 @@ const registerSchema = z.object({
 export async function POST(req: Request) {
     console.log("Register API Hit");
     try {
+        const ip = req.headers.get("x-forwarded-for") || "unknown";
+
         const bodyText = await req.text();
         console.log("Register Body:", bodyText);
 
@@ -26,13 +30,21 @@ export async function POST(req: Request) {
         try {
             body = JSON.parse(bodyText);
         } catch (e) {
+            AuthRateLimit.recordFailure(ip);
             console.error("JSON parse error:", e);
             return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+        }
+
+        const email = body?.email;
+        const lockout = AuthRateLimit.checkLockout(ip, email);
+        if (!lockout.allowed) {
+            return NextResponse.json({ error: lockout.reason || "Too many attempts" }, { status: 429 });
         }
 
         const validation = registerSchema.safeParse(body);
 
         if (!validation.success) {
+            AuthRateLimit.recordFailure(ip, email);
             console.error("Validation failed:", JSON.stringify(validation.error.format()));
             return NextResponse.json(
                 { error: "Geçersiz veriler", details: validation.error.format() },
@@ -49,6 +61,7 @@ export async function POST(req: Request) {
         });
 
         if (existingUser) {
+            AuthRateLimit.recordFailure(ip, email);
             console.log("User exists:", email);
             return NextResponse.json(
                 { error: "Bu e-posta adresi zaten kullanımda" },
@@ -73,7 +86,7 @@ export async function POST(req: Request) {
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
         const verificationExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
-        // Create User + Profile + Ledger entry in atomic transaction
+        // Create User + Profile in atomic transaction
         const newUser = await prisma.$transaction(async (tx) => {
             const user = await tx.user.create({
                 data: {
@@ -89,7 +102,7 @@ export async function POST(req: Request) {
                 }
             });
 
-            // If GUIDE or ORGANIZATION, create profile AND write ledger
+            // If GUIDE or ORGANIZATION, create profile
             if (role === 'GUIDE' || role === 'ORGANIZATION') {
                 await tx.guideProfile.create({
                     data: {
@@ -100,31 +113,35 @@ export async function POST(req: Request) {
                         quotaTarget: 100,
                         currentCount: 0,
                         isApproved: false,
-                        credits: 30,
                         package: "FREEMIUM",
                         tokens: 0
                     }
                 });
 
-                // Write initial credits to ledger (source of truth)
-                await tx.creditTransaction.create({
-                    data: {
-                        userId: user.id,
-                        amount: 30,
-                        type: "admin",
-                        reason: "Initial signup credits",
-                    }
-                });
-
-                console.log(`Created profile for ${role}: ${email} with 30 credits (ledger synced).`);
+                console.log(`Created profile for ${role}: ${email}.`);
             }
 
             return user;
         });
 
+        // ─── INVARIANT: Every user MUST have at least 1 ledger entry ─────
+        // This guarantees: SUM(ledger) == tokenBalance for all users.
+        // Empty ledger state is IMPOSSIBLE after this point.
+        const initialTokens = (role === 'GUIDE' || role === 'ORGANIZATION') ? 30 : 0;
+
+        await grantToken({
+            userId: newUser.id,
+            amount: initialTokens,
+            type: "INITIAL_BALANCE",
+            reason: "INITIAL_BALANCE",
+            idempotencyKey: `register:${newUser.id}`,
+        });
+
+        console.log(`Seeded ledger for ${email}: ${initialTokens} tokens (role: ${role}).`);
+
         console.log("User saved.");
 
-        // Simulate Sending Email (Log to console/file in dev)
+        // Simulate Sending Email
         console.log("----------------------------------------------");
         console.log(`Verification Code for ${email}: ${verificationCode}`);
         console.log("----------------------------------------------");
@@ -143,6 +160,9 @@ export async function POST(req: Request) {
                 console.error("Failed to save dev verify code:", error);
             }
         }
+
+        // Clear tracking on successful registration
+        AuthRateLimit.recordSuccess(ip, email);
 
         return NextResponse.json({ success: true, email });
 

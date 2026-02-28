@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-guards";
 import { logAdminAction } from "@/lib/admin-audit";
+import { grantToken } from "@/src/modules/tokens/application/grant-token.usecase";
+import { TOKEN_COSTS } from "@/lib/package-system";
 
 export async function POST(req: Request) {
     try {
@@ -35,16 +37,18 @@ export async function POST(req: Request) {
             }
         });
 
-        // Auto-refund if listing was featured (credits were spent)
+        // Auto-refund if listing was featured (tokens were spent)
         if (listing.isFeatured) {
-            const { TokenService } = await import("@/lib/token-service");
-            await TokenService.grantCredits(
-                listing.guideId,
-                TokenService.COST_FEATURE,
-                "refund",
-                `Auto-refund: featured listing ${listingId} rejected`,
-                listingId
-            );
+            const featureCost = TOKEN_COSTS.BOOST || 10;
+
+            await grantToken({
+                userId: listing.guideId,
+                amount: featureCost,
+                type: "REFUND",
+                reason: `Auto-refund: featured listing ${listingId} rejected`,
+                relatedId: listingId,
+                idempotencyKey: `refund-feature:${listing.guideId}:${listingId}`,
+            });
 
             await prisma.guideListing.update({
                 where: { id: listingId },

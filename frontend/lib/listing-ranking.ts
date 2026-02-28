@@ -1,6 +1,15 @@
-// ─── Listing Ranking Algorithm ──────────────────────────────────────────
-// Dual scoring: Guide listings and Corporate listings use different formulas.
-// Higher score = higher position in search results.
+// ─── Listing Ranking Algorithm (LEGACY) ─────────────────────────────────
+// @deprecated Use `src/modules/ranking/ranking-engine.ts` instead.
+// This file is kept for backward compatibility only.
+// New code should import from the ranking-engine module.
+//
+// The new 5-pillar engine provides:
+//   - Conversion-weighted scoring
+//   - Trust multiplier (not additive)
+//   - Boost hard-capped at 200 (anti-pay-to-win)
+//   - Personalization layer
+//   - Cold-start bonus
+//   - EMA smoothing (anti-oscillation)
 
 import { PACKAGE_LIMITS } from "./package-system";
 import type { PackageType } from "./db-types";
@@ -20,7 +29,7 @@ interface ListingInput {
 
 interface GuideInput {
     packageType: string;
-    isDiyanetVerified: boolean;
+    isIdentityVerified: boolean;
     trustScore: number;
     completedTrips: number;
     // Profile completeness (0-100)
@@ -45,7 +54,7 @@ const GUIDE_WEIGHTS = {
     PACKAGE_PRO: 250,
     PACKAGE_STARTER: 100,
     PACKAGE_FREE: 0,
-    DIYANET_VERIFIED: 300,
+    IDENTITY_VERIFIED: 300,
     RESPONSE_TIME_FAST: 200,     // < 1 hour
     RESPONSE_TIME_MED: 100,      // < 6 hours
     RESPONSE_TIME_SLOW: 0,       // > 6 hours
@@ -79,7 +88,7 @@ const CORP_WEIGHTS = {
  *
  * Formula:
  *   packageScore         (0-400)
- * + diyanetBonus         (0 or 300)
+ * + identityBonus        (0 or 300)
  * + responseTimeScore    (0-200)
  * + activityScore        (0-200)
  * + boostScore           (0-500 + raw boostScore)
@@ -95,18 +104,18 @@ export function scoreGuideListing(listing: ListingInput, guide: GuideInput): num
     const now = Date.now();
 
     // ── 1. Package tier ───────────────────────────────────────────
-    let packageScore = GUIDE_WEIGHTS.PACKAGE_FREE;
+    let packageScore: number = GUIDE_WEIGHTS.PACKAGE_FREE;
     switch (guide.packageType) {
         case "LEGEND": packageScore = GUIDE_WEIGHTS.PACKAGE_LEGEND; break;
         case "PRO": packageScore = GUIDE_WEIGHTS.PACKAGE_PRO; break;
         case "STARTER": packageScore = GUIDE_WEIGHTS.PACKAGE_STARTER; break;
     }
 
-    // ── 2. Diyanet badge ──────────────────────────────────────────
-    const diyanet = guide.isDiyanetVerified ? GUIDE_WEIGHTS.DIYANET_VERIFIED : 0;
+    // ── 2. Identity badge ──────────────────────────────────────────
+    const identityBadge = guide.isIdentityVerified ? GUIDE_WEIGHTS.IDENTITY_VERIFIED : 0;
 
     // ── 3. Response time ──────────────────────────────────────────
-    let responseScore = GUIDE_WEIGHTS.RESPONSE_TIME_SLOW;
+    let responseScore: number = GUIDE_WEIGHTS.RESPONSE_TIME_SLOW;
     if (guide.avgResponseHours <= 1) responseScore = GUIDE_WEIGHTS.RESPONSE_TIME_FAST;
     else if (guide.avgResponseHours <= 6) responseScore = GUIDE_WEIGHTS.RESPONSE_TIME_MED;
 
@@ -140,7 +149,7 @@ export function scoreGuideListing(listing: ListingInput, guide: GuideInput): num
         : 0;
 
     return Math.round(
-        packageScore + diyanet + responseScore + activityScore +
+        packageScore + identityBadge + responseScore + activityScore +
         boostActive + boostRaw + profileScore + trustScore + tripScore +
         freshness + fillPenalty
     );
@@ -179,7 +188,7 @@ export function scoreCorporateListing(listing: ListingInput, corp: CorporateInpu
     const boostRaw = listing.boostScore * CORP_WEIGHTS.BOOST_SCORE_MULTI;
 
     // ── 4. Package tier ───────────────────────────────────────────
-    let packageScore = CORP_WEIGHTS.PACKAGE_BASIC;
+    let packageScore: number = CORP_WEIGHTS.PACKAGE_BASIC;
     switch (corp.packageType) {
         case "CORP_ENTERPRISE": packageScore = CORP_WEIGHTS.PACKAGE_ENTERPRISE; break;
         case "CORP_PRO": packageScore = CORP_WEIGHTS.PACKAGE_PRO; break;
@@ -237,7 +246,7 @@ export function calculateProfileCompleteness(user: {
     bio?: string | null;
     photo?: string | null;
     city?: string | null;
-    isDiyanetVerified?: boolean;
+    isIdentityVerified?: boolean;
 }): number {
     let score = 0;
     const weights = {
@@ -246,7 +255,7 @@ export function calculateProfileCompleteness(user: {
         bio: 20,
         photo: 25,
         city: 10,
-        diyanet: 5,
+        identity: 5,
     };
 
     if (user.fullName?.trim()) score += weights.fullName;
@@ -254,7 +263,7 @@ export function calculateProfileCompleteness(user: {
     if (user.bio?.trim() && user.bio.length >= 50) score += weights.bio;
     if (user.photo) score += weights.photo;
     if (user.city?.trim()) score += weights.city;
-    if (user.isDiyanetVerified) score += weights.diyanet;
+    if (user.isIdentityVerified) score += weights.identity;
 
     return Math.min(score, 100);
 }

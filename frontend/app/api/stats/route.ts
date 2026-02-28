@@ -12,22 +12,49 @@ export async function GET() {
 
     const totalRequests = await prisma.umrahRequest.count();
 
-    // New requests in last 24h
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const newRequests = await prisma.umrahRequest.count({
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    // 1. Total Listing Views (Sum of views across all active listings)
+    const listings = await prisma.guideListing.findMany({
+        where: { guideId: session.user.id }
+    });
+
+    const totalViews = listings.reduce((acc, curr) => acc + (curr.views || 0), 0);
+
+    // 2. Active Competition (Count of active approved listings globally)
+    const activeCompetitors = await prisma.guideListing.count({
+        where: { approvalStatus: 'APPROVED' }
+    });
+
+    // 3. Missed Demand / FOMO (Requests the agency did NOT bid on)
+    // - Count total OPEN requests that were created in the last 30 days
+    // - Subtract the ones this agency specifically opened a Conversation for.
+    const totalOpenDemand = await prisma.umrahRequest.count({
         where: {
-            createdAt: { gte: oneDayAgo }
+            status: 'opened',
+            createdAt: { gte: thirtyDaysAgo }
         }
     });
 
+    const agencyInteractions = await prisma.conversation.count({
+        where: {
+            guideId: session.user.id,
+            request: {
+                createdAt: { gte: thirtyDaysAgo }
+            }
+        }
+    });
+
+    const missedOpportunities = Math.max(0, totalOpenDemand - agencyInteractions);
+
     const stats = [
-        { title: 'Görüntülenme', value: '12,456', change: 12, trend: 'up' },
-        { title: 'Tıklama', value: '2,341', change: 8, trend: 'up' },
-        { title: 'Talep', value: totalRequests.toString(), change: newRequests, trend: 'up' },
-        { title: 'Dönüşüm', value: '%5.2', change: -2, trend: 'down' },
+        { title: 'İlan Görüntülenmesi', value: totalViews.toLocaleString(), change: 5, trend: 'up' },
+        { title: 'Aktif Rakipler', value: activeCompetitors.toString(), change: 0, trend: 'neutral' },
+        { title: 'Kaçırılan Fırsatlar', value: missedOpportunities.toString(), change: missedOpportunities > 0 ? 100 : 0, trend: 'down' },
+        { title: 'Toplam Talep', value: totalRequests.toString(), change: newRequests, trend: 'up' },
     ];
 
-    // Get latest 5 requests
+    // Get latest 5 actual requests to surface to the agency as hot leads
     const recentRequests = await prisma.umrahRequest.findMany({
         orderBy: { createdAt: 'desc' },
         take: 5
@@ -35,11 +62,11 @@ export async function GET() {
 
     const formattedRequests = recentRequests.map(r => ({
         id: r.id,
-        customerName: "Misafir Kullanıcı",
-        listingTitle: `${r.departureCity}`,
-        message: r.note || "Detay yok",
+        customerName: "Gizli Misafir",
+        listingTitle: `${r.departureCity} Çıkışlı Müsaitlik`,
+        message: r.note || "Hemen Teklif İletin...",
         timeAgo: "Yeni",
-        status: 'new',
+        status: r.status,
         createdAt: r.createdAt.toISOString()
     }));
 

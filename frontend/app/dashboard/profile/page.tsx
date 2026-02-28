@@ -26,7 +26,7 @@ export default function DashboardProfilePage() {
         city: '',
         bio: '',
         photo: '',
-        isDiyanet: false,
+        isIdentityVerified: false,
     });
 
     useEffect(() => {
@@ -40,7 +40,7 @@ export default function DashboardProfilePage() {
                         city: data.city || '',
                         bio: data.bio || '', // Handle null
                         photo: data.photo || '',
-                        isDiyanet: data.isDiyanet || false,
+                        isIdentityVerified: data.isIdentityVerified || false,
                     });
                 }
             })
@@ -206,13 +206,13 @@ export default function DashboardProfilePage() {
 
                         <div className="flex items-center space-x-2 border p-3 rounded bg-gray-50">
                             <Switch
-                                checked={formData.isDiyanet}
-                                onCheckedChange={(c) => setFormData({ ...formData, isDiyanet: c })}
+                                checked={formData.isIdentityVerified}
+                                onCheckedChange={(c) => setFormData({ ...formData, isIdentityVerified: c })}
                             />
                             <div>
-                                <Label className="font-semibold">Diyanet Personeli misiniz?</Label>
+                                <Label className="font-semibold">Kimlik doğrulaması yapmak ister misiniz?</Label>
                                 <p className="text-xs text-gray-500">
-                                    Profilinizde "Diyanet Personeli" rozeti görünecektir.
+                                    Profilinizde "Kimlik Onaylı" rozeti görünecektir.
                                 </p>
                             </div>
                         </div>

@@ -3,7 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-guards";
 import { logAdminAction } from "@/lib/admin-audit";
-import { TokenService } from "@/lib/token-service";
+import { grantToken } from "@/src/modules/tokens/application/grant-token.usecase";
+import { spendToken } from "@/src/modules/tokens/application/spend-token.usecase";
 
 export async function GET(req: Request) {
     try {
@@ -20,8 +21,15 @@ export async function GET(req: Request) {
 
         const user = await prisma.user.findUnique({
             where: { email },
-            include: {
-                guideProfile: { select: { credits: true, fullName: true, package: true } }
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                tokenBalance: true,
+                isMuted: true,
+                mutedUntil: true,
+                guideProfile: { select: { fullName: true, package: true } },
             }
         });
 
@@ -29,13 +37,12 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        const transactions = await prisma.creditTransaction.findMany({
+        // Read from unified ledger (token_ledger_entries)
+        const transactions = await prisma.tokenTransaction.findMany({
             where: { userId: user.id },
             orderBy: { createdAt: "desc" },
             take: 100,
         });
-
-        const balance = await TokenService.getBalance(user.id);
 
         return NextResponse.json({
             user: {
@@ -48,7 +55,7 @@ export async function GET(req: Request) {
                 isMuted: user.isMuted,
                 mutedUntil: user.mutedUntil,
             },
-            balance,
+            balance: user.tokenBalance,
             transactions,
         });
     } catch (error) {
@@ -87,22 +94,28 @@ export async function POST(req: Request) {
 
         let newBalance: number;
 
+        // Mandatory idempotency key for admin adjustments
+        const idempotencyKey = `admin-adjust:${adminUser.id}:${targetUserId}:${amount}:${Date.now()}`;
+
         if (amount > 0) {
-            // Grant credits
-            newBalance = await TokenService.grantCredits(
-                targetUserId,
+            // Grant tokens via unified ledger
+            const result = await grantToken({
+                userId: targetUserId,
                 amount,
-                "admin",
-                `Admin grant: ${reason}`,
-            );
+                type: "ADMIN_GRANT",
+                reason: `Admin grant: ${reason}`,
+                idempotencyKey,
+            });
+            newBalance = result.newBalance;
         } else if (amount < 0) {
-            // Deduct credits
-            const result = await TokenService.deductCredits(
-                targetUserId,
-                Math.abs(amount),
-                `Admin deduction: ${reason}`,
-            );
-            if (!result.success) {
+            // Deduct tokens via unified ledger
+            const result = await spendToken({
+                userId: targetUserId,
+                action: "DEMAND_UNLOCK", // Generic action for admin deductions
+                relatedId: undefined,
+                reason: `Admin deduction: ${reason}`,
+            });
+            if (!result.ok) {
                 return NextResponse.json({ error: "Insufficient balance for deduction" }, { status: 400 });
             }
             newBalance = result.newBalance;

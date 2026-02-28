@@ -59,7 +59,7 @@ async function getListing(id: string) {
             city: guide.city,
             bio: guide.bio,
             phone: guide.phone,
-            isDiyanet: guide.isDiyanet,
+            isIdentityVerified: guide.isIdentityVerified,
             photo: guide.photo,
             trustScore: guide.trustScore || 50,
             completedTrips: guide.completedTrips || 0,
@@ -76,7 +76,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
         notFound();
     }
 
-    const isDiyanet = listing.guide?.isDiyanet;
+    const isIdentityVerified = listing.guide?.isIdentityVerified;
     const isPremium = listing.guide?.package !== 'FREEMIUM';
 
     return (
@@ -102,9 +102,9 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                 <div className="absolute bottom-0 left-0 w-full p-6 sm:p-10">
                     <div className="container mx-auto">
                         <div className="flex flex-wrap gap-3 mb-4">
-                            {isDiyanet && (
+                            {isIdentityVerified && (
                                 <Badge className="bg-teal-500 hover:bg-teal-600 border-none text-white px-3 py-1 text-base">
-                                    <ShieldCheck className="w-4 h-4 mr-2" /> Diyanet Onaylı
+                                    <ShieldCheck className="w-4 h-4 mr-2" /> Kimlik Onaylı
                                 </Badge>
                             )}
                             <Badge variant="secondary" className="bg-white/90 text-gray-900 px-3 py-1 text-base backdrop-blur-md">

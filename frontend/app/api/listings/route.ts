@@ -20,7 +20,7 @@ export async function GET(req: Request) {
         const maxDate = searchParams.get('maxDate');
         const minPrice = searchParams.get('minPrice');
         const maxPrice = searchParams.get('maxPrice');
-        const isDiyanetFilter = searchParams.get('isDiyanet');
+        const isIdentityVerifiedFilter = searchParams.get('isIdentityVerified');
 
         const now = new Date();
 
@@ -38,8 +38,8 @@ export async function GET(req: Request) {
             where.departureCityId = departureCityId;
         }
 
-        if (isDiyanetFilter === 'true') {
-            where.guide = { isDiyanet: true };
+        if (isIdentityVerifiedFilter === 'true') {
+            where.guide = { isIdentityVerified: true };
         }
 
         let listings = await prisma.guideListing.findMany({
@@ -137,7 +137,7 @@ export async function GET(req: Request) {
                     bio: profile.bio,
                     // phone deliberately omitted from list view — exposed only on detail page
                     // after PackageSystem.isPhoneVisible() check
-                    isDiyanet: profile.isDiyanet,
+                    isIdentityVerified: profile.isIdentityVerified,
                     photo: profile.photo,
                     trustScore: profile.trustScore || 50,
                     completedTrips: profile.completedTrips || 0,
@@ -160,7 +160,7 @@ export async function GET(req: Request) {
                 {
                     trustScore: l.guide?.trustScore || 50,
                     completedTrips: l.guide?.completedTrips || 0,
-                    isDiyanet: l.guide?.isDiyanet || false,
+                    isIdentityVerified: l.guide?.isIdentityVerified || false,
                     priorityRanking: l.guide?.package ? PackageSystem.getLimits(l.guide.package as GuidePackage).priorityRanking : false,
                 },
             ),

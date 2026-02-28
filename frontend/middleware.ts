@@ -19,7 +19,8 @@ export default auth((req) => {
 
     const publicRoutes = [
         "/", "/login", "/register", "/about", "/contact", "/faq",
-        "/terms", "/privacy", "/help",
+        "/terms", "/privacy", "/help", "/kvkk", "/cookies",
+        "/listing-terms", "/refund-policy", "/consent",
         "/auth/verify"
     ];
     const isPublicRoute = publicRoutes.includes(nextUrl.pathname);

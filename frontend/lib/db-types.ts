@@ -109,7 +109,7 @@ export interface UserProfile {
     city?: string | null;
     bio?: string | null;
     photo?: string | null;
-    isDiyanetVerified: boolean;
+    isIdentityVerified: boolean;
     trustScore: number;
     completedTrips: number;
     role: UserRole;

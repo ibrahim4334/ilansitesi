@@ -19,7 +19,7 @@ export default function GuideProfilePage() {
         phone: "",
         city: "",
         bio: "",
-        isDiyanet: false
+        isIdentityVerified: false
     });
 
     useEffect(() => {
@@ -32,7 +32,7 @@ export default function GuideProfilePage() {
                         phone: data.phone || "",
                         city: data.city || "",
                         bio: data.bio || "",
-                        isDiyanet: data.isDiyanet || false
+                        isIdentityVerified: data.isIdentityVerified || false
                     });
                 }
             })
@@ -106,10 +106,10 @@ export default function GuideProfilePage() {
                     </div>
                     <div className="flex items-center space-x-2 border p-3 rounded">
                         <Switch
-                            checked={formData.isDiyanet}
-                            onCheckedChange={c => setFormData({ ...formData, isDiyanet: c })}
+                            checked={formData.isIdentityVerified}
+                            onCheckedChange={c => setFormData({ ...formData, isIdentityVerified: c })}
                         />
-                        <Label>Diyanet Personeli misiniz?</Label>
+                        <Label>Kimlik doğrulaması yapmak ister misiniz?</Label>
                     </div>
 
                     <Button type="submit" className="w-full" disabled={saving}>

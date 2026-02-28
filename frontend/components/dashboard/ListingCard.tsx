@@ -101,6 +101,14 @@ export function ListingCard({ listing, onAction, guideImage }: ListingCardProps)
                                                 <Star className="w-4 h-4" /> Öne Çıkar
                                             </button>
                                         )}
+                                        {listing.status === 'active' && (
+                                            <button
+                                                onClick={() => { onAction?.('spotlight', listing.id); setMenuOpen(false); }}
+                                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-amber-700 hover:bg-amber-50"
+                                            >
+                                                <Sparkles className="w-4 h-4" /> Saatlik Sponsor
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => { onAction?.('share', listing.id); setMenuOpen(false); }}
                                             className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"

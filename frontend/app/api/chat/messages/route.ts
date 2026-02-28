@@ -87,7 +87,7 @@ export async function GET(req: Request) {
         const messages = await prisma.message.findMany({
             where: {
                 conversationId: threadId,
-                deletedAt: null,   // exclude soft-deleted
+                blocked: false,   // exclude soft-deleted/blocked
                 ...(cursor ? { createdAt: { lt: new Date(cursor) } } : {}),
             },
             orderBy: { createdAt: "desc" }, // newest first, client reverses for display
@@ -209,7 +209,6 @@ export async function POST(req: Request) {
                 role: session.user.role || "USER",
                 body: message.trim().substring(0, MAX_MESSAGE_LENGTH),
                 blocked: isBlocked,
-                deletedAt: null,
             },
         });
 
@@ -268,11 +267,11 @@ export async function DELETE(req: Request) {
 
         const message = await prisma.message.findUnique({
             where: { id: messageId },
-            select: { id: true, senderId: true, deletedAt: true },
+            select: { id: true, senderId: true, blocked: true },
         });
 
         if (!message) return NextResponse.json({ error: "Message not found" }, { status: 404 });
-        if (message.deletedAt) return NextResponse.json({ error: "Already deleted" }, { status: 409 });
+        if (message.blocked) return NextResponse.json({ error: "Already deleted" }, { status: 409 });
 
         // Owner or admin can delete
         const isOwner = message.senderId === currentUser.id;
@@ -281,7 +280,7 @@ export async function DELETE(req: Request) {
 
         await prisma.message.update({
             where: { id: messageId },
-            data: { deletedAt: new Date() },
+            data: { blocked: true },
         });
 
         return NextResponse.json({ success: true });

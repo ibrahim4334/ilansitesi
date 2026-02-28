@@ -1,12 +1,10 @@
-
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { requireRole } from "@/lib/api-guards";
-import { TokenService } from "@/lib/token-service";
+import { spendToken } from "@/src/modules/tokens/application/spend-token.usecase";
 import { rateLimit } from "@/lib/rate-limit";
 
-const CHAT_THREAD_COST = 50; // Cost to start a conversation
+const CHAT_THREAD_COST = 50; // TODO: move to TOKEN_COSTS in package-system.ts
 
 export async function POST(req: Request) {
     try {
@@ -16,7 +14,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const guideId = session.user.id; // string, narrowed from string|undefined above
+        const guideId = session.user.id;
 
         // Rate limit: 5 threads per minute per user
         const rl = rateLimit(`thread:${guideId}`, 60_000, 5);
@@ -54,104 +52,43 @@ export async function POST(req: Request) {
             return NextResponse.json(existing);
         }
 
-        // Deterministic idempotency key
-        const idempotencyKey = `thread:${session.user.id}:${requestId}`;
+        const spendResult = await spendToken({
+            userId: guideId,
+            action: "DEMAND_UNLOCK",
+            relatedId: requestId,
+            reason: `Start conversation for request ${requestId}`,
+        });
 
-        // ─── FULLY ATOMIC: balance check + deduct + conversation creation in ONE tx ───
-        // Previously, credits were deducted by TokenService (Tx#1) and conversation was
-        // created afterward (outside Tx#1). If conversation creation failed, credits were
-        // permanently lost. Now everything is in a single SERIALIZABLE transaction.
-        try {
-            const conversation = await prisma.$transaction(async (tx) => {
-                // (1) Idempotency check
-                const existingLedger = await tx.creditTransaction.findUnique({
-                    where: { idempotencyKey }
-                });
-                if (existingLedger) {
-                    // Credits already deducted — ensure conversation exists
-                    const conv = await tx.conversation.findUnique({
-                        where: {
-                            requestId_guideId: {
-                                requestId,
-                                guideId
-                            }
-                        }
-                    });
-                    return conv;
-                }
-
-                // (2) Row-level lock on balance
-                const [balanceRow] = await tx.$queryRaw<[{ balance: number }]>`
-                    SELECT COALESCE(SUM(amount), 0) AS balance
-                    FROM credit_transactions
-                    WHERE userId = ${guideId}
-                    FOR UPDATE
-                `;
-                const currentBalance = Number(balanceRow.balance);
-
-                // (3) Strict non-negative guard
-                if (currentBalance - CHAT_THREAD_COST < 0) {
-                    throw new Error('INSUFFICIENT_CREDITS');
-                }
-
-                // (4) Write deduction to ledger
-                await tx.creditTransaction.create({
-                    data: {
-                        userId: guideId,
-                        amount: -CHAT_THREAD_COST,
-                        type: "spend",
-                        reason: `Chat thread started for Request #${requestId}`,
-                        relatedId: requestId,
-                        idempotencyKey,
-                    }
-                });
-
-                // (5) Update GuideProfile cache
-                const updated = await tx.guideProfile.update({
-                    where: { userId: guideId },
-                    data: { credits: { decrement: CHAT_THREAD_COST } }
-                });
-
-                // Safety: ensure cache non-negative
-                if (updated.credits < 0) {
-                    await tx.guideProfile.update({
-                        where: { userId: guideId },
-                        data: { credits: 0 }
-                    });
-                }
-
-                // (6) Create conversation — inside the SAME transaction
-                const newConv = await tx.conversation.create({
-                    data: {
-                        requestId,
-                        guideId,
-                        userId: userId,
-                    }
-                });
-
-                return newConv;
-            }, {
-                isolationLevel: 'Serializable',
-                timeout: 10000,
-            });
-
-            return NextResponse.json(conversation);
-
-        } catch (error: any) {
-            if (error.message === 'INSUFFICIENT_CREDITS') {
+        if (!spendResult.ok) {
+            if (spendResult.error === "INSUFFICIENT_TOKENS") {
                 return NextResponse.json({
                     error: "Insufficient credits",
                     cost: CHAT_THREAD_COST,
-                    balance: await TokenService.getBalance(session.user.id)
+                    balance: spendResult.newBalance,
                 }, { status: 402 });
             }
-            // P2002: parallel call already inserted the idempotency key — safe to return existing conversation
+            return NextResponse.json({ error: spendResult.error }, { status: 400 });
+        }
+
+        // ─── Create conversation (post-spend) ───
+        try {
+            const newConv = await prisma.conversation.create({
+                data: {
+                    requestId,
+                    guideId,
+                    userId: userId,
+                }
+            });
+
+            return NextResponse.json(newConv);
+        } catch (error: any) {
+            // P2002: parallel call already created the conversation — return existing
             if (error.code === 'P2002') {
                 const existingConv = await prisma.conversation.findUnique({
                     where: {
                         requestId_guideId: {
                             requestId,
-                            guideId: session.user.id
+                            guideId
                         }
                     }
                 });

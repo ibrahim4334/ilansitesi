@@ -10,29 +10,26 @@ export async function GET() {
         if (guard) return guard;
 
         const user = await prisma.user.findUnique({
-            where: { email: session!.user.email! }
+            where: { email: session!.user.email! },
+            select: { id: true, tokenBalance: true },
         });
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-        const transactions = await prisma.creditTransaction.findMany({
+        // Read from unified ledger (token_ledger_entries / tokenTransaction)
+        const transactions = await prisma.tokenTransaction.findMany({
             where: { userId: user.id },
             orderBy: { createdAt: 'desc' },
             take: 50,
         });
 
-        const profile = await prisma.guideProfile.findUnique({
-            where: { userId: user.id },
-            select: { credits: true }
-        });
-
         return NextResponse.json({
-            balance: profile?.credits || 0,
+            balance: user.tokenBalance,
             transactions: transactions.map(t => ({
                 id: t.id,
                 amount: t.amount,
-                type: t.type,
-                reason: t.reason,
-                relatedId: t.relatedId,
+                type: t.entryType,
+                reason: t.reasonCode,
+                relatedId: t.referenceId,
                 createdAt: t.createdAt.toISOString(),
             }))
         });

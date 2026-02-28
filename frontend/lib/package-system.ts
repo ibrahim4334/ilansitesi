@@ -26,8 +26,8 @@ export interface DailyCaps {
 export const DAILY_CAPS: Record<PackageType, DailyCaps> = {
     FREE: { offers: 1, unlocks: 0, boosts: 0, spotlights: 0 },
     STARTER: { offers: 10, unlocks: 5, boosts: 1, spotlights: 0 },
-    PRO: { offers: 30, unlocks: 15, boosts: 3, spotlights: 0 },
-    LEGEND: { offers: 50, unlocks: 30, boosts: 5, spotlights: 0 },
+    PRO: { offers: 30, unlocks: 15, boosts: 3, spotlights: 1 },
+    LEGEND: { offers: 50, unlocks: 30, boosts: 5, spotlights: 2 },
     CORP_BASIC: { offers: 20, unlocks: 10, boosts: 3, spotlights: 1 },
     CORP_PRO: { offers: 50, unlocks: 30, boosts: 10, spotlights: 3 },
     CORP_ENTERPRISE: { offers: 200, unlocks: 100, boosts: 30, spotlights: 10 },
@@ -48,7 +48,7 @@ export interface PackageLimits {
     featuredEligible: boolean;
     priorityRanking: boolean;
     trustBoost: boolean;
-    diyanetEligible: boolean;
+    identityVerificationEligible: boolean;
     spotlightEligible: boolean;
     posterQuality: "LOW" | "NORMAL" | "HIGH";
     watermark: boolean;
@@ -70,7 +70,7 @@ export const PACKAGE_LIMITS: Record<PackageType, PackageLimits> = {
         featuredEligible: false,
         priorityRanking: false,
         trustBoost: false,
-        diyanetEligible: false,
+        identityVerificationEligible: false,
         spotlightEligible: false,
         posterQuality: "LOW",
         watermark: true,
@@ -89,7 +89,7 @@ export const PACKAGE_LIMITS: Record<PackageType, PackageLimits> = {
         featuredEligible: false,
         priorityRanking: false,
         trustBoost: false,
-        diyanetEligible: true,
+        identityVerificationEligible: true,
         spotlightEligible: false,
         posterQuality: "NORMAL",
         watermark: false,
@@ -108,8 +108,8 @@ export const PACKAGE_LIMITS: Record<PackageType, PackageLimits> = {
         featuredEligible: true,
         priorityRanking: true,
         trustBoost: false,
-        diyanetEligible: true,
-        spotlightEligible: false,
+        identityVerificationEligible: true,
+        spotlightEligible: true,
         posterQuality: "HIGH",
         watermark: false,
         aiGenerator: false,
@@ -127,8 +127,8 @@ export const PACKAGE_LIMITS: Record<PackageType, PackageLimits> = {
         featuredEligible: true,
         priorityRanking: true,
         trustBoost: true,
-        diyanetEligible: true,
-        spotlightEligible: false,
+        identityVerificationEligible: true,
+        spotlightEligible: true,
         posterQuality: "HIGH",
         watermark: false,
         aiGenerator: true,
@@ -147,7 +147,7 @@ export const PACKAGE_LIMITS: Record<PackageType, PackageLimits> = {
         featuredEligible: true,
         priorityRanking: true,
         trustBoost: false,
-        diyanetEligible: true,
+        identityVerificationEligible: true,
         spotlightEligible: true,
         posterQuality: "NORMAL",
         watermark: false,
@@ -166,7 +166,7 @@ export const PACKAGE_LIMITS: Record<PackageType, PackageLimits> = {
         featuredEligible: true,
         priorityRanking: true,
         trustBoost: true,
-        diyanetEligible: true,
+        identityVerificationEligible: true,
         spotlightEligible: true,
         posterQuality: "HIGH",
         watermark: false,
@@ -185,7 +185,7 @@ export const PACKAGE_LIMITS: Record<PackageType, PackageLimits> = {
         featuredEligible: true,
         priorityRanking: true,
         trustBoost: true,
-        diyanetEligible: true,
+        identityVerificationEligible: true,
         spotlightEligible: true,
         posterQuality: "HIGH",
         watermark: false,
@@ -242,8 +242,8 @@ export class PackageSystem {
         return this.getLimits(packageType).phoneVisible;
     }
 
-    static isDiyanetEligible(packageType: string): boolean {
-        return this.getLimits(packageType).diyanetEligible;
+    static isIdentityVerificationEligible(packageType: string): boolean {
+        return this.getLimits(packageType).identityVerificationEligible;
     }
 
     static canBoost(packageType: string, currentBoostCount: number): boolean {
@@ -267,4 +267,67 @@ export class PackageSystem {
     static getPosterQuality(packageType: string): "LOW" | "NORMAL" | "HIGH" {
         return this.getLimits(packageType).posterQuality;
     }
+}
+
+// ── Boost Tier Access (per package) ─────────────────────────────────────
+
+export type BoostTier = "BASIC" | "PREMIUM" | "ELITE";
+
+export const BOOST_TIER_ACCESS: Record<PackageType, BoostTier[]> = {
+    FREE: [],
+    STARTER: ["BASIC"],
+    PRO: ["BASIC", "PREMIUM"],
+    LEGEND: ["BASIC", "PREMIUM", "ELITE"],
+    CORP_BASIC: ["BASIC", "PREMIUM"],
+    CORP_PRO: ["BASIC", "PREMIUM", "ELITE"],
+    CORP_ENTERPRISE: ["BASIC", "PREMIUM", "ELITE"],
+};
+
+export function canAccessBoostTier(packageType: string, tier: BoostTier): boolean {
+    const access = BOOST_TIER_ACCESS[packageType as PackageType] || [];
+    return access.includes(tier);
+}
+
+// ── Plan Prices (TRY, monthly) ──────────────────────────────────────────
+
+export const PLAN_PRICES_TRY: Record<PackageType, number> = {
+    FREE: 0,
+    STARTER: 299,
+    PRO: 699,
+    LEGEND: 1499,
+    CORP_BASIC: 1999,
+    CORP_PRO: 4999,
+    CORP_ENTERPRISE: 12999,
+};
+
+export const ANNUAL_DISCOUNT = 0.14;  // 14% off → "2 ay hediye"
+export const FREEZE_MONTHLY_TRY = 99; // Paket dondurma fee
+
+// ── Token Expiry Rules ──────────────────────────────────────────────────
+
+export const TOKEN_EXPIRY_DAYS = {
+    PURCHASED: 90,   // À la carte purchases
+    PROMO: 30,   // Sign-up bonus / promotional grants
+    SUBSCRIPTION: null, // Never expires (capped by soft cap)
+} as const;
+
+// ── Subscription Rules ──────────────────────────────────────────────────
+
+export const DOWNGRADE_COOLDOWN_DAYS = 7;  // Wait 7 days after last plan change
+export const BLAST_THRESHOLD_HOURS = 48;   // If >80% tokens spent in <48h, block downgrade
+export const BLAST_THRESHOLD_PCT = 0.80;
+
+// ── Plan Ordering (for upgrade/downgrade detection) ─────────────────────
+
+const PLAN_ORDER: Record<string, number> = {
+    FREE: 0, STARTER: 1, PRO: 2, LEGEND: 3,
+    CORP_BASIC: 10, CORP_PRO: 11, CORP_ENTERPRISE: 12,
+};
+
+export function isUpgrade(from: string, to: string): boolean {
+    return (PLAN_ORDER[to] ?? 0) > (PLAN_ORDER[from] ?? 0);
+}
+
+export function isDowngrade(from: string, to: string): boolean {
+    return (PLAN_ORDER[to] ?? 0) < (PLAN_ORDER[from] ?? 0);
 }

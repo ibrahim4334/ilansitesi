@@ -1,10 +1,11 @@
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { Review } from "../domain/Review";
 import { ReviewPolicy } from "../domain/ReviewPolicy";
 import { Sanitizer } from "../infrastructure/utils/Sanitizer";
 import { ProfanityFilter } from "../infrastructure/utils/ProfanityFilter";
 import { ReviewRepository } from "../infrastructure/ReviewRepository";
 import { HashUtil } from "../infrastructure/utils/HashUtil";
+import { checkReviewIntegrity } from "./ReviewIntegrityEngine";
 
 interface CreateReviewRequest {
     guideId: string;
@@ -34,13 +35,15 @@ export class CreateReviewUseCase {
         );
         ReviewPolicy.validateTags(req.positiveTags ?? [], req.negativeTags ?? []);
 
-        // 2. Fetch Interaction data (UmrahRequest and Offer and Conversation)
-        const demand = await prisma.demand.findUnique({
+        // 2. Prevent self-review (Anti-Sybil Hard Block)
+        if (req.guideId === req.reviewerUserId) {
+            throw new Error("Kendi profilinizi değerlendiremezsiniz."); // Self-review block
+        }
+
+        // 3. Fetch Interaction data (UmrahRequest and Offer and Conversation)
+        const demand = await prisma.umrahRequest.findUnique({
             where: { id: req.requestId },
             include: {
-                offers: {
-                    where: { guideId: req.guideId },
-                },
                 conversations: {
                     where: { guideId: req.guideId },
                     include: { messages: { take: 1 } },
@@ -51,16 +54,27 @@ export class CreateReviewUseCase {
         if (!demand) {
             throw new Error("Talebiniz bulunamadı.");
         }
-        if (demand.createdBy !== req.reviewerUserId) {
-            throw new Error("Yalnızca kendi talebiniz için değerlendirme yapabilirsiniz.");
+        if (demand.userEmail && req.reviewerUserId) {
+            // Note: the schema defines userEmail on UmrahRequest.
+            // Ensure the reviewer is the one who created the request.
+            const user = await prisma.user.findUnique({ where: { id: req.reviewerUserId } });
+            if (demand.userEmail !== user?.email) {
+                throw new Error("Yalnızca kendi talebiniz için değerlendirme yapabilirsiniz.");
+            }
         }
 
-        const hasOffer = demand.offers.length > 0;
         const hasConversation = demand.conversations.length > 0 && demand.conversations[0].messages.length > 0;
 
-        // A user can review a guide ONLY IF: They created a request, the guide sent an offer, there was a message exchange
-        if (!hasOffer || !hasConversation) {
-            throw new Error("Yalnızca teklif aldığınız ve mesajlaştığınız rehberleri değerlendirebilirsiniz.");
+        // P1 Requirement: Booking/Assignment verification
+        // Status must be closed/completed (meaning user picked a guide)
+        const isRequestClosed = demand.status === "closed" || demand.status === "completed";
+
+        if (!hasConversation) {
+            throw new Error("Yalnızca mesajlaştığınız rehberleri değerlendirebilirsiniz.");
+        }
+
+        if (!isRequestClosed) {
+            throw new Error("Değerlendirme yapabilmek için anlaşmanın tamamlanması gereklidir.");
         }
 
         // Check if review already exists
@@ -94,15 +108,16 @@ export class CreateReviewUseCase {
             req.ratingTimeManagement
         );
 
-        let ipRiskHigh = false;
-        if (ipHash) {
-            const distinctUsersFromIP = await this.repo.findPendingIPMatches(req.guideId, ipHash);
-            if (distinctUsersFromIP >= 3) {
-                ipRiskHigh = true;
-            }
-        }
+        // 5. Run integrity engine (replaces manual flag checks)
+        const integrityResult = await checkReviewIntegrity(
+            req.guideId,
+            req.reviewerUserId,
+            cleanComment,
+            isExtreme,
+            hasProfanity,
+        );
 
-        // 5. Create Entity
+        // 6. Create Entity
         const review = Review.create({
             guideId: req.guideId,
             reviewerUserId: req.reviewerUserId,
@@ -118,17 +133,23 @@ export class CreateReviewUseCase {
             userAgentHash,
         });
 
-        if (hasProfanity || isExtreme || ipRiskHigh) {
+        // 7. Apply integrity decision
+        if (integrityResult.action === "AUTO_REJECT") {
+            review.reject();
+            console.warn(`[Review] Auto-rejected: ${integrityResult.flags.join(", ")}`);
+        } else if (integrityResult.action === "QUEUE_FOR_REVIEW") {
             review.markAsPending();
             if (hasProfanity) {
-                // Here we could notify admin via an event or email...
                 console.warn(`[Review] Profanity detected for Request ID: ${req.requestId}`);
+            }
+            if (integrityResult.flags.includes("SIMILAR_REVIEW")) {
+                console.warn(`[Review] Similar review detected (score: ${integrityResult.similarityScore})`);
             }
         } else {
             review.approve();
         }
 
-        // 6. Persist
+        // 8. Persist
         await this.repo.save(review);
     }
 }

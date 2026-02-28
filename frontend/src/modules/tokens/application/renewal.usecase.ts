@@ -1,7 +1,14 @@
 // ─── Token Renewal Use Case ─────────────────────────────────────────────
 // Monthly subscription token renewal with soft cap enforcement.
+//
+// Safety guarantees:
+//   1. Idempotency check INSIDE SERIALIZABLE interactive $transaction
+//   2. withSerializableRetry handles deadlock/serialization failures
+//   3. P2002 on idempotencyKey caught gracefully
 
 import { prisma } from "@/lib/prisma";
+import { withSerializableRetry } from "@/lib/with-retry";
+import { LedgerEntryType } from "@prisma/client";
 import { TokenPolicy } from "../domain/token-policy";
 import { TokenRepository } from "../infrastructure/token.repository";
 import { EventBus } from "@/src/core/events/event-bus";
@@ -27,51 +34,63 @@ export async function processMonthlyRenewal(): Promise<RenewalResult> {
         const idempotencyKey = `renewal:${user.id}:${monthKey}`;
 
         try {
-            // Check if already renewed this month
-            const existing = await prisma.tokenTransaction.findUnique({
-                where: { idempotencyKey },
-            });
-            if (existing) {
+            const result = await withSerializableRetry(() =>
+                prisma.$transaction(async (tx) => {
+                    // ── (1) Idempotency check INSIDE transaction ──────────
+                    const existing = await tx.tokenTransaction.findUnique({
+                        where: { idempotencyKey },
+                    });
+                    if (existing) return null; // Already renewed this month
+
+                    const newBalance = TokenPolicy.calculateRenewal(
+                        user.tokenBalance,
+                        user.packageType,
+                    );
+                    const grantAmount = newBalance - user.tokenBalance;
+
+                    if (grantAmount <= 0) return null; // Already at or above soft cap
+
+                    // ── (2) Create immutable ledger entry ─────────────────
+                    await tx.tokenTransaction.create({
+                        data: {
+                            userId: user.id,
+                            entryType: LedgerEntryType.PURCHASE,
+                            amount: grantAmount,
+                            idempotencyKey,
+                            reasonCode: `Monthly renewal (${monthKey})`,
+                        },
+                    });
+
+                    // ── (3) Update cached balance ─────────────────────────
+                    await tx.user.update({
+                        where: { id: user.id },
+                        data: { tokenBalance: newBalance },
+                    });
+
+                    return grantAmount;
+                }, {
+                    isolationLevel: "Serializable",
+                    timeout: 10_000,
+                })
+            );
+
+            if (result === null) {
+                skipped++;
+            } else {
+                EventBus.emit("TOKEN_RENEWED", {
+                    userId: user.id,
+                    granted: result,
+                    month: monthKey,
+                });
+                processed++;
+            }
+
+        } catch (error: any) {
+            // P2002 = duplicate idempotencyKey — already processed by parallel cron
+            if (error.code === "P2002") {
                 skipped++;
                 continue;
             }
-
-            const newBalance = TokenPolicy.calculateRenewal(
-                user.tokenBalance,
-                user.packageType,
-            );
-            const grantAmount = newBalance - user.tokenBalance;
-
-            if (grantAmount <= 0) {
-                skipped++; // Already at or above soft cap
-                continue;
-            }
-
-            await prisma.$transaction([
-                prisma.tokenTransaction.create({
-                    data: {
-                        userId: user.id,
-                        type: "SUBSCRIPTION",
-                        amount: grantAmount,
-                        reason: `Monthly renewal (${monthKey})`,
-                        idempotencyKey,
-                    },
-                }),
-                prisma.user.update({
-                    where: { id: user.id },
-                    data: { tokenBalance: newBalance },
-                }),
-            ]);
-
-            EventBus.emit("TOKEN_RENEWED", {
-                userId: user.id,
-                granted: grantAmount,
-                newBalance,
-                month: monthKey,
-            });
-
-            processed++;
-        } catch (error) {
             console.error(`[Renewal] Failed for user ${user.id}:`, error);
             errors++;
         }

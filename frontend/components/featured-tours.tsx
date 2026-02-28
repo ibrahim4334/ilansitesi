@@ -24,7 +24,7 @@ export async function FeaturedTours() {
     guide: {
       fullName: tour.agencyName || tour.agency_name || "Acente",
       city: tour.departureCity,
-      isDiyanet: false,
+      isIdentityVerified: false,
       trustScore: tour.rating ? tour.rating * 20 : 100, // 5 scale to 100
       package: "AGENCY"
     },

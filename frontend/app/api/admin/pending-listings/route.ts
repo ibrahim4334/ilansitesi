@@ -30,7 +30,7 @@ export async function GET() {
             createdAt: l.createdAt,
             trustScore: l.guide?.trustScore ?? 0,
             isFeatured: l.isFeatured,
-            departureCity: l.departureCity,
+            departureCityId: l.departureCityId,
             city: l.city,
         }));
 

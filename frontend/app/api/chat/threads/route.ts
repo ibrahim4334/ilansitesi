@@ -34,7 +34,7 @@ export async function GET(req: Request) {
             where,
             include: {
                 messages: {
-                    where: { deletedAt: null },
+                    where: { blocked: false },
                     orderBy: { createdAt: 'desc' },
                     take: 1 // Only need last message
                 },

@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { requireAuth } from "@/lib/api-guards";
 import { rateLimit } from "@/lib/rate-limit";
 import { safeErrorMessage } from "@/lib/safe-error";
+import { uploadToVault } from "@/lib/s3-client";
 
 // ── Security constants ──────────────────────────────────────────────────────
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -61,6 +62,20 @@ export async function POST(req: Request) {
 
         // VULN-8c: Sanitize filename — prevent path traversal
         const sanitized = sanitizeFilename(file.name);
+
+        // Vault Upload Branch (Private KYC)
+        const intent = formData.get("intent") as string;
+        if (intent === "kyc") {
+            const vaultKey = `kyc/${session!.user.id}/${Date.now()}_${sanitized}`;
+            await uploadToVault(vaultKey, buffer, file.type);
+
+            return NextResponse.json({
+                success: true,
+                url: `vault://${vaultKey}` // Return a virtual URL that the client submits to DB
+            });
+        }
+
+        // Public Upload Branch (Profile photos, etc)
         const filename = `${Date.now()}_${sanitized}`;
 
         // Ensure "public/uploads" exists

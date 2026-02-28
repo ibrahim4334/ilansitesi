@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { ListingList } from '@/components/dashboard/ListingCard';
 import { CreditBalance } from '@/components/guide-dashboard/credit-balance';
+import { SpotlightPurchaseModal } from '@/components/dashboard/spotlight-modal';
 import useSWR from 'swr';
 import { useSession } from 'next-auth/react';
 
@@ -25,6 +26,7 @@ export default function ListingsPage() {
     const { data: session } = useSession();
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
+    const [spotlightModalListing, setSpotlightModalListing] = useState<string | null>(null);
 
     const { data: rawListings, error, isLoading, mutate } = useSWR(
         '/api/guide/my-listings',
@@ -103,6 +105,8 @@ export default function ListingsPage() {
             } catch (err) {
                 console.error('Copy failed', err);
             }
+        } else if (action === 'spotlight') {
+            setSpotlightModalListing(listingId);
         } else if (action === 'feature') {
             if (!confirm('Bu ilanı öne çıkarmak için kredi bakiyenizden düşülecektir. Onaylıyor musunuz?')) return;
             try {
@@ -238,6 +242,15 @@ export default function ListingsPage() {
                     </div>
                 )}
             </div>
+
+            {spotlightModalListing && (
+                <SpotlightPurchaseModal
+                    isOpen={!!spotlightModalListing}
+                    onClose={() => setSpotlightModalListing(null)}
+                    listingId={spotlightModalListing}
+                    balance={Number.MAX_SAFE_INTEGER} // Ideally pass real balance or rely on backend blocks
+                />
+            )}
         </DashboardLayout>
     );
 }

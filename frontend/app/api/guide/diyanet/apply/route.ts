@@ -2,12 +2,12 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireSupply } from "@/lib/api-guards";
-import { PackageSystem } from "@/lib/package-system";
+import { PackageSystem } from "@/lib/packageType-system";
 import { safeErrorMessage } from "@/lib/safe-error";
 
 /**
  * POST /api/guide/diyanet/apply
- * Apply for Diyanet badge. Requires at least 1 paid package.
+ * Apply for Diyanet badge. Requires at least 1 paid packageType.
  *
  * Body: { idDocumentUrl, certificateUrl, contactEmail, note? }
  */
@@ -35,16 +35,16 @@ export async function POST(req: Request) {
         // Resolve user
         const user = await prisma.user.findUnique({
             where: { email: session!.user.email! },
-            select: { id: true, packageType: true, isDiyanetVerified: true },
+            select: { id: true, packageType: true, isIdentityVerifiedVerified: true },
         });
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
         // Already verified
-        if (user.isDiyanetVerified) {
-            return NextResponse.json({ error: "Zaten Diyanet onaylısınız" }, { status: 400 });
+        if (user.isIdentityVerifiedVerified) {
+            return NextResponse.json({ error: "Zaten kimlik onaylısınız" }, { status: 400 });
         }
 
-        // Package requirement: must have at least 1 paid package
+        // Package requirement: must have at least 1 paid packageType
         if (user.packageType === "FREE") {
             return NextResponse.json({
                 error: "Diyanet rozeti için en az bir ücretli paket gereklidir",
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
         }
 
         // Diyanet eligibility check
-        if (!PackageSystem.isDiyanetEligible(user.packageType)) {
+        if (!PackageSystem.isIdentityVerifiedEligible(user.packageType)) {
             return NextResponse.json({
                 error: "Mevcut paketiniz Diyanet rozeti başvurusunu desteklemiyor",
             }, { status: 403 });
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
                 certificateUrl: certificateUrl.trim(),
                 contactEmail: contactEmail.trim().toLowerCase(),
                 note: note?.trim()?.substring(0, 500) || null,
-                packageAtApply: user.packageType,
+                packageTypeAtApply: user.packageType,
                 status: "PENDING",
             },
         });

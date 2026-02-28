@@ -30,7 +30,7 @@ export async function GET(req: Request) {
                     select: { departureCity: true, dateRange: true } // Context
                 },
                 guide: {
-                    select: { name: true, guideProfile: { select: { isDiyanet: true } } }
+                    select: { name: true, guideProfile: { select: { isIdentityVerified: true } } }
                 },
                 user: {
                     select: { name: true }

@@ -2,8 +2,8 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/api-guards"
-import { TokenService } from "@/lib/token-service"
 import { logAdminAction } from "@/lib/admin-audit"
+import { grantToken } from "@/src/modules/tokens/application/grant-token.usecase"
 
 /**
  * ADMIN-ONLY: Set a user's role.
@@ -32,7 +32,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "User not found" }, { status: 404 })
         }
 
-        // Prevent role change if already the same
         if (targetUser.role === role) {
             return NextResponse.json({ error: "User already has this role" }, { status: 400 })
         }
@@ -59,19 +58,19 @@ export async function POST(req: Request) {
                         quotaTarget: 100,
                         currentCount: 0,
                         isApproved: false,
-                        credits: 30,
                         package: "FREEMIUM",
                         tokens: 0
                     }
                 })
 
-                // Write initial credits to ledger (source of truth)
-                await TokenService.grantCredits(
-                    targetUserId,
-                    30,
-                    "admin",
-                    "Initial signup credits (admin role assignment)"
-                )
+                // Write initial tokens to unified ledger
+                await grantToken({
+                    userId: targetUserId,
+                    amount: 30,
+                    type: "ADMIN_GRANT",
+                    reason: "Initial signup credits (admin role assignment)",
+                    idempotencyKey: `set-role-grant:${targetUserId}`,
+                })
             }
         }
 

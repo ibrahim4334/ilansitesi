@@ -7,6 +7,7 @@ import Credentials from "next-auth/providers/credentials"
 import { authConfig } from "./auth.config"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "./prisma"
+import { AuthRateLimit } from "./auth-rate-limit"
 
 // Extend session type
 declare module "next-auth" {
@@ -76,20 +77,44 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" }
             },
-            async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) return null;
+            async authorize(credentials, req) {
+                // Determine IP address securely
+                // Use type 'any' for req to bypass NextAuth strict type definitions if headers is missing on its type
+                const request = req as any;
+                const ip = request?.headers?.get?.("x-forwarded-for") ?? "unknown";
+                const email = credentials?.email as string;
+
+                // 1. Bruteforce Hard Check
+                const lockout = AuthRateLimit.checkLockout(ip, email);
+                if (!lockout.allowed) {
+                    throw new Error("Invalid credentials"); // Generic error, no leakage
+                }
+
+                if (!email || !credentials?.password) {
+                    AuthRateLimit.recordFailure(ip, email);
+                    return null;
+                }
 
                 const bcrypt = await import("bcryptjs");
 
                 const user = await prisma.user.findUnique({
-                    where: { email: credentials.email as string }
+                    where: { email }
                 });
 
-                if (!user || !user.passwordHash) return null;
+                if (!user || !user.passwordHash) {
+                    AuthRateLimit.recordFailure(ip, email);
+                    throw new Error("Invalid credentials");
+                }
 
                 const isValid = await bcrypt.compare(credentials.password as string, user.passwordHash);
 
-                if (!isValid) return null;
+                if (!isValid) {
+                    AuthRateLimit.recordFailure(ip, email);
+                    throw new Error("Invalid credentials");
+                }
+
+                // 2. Clear failures on success
+                AuthRateLimit.recordSuccess(ip, email);
 
                 return {
                     id: user.id,

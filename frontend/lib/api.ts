@@ -111,7 +111,7 @@ const mockTourDetails: Record<string, Tour> = {
     id: 1,
     slug: "ramazan-umresi-2025",
     title: "Ramazan Umresi 2025",
-    description: "Ramazan ayının maneviyatını Mekke ve Medine'de yaşayın. Diyanet onaylı rehberlerimiz eşliğinde unutulmaz bir ibadet deneyimi sizi bekliyor.",
+    description: "Ramazan ayının maneviyatını Mekke ve Medine'de yaşayın. Kimlik onaylı güvenilir rehberlerimiz eşliğinde unutulmaz bir ibadet deneyimi sizi bekliyor.",
     price: 52000,
     duration: "10 Gün / 9 Gece",
     departureCity: "İstanbul",
@@ -192,7 +192,7 @@ export async function getTours(filters?: TourFilters): Promise<ToursResponse> {
     let filteredTours = [...mockTours];
 
     if (filters?.city) {
-      filteredTours = filteredTours.filter(t => t.departureCity.toLowerCase() === filters.city?.toLowerCase());
+      filteredTours = filteredTours.filter(t => t.departureCity?.toLowerCase() === filters.city?.toLowerCase());
     }
     if (filters?.minPrice !== undefined) {
       filteredTours = filteredTours.filter(t => t.price >= (filters.minPrice || 0));
@@ -265,7 +265,7 @@ export async function getTourBySlug(slug: string): Promise<Tour | null> {
       return {
         ...listItem,
         description: "Bu tur hakkında detaylı bilgi için acente ile iletişime geçin.",
-        images: [listItem.thumbnail],
+        images: listItem.thumbnail ? [listItem.thumbnail] : [],
         included: ["Uçak bileti", "Otel konaklaması", "Vize işlemleri", "Transfer"],
         excluded: ["Kişisel harcamalar"],
         itinerary: [

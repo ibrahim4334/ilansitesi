@@ -3,9 +3,9 @@ import { Shield, CreditCard, HeadphonesIcon, Award } from "lucide-react";
 const features = [
   {
     icon: Shield,
-    title: "Diyanet Onaylı Turlar",
+    title: "Kimlik Onaylı Turlar",
     description:
-      "Tüm turlarımız Diyanet İşleri Başkanlığı tarafından onaylı, lisanslı ve güvenilir acenteler tarafından düzenlenmektedir.",
+      "Tüm turlarımız platformumuz tarafından kimlik doğrulaması yapılmış, lisanslı ve güvenilir acenteler tarafından düzenlenmektedir.",
   },
   {
     icon: CreditCard,

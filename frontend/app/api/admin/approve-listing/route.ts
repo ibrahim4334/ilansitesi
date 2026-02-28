@@ -30,14 +30,18 @@ export async function POST(req: Request) {
         });
         if (!adminUser) return NextResponse.json({ error: "Admin user not found" }, { status: 404 });
 
-        // APPROVE only
-        await prisma.guideListing.update({
-            where: { id: listingId },
+        // APPROVE only with race-condition block
+        const updateResult = await prisma.guideListing.updateMany({
+            where: { id: listingId, approvalStatus: 'PENDING' },
             data: {
                 approvalStatus: 'APPROVED',
                 active: true
             }
         });
+
+        if (updateResult.count === 0) {
+            return NextResponse.json({ error: "Listing is not pending or already approved." }, { status: 409 });
+        }
 
         // Write audit log
         await logAdminAction(

@@ -32,7 +32,7 @@ export function GuideListingsSection() {
                         En İyi Umre Turları
                     </h2>
                     <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
-                        Manevi yolculuğunuz için Diyanet onaylı ve tecrübeli rehberlerden size özel paketler.
+                        Manevi yolculuğunuz için kimlik onaylı ve tecrübeli rehberlerden size özel paketler.
                     </p>
                 </div>
 

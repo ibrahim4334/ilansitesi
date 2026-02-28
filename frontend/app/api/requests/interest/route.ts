@@ -2,9 +2,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireSupply } from "@/lib/api-guards";
-import { TokenService } from "@/lib/token-service";
+import { spendToken } from "@/src/modules/tokens/application/spend-token.usecase";
 import { rateLimit } from "@/lib/rate-limit";
-import { withSerializableRetry } from "@/lib/with-retry";
 import { getRoleConfig } from "@/lib/role-config";
 import { safeErrorMessage } from "@/lib/safe-error";
 
@@ -57,24 +56,6 @@ export async function POST(req: Request) {
         });
         if (!requestOwner) return NextResponse.json({ error: "Request owner not found" }, { status: 404 });
 
-        // Ensure guide profile exists
-        await prisma.guideProfile.upsert({
-            where: { userId: guideUser.id },
-            update: {},
-            create: {
-                userId: guideUser.id,
-                fullName: session!.user.name || "Unknown Guide",
-                phone: "",
-                city: "",
-                credits: 0,
-                tokens: 0,
-                quotaTarget: 30,
-                currentCount: 0,
-                isApproved: false,
-                package: "FREEMIUM"
-            }
-        });
-
         // ─── Get cost from ROLE_CONFIG ───
         const roleConfig = getRoleConfig(session!.user.role);
         const cost = roleConfig.interestCost;
@@ -95,58 +76,27 @@ export async function POST(req: Request) {
             );
         }
 
-        // Deterministic idempotency key: prevents double-charge on network retries
-        const idempotencyKey = `interest:${guideUser.id}:${requestId}`;
+        const spendResult = await spendToken({
+            userId: guideUser.id,
+            action: "DEMAND_UNLOCK",
+            relatedId: requestId,
+            reason: `Express interest in request ${requestId}`,
+        });
 
-        // ─── FULLY ATOMIC with retry: balance check + deduct + interest + conversation ───
-        let newBalance: number;
+        if (!spendResult.ok) {
+            if (spendResult.error === "INSUFFICIENT_TOKENS") {
+                return NextResponse.json({
+                    error: "INSUFFICIENT_CREDITS",
+                    message: "Yetersiz Token",
+                    balance: spendResult.newBalance,
+                }, { status: 402 });
+            }
+            return NextResponse.json({ error: spendResult.error }, { status: 400 });
+        }
+
+        // ─── Create interest + conversation (post-spend) ───
         try {
-            const result = await withSerializableRetry(() => prisma.$transaction(async (tx) => {
-                // (1) Idempotency check — if this key exists, the action already completed
-                const existingLedger = await tx.creditTransaction.findUnique({
-                    where: { idempotencyKey }
-                });
-                if (existingLedger) {
-                    const bal = await tx.creditTransaction.aggregate({
-                        where: { userId: guideUser.id },
-                        _sum: { amount: true }
-                    });
-                    return { balance: bal._sum.amount || 0, idempotent: true };
-                }
-
-                // (2) Row-level lock on balance (prevents concurrent double-spend)
-                const [balanceRow] = await tx.$queryRaw<[{ balance: number }]>`
-                    SELECT COALESCE(SUM(amount), 0) AS balance
-                    FROM credit_transactions
-                    WHERE userId = ${guideUser.id}
-                    FOR UPDATE
-                `;
-                const currentBalance = Number(balanceRow.balance);
-
-                // (3) Strict balance guard
-                if (currentBalance - cost < 0) {
-                    throw new Error('INSUFFICIENT_CREDITS');
-                }
-
-                // (4) Write credit deduction to ledger
-                await tx.creditTransaction.create({
-                    data: {
-                        userId: guideUser.id,
-                        amount: -cost,
-                        type: "spend",
-                        reason: `Express interest in request ${requestId}`,
-                        relatedId: requestId,
-                        idempotencyKey,
-                    }
-                });
-
-                // (5) Update GuideProfile cache
-                const updated = await tx.guideProfile.update({
-                    where: { userId: guideUser.id },
-                    data: { credits: { decrement: cost } }
-                });
-
-                // (6) Create interest record
+            await prisma.$transaction(async (tx) => {
                 await tx.requestInterest.create({
                     data: {
                         requestId,
@@ -154,13 +104,9 @@ export async function POST(req: Request) {
                     }
                 });
 
-                // (7) Create conversation (if not already exists)
                 const existingConvo = await tx.conversation.findUnique({
                     where: {
-                        requestId_guideId: {
-                            requestId,
-                            guideId: guideUser.id
-                        }
+                        requestId_guideId: { requestId, guideId: guideUser.id }
                     }
                 });
 
@@ -173,37 +119,17 @@ export async function POST(req: Request) {
                         }
                     });
                 }
-
-                return { balance: Math.max(0, updated.credits), idempotent: false };
-            }, {
-                isolationLevel: 'Serializable',
-                timeout: 10000,
-            }));
-
-            newBalance = result.balance;
-            if (result.idempotent) {
-                return NextResponse.json({ message: "Interest already recorded (idempotent)", creditsRemaining: newBalance }, { status: 200 });
+            });
+        } catch (err: any) {
+            // P2002 on requestInterest unique constraint — parallel race
+            if (err.code === "P2002") {
+                return NextResponse.json({ message: "Interest already recorded", creditsRemaining: spendResult.newBalance }, { status: 200 });
             }
-
-        } catch (error: any) {
-            if (error.message === 'INSUFFICIENT_CREDITS') {
-                const balance = await TokenService.getBalance(guideUser.id);
-                return NextResponse.json({
-                    error: "INSUFFICIENT_CREDITS",
-                    message: "Yetersiz Kredi",
-                    balance
-                }, { status: 402 });
-            }
-            // Unique constraint on idempotencyKey — parallel race condition resolved
-            if (error.code === 'P2002') {
-                const balance = await TokenService.getBalance(guideUser.id);
-                return NextResponse.json({ message: "Interest already recorded", creditsRemaining: balance }, { status: 200 });
-            }
-            throw error;
+            throw err;
         }
 
-        console.log(`[Interest] Deducted ${cost} credits from ${guideUser.id} (${session!.user.role}). New balance: ${newBalance}`);
-        return NextResponse.json({ message: "Interest recorded", creditsRemaining: newBalance }, { status: 201 });
+        console.log(`[Interest] Deducted ${spendResult.cost} tokens from ${guideUser.id}. New balance: ${spendResult.newBalance}`);
+        return NextResponse.json({ message: "Interest recorded", creditsRemaining: spendResult.newBalance }, { status: 201 });
 
     } catch (error) {
         console.error("Interest error:", error);

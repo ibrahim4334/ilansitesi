@@ -22,8 +22,21 @@ export type EventName =
     | "TOKEN_RENEWED"
     | "PACKAGE_UPGRADED"
     | "PACKAGE_DOWNGRADED"
-    | "DIYANET_APPROVED"
-    | "DIYANET_REVOKED";
+    | "PLAN_UPGRADED"
+    | "PLAN_DOWNGRADE_SCHEDULED"
+    | "PLAN_FROZEN"
+    | "IDENTITY_APPROVED"
+    | "IDENTITY_REVOKED"
+    // Auto-replenish events
+    | "AUTO_REPLENISH_CONFIGURED"
+    | "AUTO_REPLENISH_SUCCESS"
+    | "AUTO_REPLENISH_ALERT"
+    | "AUTO_REPLENISH_SUSPENDED"
+    // Advanced monetization events
+    | "DYNAMIC_PRICE_APPLIED"
+    | "CREDIT_LINE_DRAWN"
+    | "CREDIT_LINE_REPAID"
+    | "PERFORMANCE_TIER_CHANGED";
 
 type EventHandler<T = any> = (data: T) => Promise<void>;
 

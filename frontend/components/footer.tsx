@@ -104,6 +104,14 @@ export function Footer() {
                   Yardım Merkezi
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/refund-policy"
+                  className="text-lg text-card/70 transition-colors hover:text-card"
+                >
+                  İade ve İptal Politikası
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -121,6 +129,22 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/terms"
+                  className="text-lg text-card/70 transition-colors hover:text-card"
+                >
+                  Kullanım Koşulları
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/listing-terms"
+                  className="text-lg text-card/70 transition-colors hover:text-card"
+                >
+                  İlan Yayınlama Şartları
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/privacy"
                   className="text-lg text-card/70 transition-colors hover:text-card"
                 >
@@ -129,10 +153,26 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/terms"
+                  href="/kvkk"
                   className="text-lg text-card/70 transition-colors hover:text-card"
                 >
-                  Kullanım Koşulları
+                  KVKK
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/cookies"
+                  className="text-lg text-card/70 transition-colors hover:text-card"
+                >
+                  Çerez Politikası
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/consent"
+                  className="text-lg text-card/70 transition-colors hover:text-card"
+                >
+                  Açık Rıza Metni
                 </Link>
               </li>
             </ul>

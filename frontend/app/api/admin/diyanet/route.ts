@@ -107,25 +107,30 @@ export async function PATCH(req: Request) {
                 return NextResponse.json({ error: "Can only approve PENDING applications" }, { status: 400 });
             }
 
-            // Verify user still has a paid package
+            // Verify user still has a paid packageType
             if (application.user.packageType === "FREE") {
                 return NextResponse.json({
-                    error: "User no longer has a paid package. Cannot approve.",
+                    error: "User no longer has a paid packageType. Cannot approve.",
                 }, { status: 400 });
             }
 
+            const updateResult = await prisma.diyanetApplication.updateMany({
+                where: { id: applicationId, status: "PENDING" },
+                data: {
+                    status: "APPROVED",
+                    reviewedBy: adminUser.id,
+                    reviewedAt: new Date(),
+                },
+            });
+
+            if (updateResult.count === 0) {
+                return NextResponse.json({ error: "Application is not pending or already processed." }, { status: 409 });
+            }
+
             await prisma.$transaction([
-                prisma.diyanetApplication.update({
-                    where: { id: applicationId },
-                    data: {
-                        status: "APPROVED",
-                        reviewedBy: adminUser.id,
-                        reviewedAt: new Date(),
-                    },
-                }),
                 prisma.user.update({
                     where: { id: application.userId },
-                    data: { isDiyanetVerified: true },
+                    data: { isIdentityVerifiedVerified: true },
                 }),
                 prisma.adminAuditLog.create({
                     data: {
@@ -146,25 +151,28 @@ export async function PATCH(req: Request) {
                 return NextResponse.json({ error: "Can only reject PENDING applications" }, { status: 400 });
             }
 
-            await prisma.$transaction([
-                prisma.diyanetApplication.update({
-                    where: { id: applicationId },
-                    data: {
-                        status: "REJECTED",
-                        reviewedBy: adminUser.id,
-                        reviewedAt: new Date(),
-                        rejectionReason: reason.trim(),
-                    },
-                }),
-                prisma.adminAuditLog.create({
-                    data: {
-                        adminId: adminUser.id,
-                        action: "reject_diyanet",
-                        targetId: application.userId,
-                        reason: reason.trim(),
-                    },
-                }),
-            ]);
+            const updateResult = await prisma.diyanetApplication.updateMany({
+                where: { id: applicationId, status: "PENDING" },
+                data: {
+                    status: "REJECTED",
+                    reviewedBy: adminUser.id,
+                    reviewedAt: new Date(),
+                    rejectionReason: reason.trim(),
+                },
+            });
+
+            if (updateResult.count === 0) {
+                return NextResponse.json({ error: "Application is not pending or already processed." }, { status: 409 });
+            }
+
+            await prisma.adminAuditLog.create({
+                data: {
+                    adminId: adminUser.id,
+                    action: "reject_diyanet",
+                    targetId: application.userId,
+                    reason: reason.trim(),
+                },
+            });
 
             return NextResponse.json({ success: true, message: "Badge rejected" });
         }
@@ -175,17 +183,22 @@ export async function PATCH(req: Request) {
                 return NextResponse.json({ error: "Can only revoke APPROVED applications" }, { status: 400 });
             }
 
+            const updateResult = await prisma.diyanetApplication.updateMany({
+                where: { id: applicationId, status: "APPROVED" },
+                data: {
+                    status: "REVOKED",
+                    revokedReason: reason.trim(),
+                },
+            });
+
+            if (updateResult.count === 0) {
+                return NextResponse.json({ error: "Application is not approved or already revoked." }, { status: 409 });
+            }
+
             await prisma.$transaction([
-                prisma.diyanetApplication.update({
-                    where: { id: applicationId },
-                    data: {
-                        status: "REVOKED",
-                        revokedReason: reason.trim(),
-                    },
-                }),
                 prisma.user.update({
                     where: { id: application.userId },
-                    data: { isDiyanetVerified: false },
+                    data: { isIdentityVerifiedVerified: false },
                 }),
                 prisma.adminAuditLog.create({
                     data: {

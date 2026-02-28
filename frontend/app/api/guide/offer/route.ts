@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireSupply } from "@/lib/api-guards";
-import { TokenService } from "@/lib/token-service";
+import { spendToken } from "@/src/modules/tokens/application/spend-token.usecase";
 import { getRoleConfig } from "@/lib/role-config";
 import { rateLimit } from "@/lib/rate-limit";
 import { withSerializableRetry } from "@/lib/with-retry";
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid price" }, { status: 400 });
         }
 
-        // Rate limit: maxDailyOffers per day
+        // Rate limit: 10 offers per minute
         const rl = rateLimit(`offer:${session!.user.email}`, 60_000, 10);
         if (!rl.success) {
             return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -79,58 +79,29 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Offer already sent", offer: existingOffer }, { status: 200 });
         }
 
-        const cost = roleConfig.offerCost;
-        const idempotencyKey = `offer:${guideUser.id}:${requestId}`;
         const offerExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours
 
-        // Atomic: deduct tokens + create offer + create conversation
-        let newBalance: number;
+        const spendResult = await spendToken({
+            userId: guideUser.id,
+            action: "OFFER_SEND",
+            relatedId: requestId,
+            reason: `Offer sent to request ${requestId}`,
+        });
+
+        if (!spendResult.ok) {
+            if (spendResult.error === "INSUFFICIENT_TOKENS") {
+                return NextResponse.json({
+                    error: "INSUFFICIENT_CREDITS",
+                    message: "Yetersiz Token",
+                    balance: spendResult.newBalance,
+                }, { status: 402 });
+            }
+            return NextResponse.json({ error: spendResult.error }, { status: 400 });
+        }
+
+        // ─── Create offer + conversation (post-spend) ───
         try {
-            const result = await withSerializableRetry(() => prisma.$transaction(async (tx) => {
-                // (1) Idempotency check
-                const existingLedger = await tx.creditTransaction.findUnique({
-                    where: { idempotencyKey },
-                });
-                if (existingLedger) {
-                    const bal = await tx.creditTransaction.aggregate({
-                        where: { userId: guideUser.id },
-                        _sum: { amount: true },
-                    });
-                    return { balance: bal._sum.amount || 0, idempotent: true };
-                }
-
-                // (2) Lock + balance check
-                const [balanceRow] = await tx.$queryRaw<[{ balance: number }]>`
-                    SELECT COALESCE(SUM(amount), 0) AS balance
-                    FROM credit_transactions
-                    WHERE userId = ${guideUser.id}
-                    FOR UPDATE
-                `;
-                const currentBalance = Number(balanceRow.balance);
-
-                if (currentBalance - cost < 0) {
-                    throw new Error("INSUFFICIENT_CREDITS");
-                }
-
-                // (3) Deduct tokens
-                await tx.creditTransaction.create({
-                    data: {
-                        userId: guideUser.id,
-                        amount: -cost,
-                        type: "spend",
-                        reason: `Offer sent to request ${requestId}`,
-                        relatedId: requestId,
-                        idempotencyKey,
-                    },
-                });
-
-                // (4) Update cache
-                const updated = await tx.guideProfile.update({
-                    where: { userId: guideUser.id },
-                    data: { credits: { decrement: cost } },
-                });
-
-                // (5) Create offer
+            await prisma.$transaction(async (tx) => {
                 await tx.offer.create({
                     data: {
                         guideId: guideUser.id,
@@ -143,7 +114,7 @@ export async function POST(req: Request) {
                     },
                 });
 
-                // (6) Create conversation if not exists (for messaging after offer)
+                // Create conversation if not exists
                 const requestOwner = await tx.user.findUnique({
                     where: { email: request.userEmail },
                     select: { id: true },
@@ -160,37 +131,18 @@ export async function POST(req: Request) {
                         });
                     }
                 }
-
-                return { balance: Math.max(0, updated.credits), idempotent: false };
-            }, {
-                isolationLevel: "Serializable",
-                timeout: 10_000,
-            }));
-
-            newBalance = result.balance;
-            if (result.idempotent) {
-                return NextResponse.json({ message: "Offer already recorded (idempotent)", creditsRemaining: newBalance }, { status: 200 });
+            });
+        } catch (err: any) {
+            if (err.code === "P2002") {
+                return NextResponse.json({ message: "Offer already sent (race)", creditsRemaining: spendResult.newBalance }, { status: 200 });
             }
-        } catch (error: any) {
-            if (error.message === "INSUFFICIENT_CREDITS") {
-                const balance = await TokenService.getBalance(guideUser.id);
-                return NextResponse.json({
-                    error: "INSUFFICIENT_CREDITS",
-                    message: "Yetersiz Token",
-                    balance,
-                }, { status: 402 });
-            }
-            if (error.code === "P2002") {
-                const balance = await TokenService.getBalance(guideUser.id);
-                return NextResponse.json({ message: "Offer already sent", creditsRemaining: balance }, { status: 200 });
-            }
-            throw error;
+            throw err;
         }
 
-        console.log(`[Offer] Guide ${guideUser.id} sent offer to request ${requestId}. Cost: ${cost}, Balance: ${newBalance}`);
+        console.log(`[Offer] Guide ${guideUser.id} sent offer to request ${requestId}. Cost: ${spendResult.cost}, Balance: ${spendResult.newBalance}`);
         return NextResponse.json({
             message: "Offer sent",
-            creditsRemaining: newBalance,
+            creditsRemaining: spendResult.newBalance,
         }, { status: 201 });
 
     } catch (error) {

@@ -1,22 +1,14 @@
 import { prisma } from "@/lib/prisma";
-import { logAdminAction } from "@/lib/admin-audit";
 import Stripe from "stripe";
+import { grantToken } from "@/src/modules/tokens/application/grant-token.usecase";
+import { withSerializableRetry } from "@/lib/with-retry";
 
 // Reconcile stale pending payment transactions.
 //
-// Intended to run every 10–15 minutes via:
-//  - Vercel Cron: vercel.json `crons: [{ path: "/api/cron/reconcile", schedule: "*/15 * * * * " }]`
-//  - Or a standard cron that calls POST /api/cron/reconcile
+// Intended to run every 10–15 minutes via cron.
+// Safe to run concurrently — each row is atomically claimed via WebhookEvent dedup.
 //
-// Algorithm (safe to run concurrently - each row is atomically claimed):
-// For each Transaction with status = "pending" older than STALE_THRESHOLD_MS:
-//   1. Retrieve Stripe session
-//   2a. payment_status = "paid" -> apply credits (idempotent via "stripe:" + sessionId key)
-//   2b. status = "expired" / other -> mark as "failed"
-//   3. Log result to AdminAuditLog
-//
-// Idempotency: Step 2a uses the same idempotencyKey as the webhook handler.
-// Running this N times is safe - the second run hits the unique constraint and no-ops.
+// LEDGER: All credit grants go through grantToken() → token_ledger_entries.
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_mock_key", {
     apiVersion: "2023-10-16" as any,
@@ -36,7 +28,6 @@ export async function reconcilePendingPayments(): Promise<ReconcileResult> {
 
     const staleThreshold = new Date(Date.now() - STALE_THRESHOLD_MS);
 
-    // Find stale pending rows — only those with a real sessionId (null = Stripe call failed)
     const stalePending = await prisma.transaction.findMany({
         where: {
             status: "pending",
@@ -51,7 +42,7 @@ export async function reconcilePendingPayments(): Promise<ReconcileResult> {
             amountTRY: true,
             role: true,
         },
-        take: 50, // batch cap per run — prevents runaway on backlog
+        take: 50,
     });
 
     for (const tx of stalePending) {
@@ -62,23 +53,19 @@ export async function reconcilePendingPayments(): Promise<ReconcileResult> {
             const session = await stripe.checkout.sessions.retrieve(sessionId);
 
             if (session.payment_status === "paid") {
-                // ── Grant credits if not already done ─────────────────────
-                await prisma.$transaction(async (dbTx) => {
-                    // WebhookEvent row — if webhook already processed this, this insert
-                    // will fail with P2002 and we'll skip. If not, we proceed.
+                // ── Grant tokens if not already done ─────────────────────
+                await withSerializableRetry(() => prisma.$transaction(async (dbTx) => {
+                    // WebhookEvent row — dedup gate
                     try {
                         await dbTx.webhookEvent.create({
                             data: {
-                                eventId: `reconcile:${sessionId}`, // synthetic event ID
+                                eventId: `reconcile:${sessionId}`,
                                 eventType: "checkout.session.completed",
                                 status: "processed",
                             },
                         });
                     } catch (e: any) {
-                        if (e.code === "P2002") {
-                            // Already processed by either webhook or a previous reconcile run
-                            return;
-                        }
+                        if (e.code === "P2002") return; // Already processed
                         throw e;
                     }
 
@@ -86,29 +73,22 @@ export async function reconcilePendingPayments(): Promise<ReconcileResult> {
                         where: { id: tx.id, status: "pending" },
                         data: { status: "completed" },
                     });
+                }, { isolationLevel: "Serializable" }));
 
-                    await dbTx.creditTransaction.create({
-                        data: {
-                            userId: tx.userId,
-                            amount: tx.credits,
-                            type: "purchase",
-                            reason: `Reconciled: ${tx.credits} credits (session ${sessionId})`,
-                            relatedId: sessionId,
-                            idempotencyKey: `stripe:${sessionId}`, // Same key as webhook — safe
-                        },
-                    });
-
-                    await dbTx.guideProfile.update({
-                        where: { userId: tx.userId },
-                        data: { credits: { increment: tx.credits } },
-                    });
-                }, { isolationLevel: "Serializable" });
+                // Grant via unified ledger (has its own atomic transaction)
+                await grantToken({
+                    userId: tx.userId,
+                    amount: tx.credits,
+                    type: "PURCHASE",
+                    reason: `Reconciled: ${tx.credits} tokens (session ${sessionId})`,
+                    relatedId: sessionId,
+                    idempotencyKey: `stripe:${sessionId}`,
+                });
 
                 result.credited++;
                 console.log(`[Reconcile] Credited ${tx.credits} to ${tx.userId} via ${sessionId}`);
 
             } else {
-                // Session unpaid or expired — mark failed
                 await prisma.transaction.updateMany({
                     where: { id: tx.id, status: "pending" },
                     data: { status: "failed" },
@@ -119,7 +99,6 @@ export async function reconcilePendingPayments(): Promise<ReconcileResult> {
 
         } catch (err: any) {
             if (err.code === "P2002") {
-                // CreditTransaction idempotencyKey collision — already credited
                 console.log(`[Reconcile] Already credited: ${sessionId}`);
                 continue;
             }
@@ -129,8 +108,7 @@ export async function reconcilePendingPayments(): Promise<ReconcileResult> {
         }
     }
 
-    // Also mark PENDING rows with no sessionId older than threshold as failed
-    // (these represent Stripe API call failures during checkout creation)
+    // Mark PENDING rows with no sessionId as failed
     const orphaned = await prisma.transaction.updateMany({
         where: {
             status: "pending",

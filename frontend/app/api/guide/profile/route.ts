@@ -28,7 +28,7 @@ export async function GET(req: Request) {
                 city: "",
                 bio: "",
                 photo: "",
-                isDiyanet: false,
+                isIdentityVerified: false,
                 quotaTarget: 30,
                 currentCount: 0,
                 isApproved: false,
@@ -66,7 +66,7 @@ export async function PUT(req: Request) {
                 city: body.city || undefined,
                 bio: body.bio || undefined,
                 photo: body.photo || undefined,
-                isDiyanet: typeof body.isDiyanet === 'boolean' ? body.isDiyanet : undefined
+                isIdentityVerified: typeof body.isIdentityVerified === 'boolean' ? body.isIdentityVerified : undefined
             },
             create: {
                 userId: user.id,
@@ -75,7 +75,7 @@ export async function PUT(req: Request) {
                 city: body.city || "",
                 bio: body.bio || "",
                 photo: body.photo || "",
-                isDiyanet: body.isDiyanet || false,
+                isIdentityVerified: body.isIdentityVerified || false,
                 quotaTarget: 30,
                 currentCount: 0,
                 isApproved: false,

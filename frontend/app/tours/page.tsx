@@ -20,7 +20,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
   const maxDate = resolvedParams?.maxDate;
   const minPrice = resolvedParams?.minPrice;
   const maxPrice = resolvedParams?.maxPrice;
-  const isDiyanetFilter = resolvedParams?.isDiyanet;
+  const isIdentityVerifiedFilter = resolvedParams?.isIdentityVerified;
 
   const now = new Date();
 
@@ -35,8 +35,8 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
     where.departureCityId = departureCityId;
   }
 
-  if (isDiyanetFilter === 'true') {
-    where.guide = { isDiyanet: true };
+  if (isIdentityVerifiedFilter === 'true') {
+    where.guide = { isIdentityVerified: true };
   }
 
   // Sorting logic
@@ -154,7 +154,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
         city: profile.city,
         bio: profile.bio,
         phone: profile.phone,
-        isDiyanet: profile.isDiyanet,
+        isIdentityVerified: profile.isIdentityVerified,
         photo: profile.photo,
         trustScore: profile.trustScore || 50,
         completedTrips: profile.completedTrips || 0,
