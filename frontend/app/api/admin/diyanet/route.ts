@@ -21,7 +21,7 @@ export async function GET(req: Request) {
         const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "20")));
 
         const [applications, total] = await Promise.all([
-            prisma.diyanetApplication.findMany({
+            prisma.identityApplication.findMany({
                 where: { status },
                 orderBy: { createdAt: "asc" },
                 skip: (page - 1) * limit,
@@ -44,7 +44,7 @@ export async function GET(req: Request) {
                     },
                 },
             }),
-            prisma.diyanetApplication.count({ where: { status } }),
+            prisma.identityApplication.count({ where: { status } }),
         ]);
 
         return NextResponse.json({
@@ -87,7 +87,7 @@ export async function PATCH(req: Request) {
         }
 
         // Find application
-        const application = await prisma.diyanetApplication.findUnique({
+        const application = await prisma.identityApplication.findUnique({
             where: { id: applicationId },
             include: { user: { select: { id: true, email: true, packageType: true } } },
         });
@@ -114,7 +114,7 @@ export async function PATCH(req: Request) {
                 }, { status: 400 });
             }
 
-            const updateResult = await prisma.diyanetApplication.updateMany({
+            const updateResult = await prisma.identityApplication.updateMany({
                 where: { id: applicationId, status: "PENDING" },
                 data: {
                     status: "APPROVED",
@@ -130,7 +130,7 @@ export async function PATCH(req: Request) {
             await prisma.$transaction([
                 prisma.user.update({
                     where: { id: application.userId },
-                    data: { isIdentityVerifiedVerified: true },
+                    data: { isIdentityVerified: true },
                 }),
                 prisma.adminAuditLog.create({
                     data: {
@@ -151,7 +151,7 @@ export async function PATCH(req: Request) {
                 return NextResponse.json({ error: "Can only reject PENDING applications" }, { status: 400 });
             }
 
-            const updateResult = await prisma.diyanetApplication.updateMany({
+            const updateResult = await prisma.identityApplication.updateMany({
                 where: { id: applicationId, status: "PENDING" },
                 data: {
                     status: "REJECTED",
@@ -183,7 +183,7 @@ export async function PATCH(req: Request) {
                 return NextResponse.json({ error: "Can only revoke APPROVED applications" }, { status: 400 });
             }
 
-            const updateResult = await prisma.diyanetApplication.updateMany({
+            const updateResult = await prisma.identityApplication.updateMany({
                 where: { id: applicationId, status: "APPROVED" },
                 data: {
                     status: "REVOKED",
@@ -198,7 +198,7 @@ export async function PATCH(req: Request) {
             await prisma.$transaction([
                 prisma.user.update({
                     where: { id: application.userId },
-                    data: { isIdentityVerifiedVerified: false },
+                    data: { isIdentityVerified: false },
                 }),
                 prisma.adminAuditLog.create({
                     data: {

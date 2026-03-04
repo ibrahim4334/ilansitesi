@@ -6,6 +6,7 @@ import type { PackageType } from "./db-types";
 // ── Token Costs ─────────────────────────────────────────────────────────
 
 export const TOKEN_COSTS = {
+    LISTING_CREATE: 10,
     OFFER_SEND: 5,
     DEMAND_UNLOCK: 3,
     BOOST: 15,
@@ -13,6 +14,7 @@ export const TOKEN_COSTS = {
     REPUBLISH: 2,
     REFRESH: 1,
 } as const;
+
 
 // ── Daily Hard Caps (per package) ───────────────────────────────────────
 

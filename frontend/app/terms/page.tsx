@@ -36,7 +36,8 @@ export default function TermsPage() {
                 <ul>
                     <li>Doğrudan tur operatörü <strong>değildir</strong>; acenteler ile kullanıcıları bir araya getirir.</li>
                     <li>Turların içeriği, fiyatlandırması ve icrasından acente sorumludur.</li>
-                    <li>Kullanıcılar ile acenteler arasında güvenli bir iletişim ve eşleştirme ortamı sağlar.</li>
+                    <li>Kullanıcılar ile acenteler arasında bir iletişim ve eşleştirme ortamı sağlar.</li>
+                    <li>Platformumuz sadece ilan yayınlar, kullanıcıdan komisyon veya ödeme almaz.</li>
                     <li>Acente ve rehber doğrulama, puanlama ve değerlendirme sistemleri sunar.</li>
                 </ul>
 

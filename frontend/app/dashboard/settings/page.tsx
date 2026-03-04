@@ -14,11 +14,11 @@ export default function SettingsPage() {
     const { data: session } = useSession();
     const [notifications, setNotifications] = useState(true);
     const [marketingEmails, setMarketingEmails] = useState(false);
-    const [contactConsent, setContactConsent] = useState(session?.user?.contactConsent || false);
+    const [contactConsent, setContactConsent] = useState((session?.user as any)?.contactConsent || false);
 
     useEffect(() => {
-        if (session?.user?.contactConsent !== undefined) {
-            setContactConsent(session.user.contactConsent);
+        if ((session?.user as any)?.contactConsent !== undefined) {
+            setContactConsent((session!.user as any).contactConsent);
         }
     }, [session]);
 

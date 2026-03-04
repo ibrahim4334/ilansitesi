@@ -15,7 +15,7 @@ import { grantToken } from "@/src/modules/tokens/application/grant-token.usecase
  */
 export class PaymentService {
 
-    private static stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    private static stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_mock_key", {
         apiVersion: '2023-10-16' as any,
     });
 
@@ -165,7 +165,7 @@ export class PaymentService {
             // Mark refunded atomically
             await tx.transaction.update({
                 where: { id: transactionId },
-                data: { status: "refunded", refundedAt: new Date() },
+                data: { status: "refunded" },
             });
         }, { isolationLevel: "Serializable", timeout: 15_000 });
 

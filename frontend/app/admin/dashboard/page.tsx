@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 
 import PendingListingsPanel from '@/components/admin/PendingListingsPanel';
+import AllListingsPanel from '@/components/admin/AllListingsPanel';
 import UserRequestsPanel from '@/components/admin/UserRequestsPanel';
 import CreditManagementPanel from '@/components/admin/CreditManagementPanel';
 import BanPanel from '@/components/admin/BanPanel';
@@ -16,6 +17,7 @@ import AdminMessagesPanel from '@/app/admin/messages/page'; // We will move the 
 import AuditLogPanel from '@/components/admin/AuditLogPanel';
 
 const tabs = [
+    { id: 'all-listings', label: 'Tüm İlanlar', icon: ClipboardList, desc: 'Tüm İlanları Yönet' },
     { id: 'listings', label: 'Bekleyen İlanlar', icon: FileText, desc: 'Pending Listings' },
     { id: 'requests', label: 'Kullanıcı Talepleri', icon: Users, desc: 'User Requests' },
     { id: 'credits', label: 'Kredi Yönetimi', icon: CreditCard, desc: 'Credits' },
@@ -27,7 +29,7 @@ const tabs = [
 type TabId = typeof tabs[number]['id'];
 
 export default function AdminDashboardPage() {
-    const [activeTab, setActiveTab] = useState<TabId>('listings');
+    const [activeTab, setActiveTab] = useState<TabId>('all-listings');
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -163,6 +165,7 @@ export default function AdminDashboardPage() {
 
                 {/* Panel Content */}
                 <div className="p-6">
+                    {activeTab === 'all-listings' && <AllListingsPanel />}
                     {activeTab === 'listings' && <PendingListingsPanel />}
                     {activeTab === 'requests' && <UserRequestsPanel />}
                     {activeTab === 'credits' && <CreditManagementPanel />}

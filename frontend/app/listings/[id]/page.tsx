@@ -11,15 +11,17 @@ async function getListing(id: string) {
     const l = await prisma.guideListing.findUnique({
         where: { id },
         include: {
-            guide: true,
-            tourDays: { orderBy: { day: 'asc' } }
-        }
+            guide: { include: { user: true } } as any,
+            departureCity: true as any,
+            airline: true as any,
+            tourDays: { orderBy: { day: 'asc' } } as any
+        } as any
     });
 
     if (!l) return null;
 
-    const guide = l.guide;
-    const showPhone = guide ? PackageSystem.isPhoneVisible(guide) : false;
+    const guide = (l as any).guide;
+    const showPhone = guide ? PackageSystem.isPhoneVisible(guide.package) : false;
 
     return {
         id: l.id,
@@ -27,11 +29,11 @@ async function getListing(id: string) {
         title: l.title,
         description: l.description,
         city: l.city,
-        departureCity: l.departureCity,
+        departureCity: (l as any).departureCity?.name || l.departureCityOld || l.city,
         meetingCity: l.meetingCity,
         extraServices: l.extraServices as string[],
         hotelName: l.hotelName,
-        airline: l.airline,
+        airline: (l as any).airline?.name || l.airlineOld,
         pricing: {
             double: l.pricingDouble,
             triple: l.pricingTriple,
@@ -46,7 +48,7 @@ async function getListing(id: string) {
         startDate: l.startDate.toISOString().split('T')[0],
         endDate: l.endDate.toISOString().split('T')[0],
         totalDays: l.totalDays,
-        tourPlan: l.tourDays.map(d => ({
+        tourPlan: ((l as any).tourDays || []).map((d: any) => ({
             day: d.day,
             city: d.city,
             title: d.title,
@@ -59,7 +61,7 @@ async function getListing(id: string) {
             city: guide.city,
             bio: guide.bio,
             phone: guide.phone,
-            isIdentityVerified: guide.isIdentityVerified,
+            isIdentityVerified: (guide as any).user?.isIdentityVerified || false,
             photo: guide.photo,
             trustScore: guide.trustScore || 50,
             completedTrips: guide.completedTrips || 0,
@@ -102,11 +104,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                 <div className="absolute bottom-0 left-0 w-full p-6 sm:p-10">
                     <div className="container mx-auto">
                         <div className="flex flex-wrap gap-3 mb-4">
-                            {isIdentityVerified && (
-                                <Badge className="bg-teal-500 hover:bg-teal-600 border-none text-white px-3 py-1 text-base">
-                                    <ShieldCheck className="w-4 h-4 mr-2" /> Kimlik Onaylı
-                                </Badge>
-                            )}
+
                             <Badge variant="secondary" className="bg-white/90 text-gray-900 px-3 py-1 text-base backdrop-blur-md">
                                 <Calendar className="w-4 h-4 mr-2" />
                                 {new Date(listing.startDate).toLocaleDateString('tr-TR')} - {listing.totalDays} Gün

@@ -33,7 +33,8 @@ export default function ListingsPage() {
         fetcher
     );
 
-    const listings = (rawListings || []).map((l: any) => ({
+    const listingsArray = Array.isArray(rawListings) ? rawListings : [];
+    const listings = listingsArray.map((l: any) => ({
         id: l.id,
         title: l.title,
         status: l.approvalStatus === 'PENDING' ? 'pending'

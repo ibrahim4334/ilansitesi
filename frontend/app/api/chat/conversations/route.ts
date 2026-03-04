@@ -1,4 +1,5 @@
 
+import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
@@ -11,7 +12,7 @@ export async function GET(req: Request) {
         }
 
         const role = session.user.role;
-        let whereCondition: any = {};
+        let whereCondition: Prisma.ConversationWhereInput = {};
 
         if (role === 'USER') {
             whereCondition = { userId: session.user.id };
@@ -30,7 +31,7 @@ export async function GET(req: Request) {
                     select: { departureCity: true, dateRange: true } // Context
                 },
                 guide: {
-                    select: { name: true, guideProfile: { select: { isIdentityVerified: true } } }
+                    select: { name: true, isIdentityVerified: true }
                 },
                 user: {
                     select: { name: true }

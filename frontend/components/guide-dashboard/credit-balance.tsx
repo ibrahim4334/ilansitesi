@@ -7,14 +7,14 @@ import Link from "next/link";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export const CREDIT_BALANCE_KEY = "/api/guide/topup";
+export const CREDIT_BALANCE_KEY = "/api/guide/credits";
 
 export function CreditBalance() {
     const { data: balanceData, isLoading: balLoading } = useSWR(CREDIT_BALANCE_KEY, fetcher);
     const { data: profileData, isLoading: profLoading } = useSWR('/api/guide/profile', fetcher);
 
     const isLoading = balLoading || profLoading;
-    const credits = balanceData?.credits ?? profileData?.credits ?? 0;
+    const credits = balanceData?.balance ?? profileData?.tokenBalance ?? 0;
     const trustScore = profileData?.trustScore ?? 0;
     const pkg = profileData?.package || "FREEMIUM";
     const completedTrips = profileData?.completedTrips ?? 0;

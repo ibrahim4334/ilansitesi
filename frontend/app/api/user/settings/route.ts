@@ -14,7 +14,7 @@ export async function POST(req: Request) {
         const { contactConsent } = body;
 
         const updatedUser = await prisma.user.update({
-            where: { email: session.user.email },
+            where: { email: session!.user.email! },
             data: { contactConsent: Boolean(contactConsent) }
         });
 

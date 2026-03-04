@@ -32,6 +32,7 @@ interface ListingCardProps {
         extraServices?: string[];
         isFeatured?: boolean;
         posterImages?: string[];
+        image?: string;
     };
 }
 
@@ -65,8 +66,8 @@ export function ListingCard({ listing }: ListingCardProps) {
                 <div className="relative h-48 bg-gray-100 rounded-t-xl overflow-hidden">
                     {/* Placeholder or Actual Image */}
                     <img
-                        src={listing.posterImages?.[0] || "https://images.unsplash.com/photo-1565552629477-ff72852894c9?w=800&q=80"}
-                        alt="Umrah"
+                        src={listing.image || listing.posterImages?.[0] || "/stock/kabe-1.png"}
+                        alt={listing.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
 
@@ -77,11 +78,7 @@ export function ListingCard({ listing }: ListingCardProps) {
                                 <Star className="w-3 h-3 mr-1 fill-white" /> Öne Çıkan
                             </Badge>
                         )}
-                        {isIdentityVerified && (
-                            <Badge className="bg-white/95 text-teal-700 hover:bg-white backdrop-blur-sm shadow-sm border-0">
-                                <ShieldCheck className="w-3 h-3 mr-1" /> Kimlik Onaylı
-                            </Badge>
-                        )}
+
                         {listing.urgencyTag && (
                             <Badge variant="destructive" className="shadow-sm">
                                 <Flame className="w-3 h-3 mr-1" /> {urgencyLabels[listing.urgencyTag] || listing.urgencyTag}

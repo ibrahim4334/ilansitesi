@@ -23,9 +23,9 @@ export default function FAQPage() {
 
             <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="item-1">
-                    <AccordionTrigger>Umrebuldum üzerinden rezervasyon yapmak güvenli mi?</AccordionTrigger>
+                    <AccordionTrigger>Umrebuldum üzerinden nasıl rezervasyon yapabilirim?</AccordionTrigger>
                     <AccordionContent>
-                        Evet. Platformumuzda listelenen tüm acenteler kapsamlı doğrulama süreçleri ve TÜRSAB onaylı, lisanslı kuruluşlardır. Ödemeleriniz güvenli ödeme altyapısı ile korunmaktadır.
+                        Umrebuldum sadece bir ilan platformudur. Beğendiğiniz turun detay sayfasından doğrudan acente ile iletişime geçerek rezervasyon ve ödeme işlemlerinizi acente ile yürütebilirsiniz. Platformumuz üzerinden ödeme alınmamaktadır.
                     </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-2">

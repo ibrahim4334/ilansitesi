@@ -111,7 +111,7 @@ const mockTourDetails: Record<string, Tour> = {
     id: 1,
     slug: "ramazan-umresi-2025",
     title: "Ramazan Umresi 2025",
-    description: "Ramazan ayının maneviyatını Mekke ve Medine'de yaşayın. Kimlik onaylı güvenilir rehberlerimiz eşliğinde unutulmaz bir ibadet deneyimi sizi bekliyor.",
+    description: "Ramazan ayının maneviyatını Mekke ve Medine'de yaşayın. Güvenilir rehberlerimiz eşliğinde unutulmaz bir ibadet deneyimi sizi bekliyor.",
     price: 52000,
     duration: "10 Gün / 9 Gece",
     departureCity: "İstanbul",

@@ -35,8 +35,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
         }
 
-        const email = body?.email;
-        const lockout = AuthRateLimit.checkLockout(ip, email);
+        const rawEmail = body?.email;
+        const lockout = AuthRateLimit.checkLockout(ip, rawEmail);
         if (!lockout.allowed) {
             return NextResponse.json({ error: lockout.reason || "Too many attempts" }, { status: 429 });
         }
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
         const validation = registerSchema.safeParse(body);
 
         if (!validation.success) {
-            AuthRateLimit.recordFailure(ip, email);
+            AuthRateLimit.recordFailure(ip, rawEmail);
             console.error("Validation failed:", JSON.stringify(validation.error.format()));
             return NextResponse.json(
                 { error: "Geçersiz veriler", details: validation.error.format() },
@@ -87,57 +87,74 @@ export async function POST(req: Request) {
         const verificationExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
         // Create User + Profile in atomic transaction
-        const newUser = await prisma.$transaction(async (tx) => {
-            const user = await tx.user.create({
-                data: {
-                    name,
-                    email,
-                    phone,
-                    passwordHash: hashedPassword,
-                    role,
-                    verificationCode,
-                    verificationExpiry,
-                    isVerified: false,
-                    image: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`,
-                }
-            });
-
-            // If GUIDE or ORGANIZATION, create profile
-            if (role === 'GUIDE' || role === 'ORGANIZATION') {
-                await tx.guideProfile.create({
+        let newUser;
+        try {
+            console.log("Starting Prisma Transaction...");
+            newUser = await prisma.$transaction(async (tx) => {
+                console.log("Creating user...", { name, email, phone, role });
+                const user = await tx.user.create({
                     data: {
-                        userId: user.id,
-                        fullName: name,
-                        phone: phone,
-                        city: "İstanbul",
-                        quotaTarget: 100,
-                        currentCount: 0,
-                        isApproved: false,
-                        package: "FREEMIUM",
-                        tokens: 0
+                        name,
+                        email,
+                        phone,
+                        passwordHash: hashedPassword,
+                        role,
+                        verificationCode,
+                        verificationExpiry,
+                        isVerified: false,
+                        image: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`,
                     }
                 });
 
-                console.log(`Created profile for ${role}: ${email}.`);
-            }
+                console.log("User created with ID:", user.id);
 
-            return user;
-        });
+                // If GUIDE or ORGANIZATION, create profile
+                if (role === 'GUIDE' || role === 'ORGANIZATION') {
+                    console.log(`Creating ${role} profile for user ${user.id}...`);
+                    await tx.guideProfile.create({
+                        data: {
+                            userId: user.id,
+                            fullName: name,
+                            phone: phone,
+                            city: "İstanbul",
+                            quotaTarget: 100,
+                            currentCount: 0,
+                            isApproved: false,
+                            package: "FREEMIUM",
+                            tokens: 0
+                        }
+                    });
+
+                    console.log(`Created profile for ${role}: ${email}.`);
+                }
+
+                return user;
+            });
+            console.log("Prisma Transaction Successful.");
+        } catch (dbError) {
+            console.error("Database transaction failed:", dbError);
+            return NextResponse.json({ error: "Veritabanı kayıt hatası", details: dbError }, { status: 500 });
+        }
 
         // ─── INVARIANT: Every user MUST have at least 1 ledger entry ─────
         // This guarantees: SUM(ledger) == tokenBalance for all users.
         // Empty ledger state is IMPOSSIBLE after this point.
         const initialTokens = (role === 'GUIDE' || role === 'ORGANIZATION') ? 30 : 0;
 
-        await grantToken({
-            userId: newUser.id,
-            amount: initialTokens,
-            type: "INITIAL_BALANCE",
-            reason: "INITIAL_BALANCE",
-            idempotencyKey: `register:${newUser.id}`,
-        });
-
-        console.log(`Seeded ledger for ${email}: ${initialTokens} tokens (role: ${role}).`);
+        try {
+            console.log("Granting initial tokens...");
+            await grantToken({
+                userId: newUser.id,
+                amount: initialTokens,
+                type: "INITIAL_BALANCE",
+                reason: "INITIAL_BALANCE",
+                idempotencyKey: `register:${newUser.id}`,
+            });
+            console.log(`Seeded ledger for ${email}: ${initialTokens} tokens (role: ${role}).`);
+        } catch (tokenError) {
+            console.error("Failed to grant token error:", tokenError);
+            return NextResponse.json({ error: "Token grant hatası", details: tokenError }, { status: 500 });
+        }
 
         console.log("User saved.");
 

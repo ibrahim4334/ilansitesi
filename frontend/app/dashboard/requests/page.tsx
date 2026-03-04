@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { UmrahRequest } from "@/lib/db-types";
+import { UmrahRequest } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2, FileText, X } from "lucide-react";
 import Link from "next/link";

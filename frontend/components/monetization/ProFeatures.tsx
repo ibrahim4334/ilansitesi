@@ -319,7 +319,7 @@ export function VerifiedOrganizerBadge({ level, showLabel = true }: VerifiedOrga
                     <CheckCircle className="w-4 h-4 -ml-1" />
                 </div>
             ),
-            label: 'Onaylı Acente',
+            label: 'Kurumsal Acente',
             className: 'text-emerald-600',
         },
         premium: {

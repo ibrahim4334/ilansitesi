@@ -56,7 +56,7 @@ export const PseoSchemaGenerator = {
             "@context": "https://schema.org/",
             "@type": "Product",
             "name": title,
-            "description": `${listing.city} çıkışlı, kimlik onaylı acentelerden.`,
+            "description": `${listing.city} çıkışlı, güvenilir acentelerden.`,
             "offers": {
                 "@type": "Offer",
                 "url": `https://umrebuldum.com/ilan/${listing.id}`,
@@ -82,7 +82,7 @@ export const PseoSchemaGenerator = {
             faqs = [
                 {
                     q: `En iyi ${targetKeyword} hangileridir?`,
-                    a: "Platformumuzda Trust (Güven) skoru yüksek, kimlik onaylı acentelerin sunduğu tüm güncel turları karşılaştırabilirsiniz."
+                    a: "Platformumuzda Trust (Güven) skoru yüksek, popüler acentelerin sunduğu tüm güncel turları karşılaştırabilirsiniz."
                 },
                 {
                     q: `${targetKeyword} fiyatları ortalama ne kadar?`,
@@ -92,7 +92,7 @@ export const PseoSchemaGenerator = {
         } else if (pageType === "SEASON") {
             faqs = [
                 {
-                    q: `Kimlik onaylı ${targetKeyword} kayıtları ne zaman başlıyor?`,
+                    q: `Popüler ${targetKeyword} kayıtları ne zaman başlıyor?`,
                     a: "Özel acenteler kendi kontenjanlarını aylar öncesinden açarken, kuralar genellikle tur tarihinden 2-3 ay önce netleşmektedir."
                 }
             ];

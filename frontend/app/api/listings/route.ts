@@ -5,10 +5,13 @@ import { NextResponse } from "next/server";
 import { PackageSystem } from "@/lib/package-system";
 import { requireSupply } from "@/lib/api-guards";
 import { rateLimit } from "@/lib/rate-limit";
+import { Prisma } from "@prisma/client";
 import { getRoleConfig } from "@/lib/role-config";
 import { safeErrorMessage } from "@/lib/safe-error";
+import { safeErrorMessage } from "@/lib/safe-error";
 import { calculateListingScore } from "@/lib/listing-ranking";
-import type { GuidePackage } from "@/lib/db-types";
+import { spendToken, TOKEN_COSTS } from "@/src/modules/tokens";
+
 
 export async function GET(req: Request) {
     try {
@@ -25,11 +28,10 @@ export async function GET(req: Request) {
         const now = new Date();
 
         // Build where clause — query-level expiration filter
-        const where: any = {
-            status: 'ACTIVE',
+        let where: Prisma.GuideListingWhereInput = {
+            active: true,
             approvalStatus: 'APPROVED',
             deletedAt: null,
-            expiresAt: { gt: now },      // Only non-expired
             endDate: { gte: now }
         };
 
@@ -39,13 +41,13 @@ export async function GET(req: Request) {
         }
 
         if (isIdentityVerifiedFilter === 'true') {
-            where.guide = { isIdentityVerified: true };
+            where.guide = { user: { isIdentityVerified: true } };
         }
 
         let listings = await prisma.guideListing.findMany({
             where,
             include: {
-                guide: true,
+                guide: { include: { user: true } },
                 departureCity: true,
                 airline: true,
                 tourDays: { orderBy: { day: 'asc' } }
@@ -89,7 +91,7 @@ export async function GET(req: Request) {
         // Enrich with guide profile data
         const enrichedListings = listings.map(l => {
             const profile = l.guide;
-            const showPhone = profile ? PackageSystem.isPhoneVisible(profile) : false;
+            const showPhone = profile ? PackageSystem.isPhoneVisible(profile.package) : false;
 
             return {
                 id: l.id,
@@ -137,8 +139,8 @@ export async function GET(req: Request) {
                     bio: profile.bio,
                     // phone deliberately omitted from list view — exposed only on detail page
                     // after PackageSystem.isPhoneVisible() check
-                    isIdentityVerified: profile.isIdentityVerified,
-                    photo: profile.photo,
+                    isIdentityVerified: (profile as any)?.user?.isIdentityVerified || false,
+                    photo: profile?.photo,
                     trustScore: profile.trustScore || 50,
                     completedTrips: profile.completedTrips || 0,
                     package: profile.package || "FREEMIUM"
@@ -151,17 +153,23 @@ export async function GET(req: Request) {
             ...l,
             _score: calculateListingScore(
                 {
+                    type: "GUIDE_PROFILE",
                     isFeatured: l.isFeatured || false,
                     featuredUntil: null, // raw data not included in enriched, handled by query sort
+                    boostScore: 0, // defaults
                     updatedAt: new Date(l.createdAt || Date.now()),
+                    createdAt: new Date(l.createdAt || Date.now()),
                     filled: l.filled || 0,
                     quota: l.quota || 30,
                 },
                 {
+                    packageType: l.guide?.package || "FREEMIUM",
                     trustScore: l.guide?.trustScore || 50,
                     completedTrips: l.guide?.completedTrips || 0,
-                    isIdentityVerified: l.guide?.isIdentityVerified || false,
-                    priorityRanking: l.guide?.package ? PackageSystem.getLimits(l.guide.package as GuidePackage).priorityRanking : false,
+                    isIdentityVerified: (l.guide as any)?.user?.isIdentityVerified || false,
+                    profileCompleteness: 50, // default if missing
+                    avgResponseHours: 24, // default
+                    recentActivityCount: 1, // default
                 },
             ),
         }));
@@ -272,12 +280,31 @@ export async function POST(req: Request) {
             }, { status: 403 });
         }
         // Check package limits (business layer — may be more restrictive)
-        if (!PackageSystem.canCreateListing(profile, currentListingsCount)) {
+        if (!PackageSystem.canCreateListing(profile.package, currentListingsCount)) {
             return NextResponse.json({
                 error: "Limit Reached",
                 message: "Paket limitinize ulaştınız. Daha fazla tur eklemek için paketinizi yükseltin.",
                 code: "LIMIT_REACHED"
             }, { status: 403 });
+        }
+
+        // --- NEW: Token Deduction logic ---
+        try {
+            await spendToken({
+                userId: user.id,
+                amount: TOKEN_COSTS.LISTING_CREATE,
+                type: 'LISTING_CREATE',
+                referenceId: `listing-create-${Date.now()}` // Will be updated to actual listing ID down below if preferred, or keep as timestamp
+            });
+        } catch (error: any) {
+            if (error.message.includes('Insufficient tickets') || error.message.includes('Insufficient balance')) {
+                return NextResponse.json({
+                    error: "Yetersiz Bakiye",
+                    message: "İlan yayınlamak için yeterli jetonunuz bulunmuyor. Lütfen kredi yükleyin.",
+                    code: "INSUFFICIENT_FUNDS"
+                }, { status: 402 });
+            }
+            throw error;
         }
 
         // Normalize pricing
@@ -320,13 +347,6 @@ export async function POST(req: Request) {
                 endDate: endDate ? new Date(endDate) : new Date(Date.now() + 86400000 * 10),
                 returnDateEnd: body.returnDateEnd ? new Date(body.returnDateEnd) : null,
                 totalDays: totalDays ? parseInt(totalDays) : 10,
-                // Auto-set expiration based on package
-                expiresAt: (() => {
-                    const days = PackageSystem.getListingDuration(profile.package as GuidePackage);
-                    const exp = new Date();
-                    exp.setDate(exp.getDate() + days);
-                    return exp;
-                })(),
                 approvalStatus: 'PENDING',
                 urgencyTag: urgencyTag || null,
                 legalConsent: !!legalConsent,
@@ -355,7 +375,7 @@ export async function POST(req: Request) {
                 quad: newListing.pricingQuad,
                 currency: newListing.pricingCurrency
             },
-            tourPlan: newListing.tourDays.map(d => ({
+            tourPlan: ((newListing as any).tourDays || []).map((d: any) => ({
                 day: d.day,
                 city: d.city,
                 title: d.title,

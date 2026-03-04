@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
+import { STOCK_BACKGROUNDS } from "@/components/dashboard/poster-generator/poster-assets";
 
 const SAUDI_CITIES = ["Mekke", "Medine", "Cidde", "Riyad"];
 
@@ -64,7 +65,7 @@ export default function NewListingPage() {
         tourPlan: [] as { day: number; city: string; description: string }[],
         urgencyTag: "",
         legalConsent: false,
-        image: "" // Added image field to formData
+        image: STOCK_BACKGROUNDS[0].url
     });
 
     useEffect(() => {
@@ -219,7 +220,7 @@ export default function NewListingPage() {
                                         <SelectTrigger><SelectValue placeholder="Seçiniz" /></SelectTrigger>
                                         <SelectContent>
                                             {cities.map((c: any) => (
-                                                <SelectItem key={c.id} value={c.id}>
+                                                <SelectItem key={c.id} value={String(c.id)}>
                                                     {c.name} {c.priority ? '⭐' : ''}
                                                 </SelectItem>
                                             ))}
@@ -244,7 +245,7 @@ export default function NewListingPage() {
                                         <SelectTrigger><SelectValue placeholder="Seçiniz" /></SelectTrigger>
                                         <SelectContent>
                                             {airlines.map((a: any) => (
-                                                <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                                                <SelectItem key={a.id} value={String(a.id)}>{a.name}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -365,6 +366,35 @@ export default function NewListingPage() {
                             <div>
                                 <Label>Genel Açıklama</Label>
                                 <Textarea name="description" placeholder="Tur genel detayları..." className="h-32" value={formData.description} onChange={handleChange} />
+                            </div>
+                        </div>
+
+                        {/* Cover Image */}
+                        <div className="space-y-4">
+                            <h2 className="text-xl font-semibold border-b pb-2">Kapak Görseli</h2>
+                            <div className="space-y-4">
+                                <Label>Stok Şablonlar</Label>
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                                    {STOCK_BACKGROUNDS.map((bg) => (
+                                        <div
+                                            key={bg.id}
+                                            onClick={() => setFormData({ ...formData, image: bg.url })}
+                                            className={`cursor-pointer border-2 rounded-xl overflow-hidden aspect-video relative transition-all ${formData.image === bg.url ? 'border-blue-600 shadow-md ring-2 ring-blue-600/20' : 'border-gray-200 hover:border-blue-400'
+                                                }`}
+                                        >
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={bg.url} alt={bg.name} className="w-full h-full object-cover" />
+                                            <div className="absolute inset-x-0 bottom-0 bg-black/60 p-1.5 text-center">
+                                                <span className="text-[10px] text-white font-medium truncate block">{bg.name}</span>
+                                            </div>
+                                            {formData.image === bg.url && (
+                                                <div className="absolute top-1 right-1 bg-blue-600 rounded-full p-0.5 shadow-sm">
+                                                    <Check className="w-3 h-3 text-white" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 

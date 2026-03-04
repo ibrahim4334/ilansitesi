@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CreateReviewUseCase } from "@/src/modules/reviews/application/CreateReviewUseCase";
 import { ReviewRepository } from "@/src/modules/reviews/infrastructure/ReviewRepository";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; // Adjust authOptions import based on typical NextAuth usage in this app
+import { auth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || !session.user || !session.user.id) {
+        const session = await auth();
+        if (!session || !session.user || !(session.user as any).id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -28,7 +27,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Eksik parametreler" }, { status: 400 });
         }
 
-        const ipAddress = req.ip || req.headers.get("x-forwarded-for") || "unknown";
+        const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
         const userAgent = req.headers.get("user-agent") || "unknown";
 
         const repo = new ReviewRepository();
@@ -36,7 +35,7 @@ export async function POST(req: NextRequest) {
 
         await useCase.execute({
             guideId,
-            reviewerUserId: session.user.id,
+            reviewerUserId: (session.user as any).id,
             requestId,
             ratingCommunication: Number(ratingCommunication),
             ratingKnowledge: Number(ratingKnowledge),

@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireSupply } from "@/lib/api-guards";
-import { PackageSystem } from "@/lib/packageType-system";
+import { PackageSystem } from "@/lib/package-system";
 import { safeErrorMessage } from "@/lib/safe-error";
 
 /**
@@ -35,12 +35,12 @@ export async function POST(req: Request) {
         // Resolve user
         const user = await prisma.user.findUnique({
             where: { email: session!.user.email! },
-            select: { id: true, packageType: true, isIdentityVerifiedVerified: true },
+            select: { id: true, packageType: true, isIdentityVerified: true },
         });
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
         // Already verified
-        if (user.isIdentityVerifiedVerified) {
+        if (user.isIdentityVerified) {
             return NextResponse.json({ error: "Zaten kimlik onaylısınız" }, { status: 400 });
         }
 
@@ -60,7 +60,7 @@ export async function POST(req: Request) {
         }
 
         // Check for existing pending application
-        const existing = await prisma.diyanetApplication.findFirst({
+        const existing = await prisma.identityApplication.findFirst({
             where: {
                 userId: user.id,
                 status: { in: ["PENDING", "APPROVED"] },
@@ -81,14 +81,14 @@ export async function POST(req: Request) {
         }
 
         // Create application
-        const application = await prisma.diyanetApplication.create({
+        const application = await prisma.identityApplication.create({
             data: {
                 userId: user.id,
                 idDocumentUrl: idDocumentUrl.trim(),
                 certificateUrl: certificateUrl.trim(),
                 contactEmail: contactEmail.trim().toLowerCase(),
                 note: note?.trim()?.substring(0, 500) || null,
-                packageTypeAtApply: user.packageType,
+                packageAtApply: user.packageType,
                 status: "PENDING",
             },
         });
@@ -123,7 +123,7 @@ export async function GET(req: Request) {
         });
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-        const application = await prisma.diyanetApplication.findFirst({
+        const application = await prisma.identityApplication.findFirst({
             where: { userId: user.id },
             orderBy: { createdAt: "desc" },
             select: {

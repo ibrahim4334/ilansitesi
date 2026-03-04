@@ -13,7 +13,7 @@ import { safeErrorMessage } from "@/lib/safe-error";
  */
 export async function GET(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await auth();
@@ -25,7 +25,7 @@ export async function GET(
         });
         if (!adminUser) return NextResponse.json({ error: "Admin not found" }, { status: 404 });
 
-        const applicationId = params.id;
+        const { id: applicationId } = await params;
         if (!applicationId) return NextResponse.json({ error: "Missing application ID" }, { status: 400 });
 
         // Lookup the IdentityApplication

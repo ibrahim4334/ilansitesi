@@ -3,15 +3,15 @@ import { Shield, CreditCard, HeadphonesIcon, Award } from "lucide-react";
 const features = [
   {
     icon: Shield,
-    title: "Kimlik Onaylı Turlar",
+    title: "Geniş Acente Ağı",
     description:
-      "Tüm turlarımız platformumuz tarafından kimlik doğrulaması yapılmış, lisanslı ve güvenilir acenteler tarafından düzenlenmektedir.",
+      "Tüm turlar platformumuzda yer alan çeşitli seyahat acenteleri tarafından düzenlenmektedir.",
   },
   {
     icon: CreditCard,
-    title: "Güvenli Ödeme",
+    title: "Zengin Seçenekler",
     description:
-      "256-bit SSL şifreleme ile güvenli ödeme altyapısı. Kredi kartı veya havale ile kolayca ödeme yapın.",
+      "Farklı acentelerin sunduğu çok çeşitli umre turlarını tek bir platformda inceleme ve karşılaştırma imkanı.",
   },
   {
     icon: HeadphonesIcon,
@@ -36,7 +36,7 @@ export function WhyUs() {
             Neden Umrebuldum?
           </h2>
           <p className="mt-6 text-xl text-muted-foreground text-pretty lg:text-2xl">
-            Umre yolculuğunuzu en güvenli ve huzurlu şekilde gerçekleştirmeniz için buradayız.
+            Hayalinizdeki Umre yolculuğuna uygun turları kolayca bulmanız için buradayız.
           </p>
         </div>
 

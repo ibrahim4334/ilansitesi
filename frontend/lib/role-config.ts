@@ -15,6 +15,8 @@ export interface RoleCapabilities {
     maxDailyOffers: number;
     badge: string | null;
     onboardingTokens: number;
+    interestCost: number;
+    maxDailyInterests: number;
 }
 
 export const ROLE_CONFIG: Record<string, RoleCapabilities> = {
@@ -32,6 +34,8 @@ export const ROLE_CONFIG: Record<string, RoleCapabilities> = {
         maxDailyOffers: 1,
         badge: null,
         onboardingTokens: 20,
+        interestCost: 5,
+        maxDailyInterests: 1,
     },
     GUIDE: {
         label: "Rehber",
@@ -47,6 +51,8 @@ export const ROLE_CONFIG: Record<string, RoleCapabilities> = {
         maxDailyOffers: 50,
         badge: "guide",
         onboardingTokens: 20,
+        interestCost: 5,
+        maxDailyInterests: 20,
     },
     CORPORATE: {
         label: "Kurumsal",
@@ -62,6 +68,8 @@ export const ROLE_CONFIG: Record<string, RoleCapabilities> = {
         maxDailyOffers: 200,
         badge: "corporate",
         onboardingTokens: 20,
+        interestCost: 3,
+        maxDailyInterests: 100,
     },
     ADMIN: {
         label: "Admin",
@@ -77,6 +85,8 @@ export const ROLE_CONFIG: Record<string, RoleCapabilities> = {
         maxDailyOffers: 999,
         badge: "admin",
         onboardingTokens: 0,
+        interestCost: 0,
+        maxDailyInterests: 999,
     },
     BANNED: {
         label: "Yasaklı",
@@ -92,6 +102,8 @@ export const ROLE_CONFIG: Record<string, RoleCapabilities> = {
         maxDailyOffers: 0,
         badge: null,
         onboardingTokens: 0,
+        interestCost: 9999,
+        maxDailyInterests: 0,
     },
 } as const;
 

@@ -58,7 +58,7 @@ export async function PUT(req: Request) {
                 monthlyCap: monthlyCap !== undefined ? Number(monthlyCap) : undefined,
             },
             create: {
-                userId: session!.user.id,
+                userId: session!.user.id!,
                 status: status || "ACTIVE",
                 threshold: threshold !== undefined ? Number(threshold) : 20,
                 packageId: packageId || "medium",

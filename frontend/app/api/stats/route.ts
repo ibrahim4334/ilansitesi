@@ -14,12 +14,7 @@ export async function GET() {
 
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-    // 1. Total Listing Views (Sum of views across all active listings)
-    const listings = await prisma.guideListing.findMany({
-        where: { guideId: session.user.id }
-    });
-
-    const totalViews = listings.reduce((acc, curr) => acc + (curr.views || 0), 0);
+    const totalViews = 0; // Views not currently tracked on GuideListing
 
     // 2. Active Competition (Count of active approved listings globally)
     const activeCompetitors = await prisma.guideListing.count({
@@ -36,9 +31,12 @@ export async function GET() {
         }
     });
 
+    const listings = await prisma.guideListing.findMany({
+        where: { guideId: (session!.user as any).id }
+    });
     const agencyInteractions = await prisma.conversation.count({
         where: {
-            guideId: session.user.id,
+            guideId: (session!.user as any).id,
             request: {
                 createdAt: { gte: thirtyDaysAgo }
             }
@@ -51,7 +49,7 @@ export async function GET() {
         { title: 'İlan Görüntülenmesi', value: totalViews.toLocaleString(), change: 5, trend: 'up' },
         { title: 'Aktif Rakipler', value: activeCompetitors.toString(), change: 0, trend: 'neutral' },
         { title: 'Kaçırılan Fırsatlar', value: missedOpportunities.toString(), change: missedOpportunities > 0 ? 100 : 0, trend: 'down' },
-        { title: 'Toplam Talep', value: totalRequests.toString(), change: newRequests, trend: 'up' },
+        { title: 'Toplam Talep', value: totalRequests.toString(), change: 0, trend: 'up' },
     ];
 
     // Get latest 5 actual requests to surface to the agency as hot leads

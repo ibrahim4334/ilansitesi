@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GuideListing } from "@/lib/db-types";
+import { GuideListing } from "@prisma/client";
 
 export function MyListings() {
     const [listings, setListings] = useState<GuideListing[]>([]);

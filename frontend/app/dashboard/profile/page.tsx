@@ -47,21 +47,62 @@ export default function DashboardProfilePage() {
             .finally(() => setLoading(false));
     }, []);
 
+    const compressImageToWebP = (file: File, maxWidth = 800): Promise<File> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext("2d");
+                    ctx?.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
+                                type: "image/webp",
+                                lastModified: Date.now(),
+                            });
+                            resolve(newFile);
+                        } else {
+                            reject(new Error("Canvas to Blob failed"));
+                        }
+                    }, "image/webp", 0.8); // 80% quality WEBP
+                };
+                img.onerror = (error) => reject(error);
+            };
+            reader.onerror = (error) => reject(error);
+        });
+    };
+
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || e.target.files.length === 0) return;
-        const file = e.target.files[0];
+        const originalFile = e.target.files[0];
 
         // Simple validation
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error("Dosya boyutu 5MB'dan küçük olmalıdır.");
+        if (originalFile.size > 15 * 1024 * 1024) { // Increased to 15MB to allow raw camera but compress it down
+            toast.error("Dosya boyutu başlangıç için 15MB'dan küçük olmalıdır.");
             return;
         }
 
-        const data = new FormData();
-        data.append("file", file);
-
         setUploading(true);
         try {
+            const compressedFile = await compressImageToWebP(originalFile);
+            const data = new FormData();
+            data.append("file", compressedFile);
+
             const res = await fetch("/api/upload", {
                 method: "POST",
                 body: data,
@@ -146,21 +187,42 @@ export default function DashboardProfilePage() {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Label htmlFor="photo-upload" className="cursor-pointer bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                                    {uploading ? "Yükleniyor..." : "Fotoğraf Yükle"}
-                                </Label>
-                                <Input
-                                    id="photo-upload"
-                                    type="file"
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                    disabled={uploading}
-                                />
+                            <div className="flex flex-col sm:flex-row items-center gap-3">
+                                {/* Camera Input */}
+                                <div className="relative">
+                                    <Label htmlFor="camera-upload" className="flex items-center gap-2 cursor-pointer bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                                        <Camera className="w-4 h-4" />
+                                        {uploading ? "Bekleyin..." : "Kameradan Çek"}
+                                    </Label>
+                                    <Input
+                                        id="camera-upload"
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        capture="environment"
+                                        onChange={handleFileChange}
+                                        disabled={uploading}
+                                    />
+                                </div>
+
+                                {/* Gallery Input */}
+                                <div className="relative">
+                                    <Label htmlFor="gallery-upload" className="flex items-center gap-2 cursor-pointer bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>
+                                        {uploading ? "Bekleyin..." : "Galeriden Seç"}
+                                    </Label>
+                                    <Input
+                                        id="gallery-upload"
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        disabled={uploading}
+                                    />
+                                </div>
                             </div>
-                            <p className="text-xs text-gray-500">
-                                Max 5MB. JPG, PNG.
+                            <p className="text-xs text-gray-500 text-center">
+                                Dosyalarınız web için otomatik sıkıştırılarak (WebP) depolanır.
                             </p>
                         </div>
 
@@ -204,18 +266,7 @@ export default function DashboardProfilePage() {
                             />
                         </div>
 
-                        <div className="flex items-center space-x-2 border p-3 rounded bg-gray-50">
-                            <Switch
-                                checked={formData.isIdentityVerified}
-                                onCheckedChange={(c) => setFormData({ ...formData, isIdentityVerified: c })}
-                            />
-                            <div>
-                                <Label className="font-semibold">Kimlik doğrulaması yapmak ister misiniz?</Label>
-                                <p className="text-xs text-gray-500">
-                                    Profilinizde "Kimlik Onaylı" rozeti görünecektir.
-                                </p>
-                            </div>
-                        </div>
+
 
                         <div className="pt-4">
                             <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={saving}>

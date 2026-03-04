@@ -24,7 +24,7 @@ const SEASONS = [
 ];
 
 const ATTRIBUTES = [
-    { slug: "kimlik-onayli", name: "Kimlik Onaylı", key: "isIdentityVerified", val: true },
+    { slug: "guvenilir-acente", name: "Güvenilir", key: "isIdentityVerified", val: true },
     { slug: "vip", name: "Lüks VIP", key: "priceMin", val: 25000 },
     { slug: "ekonomik", name: "Ekonomik", key: "priceMax", val: 15000 },
     { slug: "15-gunluk", name: "15 Günlük", key: "duration", val: 15 },
@@ -58,7 +58,7 @@ async function main() {
             targetKeyword: `${city} çıkışlı umre turları`,
             h1Title: `${city} Çıkışlı En İyi Umre Turları`,
             metaTitle: `${city} Çıkışlı Umre Turları ve Fiyatları (2026) | UmreBuldum`,
-            metaDescription: `${city} havalimanı çıkışlı, en uygun fiyatlı ve kimlik onaylı Umre turlarını karşılaştırın. Güvenilir acentelerden hemen teklif alın.`,
+            metaDescription: `${city} havalimanı çıkışlı, en uygun fiyatlı ve popüler Umre turlarını karşılaştırın. Güvenilir acentelerden hemen teklif alın.`,
             searchParams: { city: city },
             contentHtml: `<h3>${city} Merkezli Umre Acenteleri</h3><p>${city} bölgesinden direkt veya aktarmalı uçuşlarla kutsal topraklara yapacağınız yolculuk için en güvenilir firmaları listeledik.</p>`,
         });
@@ -87,9 +87,9 @@ async function main() {
             targetKeyword: `${attr.name.toLowerCase()} umre turları`,
             h1Title: `${attr.name} Umre Turları ve Şirketleri`,
             metaTitle: `${attr.name} Puanı Yüksek Umre Turları | UmreBuldum`,
-            metaDescription: `${attr.name} özelliklerine sahip onaylı Umre acentelerini, önceki ziyaretçilerin yorumlarıyla birlikte inceleyin ve güvenle karar verin.`,
+            metaDescription: `${attr.name} özelliklerine sahip Umre acentelerini, önceki ziyaretçilerin yorumlarıyla birlikte inceleyin ve güvenle karar verin.`,
             searchParams: { [attr.key]: attr.val },
-            contentHtml: `<p>Manevi iklimi doya doya yaşamak için <strong>${attr.name.toLowerCase()}</strong> seçenekleri arayan yolcularımızın en çok tercih ettiği onaylı programlar.</p>`,
+            contentHtml: `<p>Manevi iklimi doya doya yaşamak için <strong>${attr.name.toLowerCase()}</strong> seçenekleri arayan yolcularımızın en çok tercih ettiği programlar.</p>`,
         });
     }
 

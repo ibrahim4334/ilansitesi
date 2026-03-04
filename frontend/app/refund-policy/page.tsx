@@ -145,7 +145,6 @@ export default function RefundPolicyPage() {
                 <ul>
                     <li>Tüketici Hakem Heyeti</li>
                     <li>Tüketici Mahkemeleri</li>
-                    <li>TÜRSAB Şikâyet Hattı</li>
                     <li>Ticaret Bakanlığı ALO 175 Hattı</li>
                 </ul>
 

@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export class ModerateReviewUseCase {
     public async execute(reviewId: string, action: "APPROVE" | "REJECT"): Promise<void> {

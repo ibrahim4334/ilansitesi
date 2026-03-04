@@ -81,12 +81,18 @@ export default function LoginPage() {
                 })
             })
 
-            const data = await res.json()
+            let data: any = {};
+            try {
+                // If the response is not JSON (e.g. 500 HTML page), this throws
+                data = await res.json()
+            } catch (jsonErr) {
+                console.error("Failed to parse register response:", jsonErr);
+            }
 
             if (!res.ok) {
-                console.error("Registration failed:", data);
-                toast.error(data.error || "Kayıt başarısız")
-                if (data.details) {
+                console.error("Registration failed:", data, "Status:", res.status);
+                toast.error(data?.error || "Kayıt başarısız. Lütfen bilgilerinizi kontrol edip tekrar deneyin.")
+                if (data?.details) {
                     console.error("Error details:", data.details);
                 }
             } else {

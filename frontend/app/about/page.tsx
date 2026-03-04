@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 const values = [
     {
         icon: Shield,
-        title: "Güvenilirlik",
-        description: "Sadece kapsamlı doğrulama süreçleri onaylı ve TÜRSAB lisanslı acentelerle çalışıyoruz.",
+        title: "Şeffaflık",
+        description: "Misafirlerimizin en doğru kararı vermelerine yardımcı olmak için tarafsız bir platform sunuyoruz.",
     },
     {
         icon: Eye,
@@ -87,7 +87,7 @@ export default function AboutPage() {
                     karar verdik.
                 </p>
                 <p>
-                    Bugün UmreBuldum, Türkiye&apos;nin her yerinden binlerce kullanıcıya kimlik onaylı acentelerin
+                    Bugün UmreBuldum, Türkiye&apos;nin her yerinden binlerce kullanıcıya güvenilir acentelerin
                     turlarını karşılaştırma, fiyat analizi yapma ve güvenle tur seçme imkanı sunmaktadır.
                 </p>
 
@@ -100,7 +100,7 @@ export default function AboutPage() {
 
                 <h2>Misyonumuz</h2>
                 <p>
-                    kapsamlı doğrulama süreçleri onaylı yetkili acenteleri tek bir platformda toplayarak,
+                    Yetkili acenteleri tek bir platformda toplayarak,
                     kullanıcılarımıza fiyat, hizmet ve kalite karşılaştırması yapma imkanı sunmak. Her bütçeye
                     ve beklentiye uygun Umre turlarını kolayca bulunabilir kılmak.
                 </p>

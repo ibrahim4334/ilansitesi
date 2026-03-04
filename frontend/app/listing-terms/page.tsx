@@ -32,17 +32,13 @@ export default function ListingTermsPage() {
 
                 <h3>2.1. Acenteler İçin</h3>
                 <ul>
-                    <li><strong>TÜRSAB Belgesi:</strong> Geçerli bir TÜRSAB (A Grubu) seyahat acentası belgesine sahip olunmalıdır.</li>
-                    <li><strong>Kimlik Onayı:</strong> kapsamlı doğrulama süreçleri&apos;ndan Umre organizasyonu düzenleme yetkisi alınmış olmalıdır.</li>
+                    <li><strong>Platform Doğrulaması:</strong> UmreBuldum&apos;un platform doğrulama sürecinden geçilmiş olmalıdır.</li>
                     <li><strong>Vergi Kaydı:</strong> Geçerli vergi levhası ve ticaret sicil kaydı bulunmalıdır.</li>
-                    <li><strong>Platform Doğulaması:</strong> UmreBuldum&apos;un kimlik ve belge doğrulama sürecinden geçilmiş olmalıdır.</li>
                 </ul>
 
                 <h3>2.2. Rehberler İçin</h3>
                 <ul>
-                    <li><strong>Rehber Belgesi:</strong> Kültür ve Turizm Bakanlığı onaylı profesyonel turist rehberi belgesi.</li>
-                    <li><strong>Kimlik Rozeti (İsteğe Bağlı):</strong> kapsamlı doğrulama süreçleri onaylı rehber rozeti (daha yüksek güvenilirlik puanı).</li>
-                    <li><strong>Kimlik Doğrulama:</strong> TC kimlik numarası ve kimlik belgesi ile doğrulama.</li>
+                    <li><strong>Platform Kaydı:</strong> Temel doğrulama süreci tamamlanmış olmalıdır.</li>
                 </ul>
 
                 <h2>3. İlan İçerik Politikası</h2>

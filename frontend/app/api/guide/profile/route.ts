@@ -38,7 +38,10 @@ export async function GET(req: Request) {
             }
         });
 
-        return NextResponse.json(profile);
+        return NextResponse.json({
+            ...profile,
+            tokenBalance: user.tokenBalance
+        });
     } catch (error) {
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }

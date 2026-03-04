@@ -20,7 +20,7 @@ const steps = [
     step: "3",
     title: "Rezervasyon Yap",
     description:
-      "Size en uygun turu seçin ve güvenli ödeme sistemiyle hemen rezervasyonunuzu yapın.",
+      "Size en uygun turu seçin ve doğrudan acenteyle iletişime geçerek rezervasyonunuzu tamamlayın.",
   },
 ];
 
@@ -44,7 +44,7 @@ export function HowItWorks() {
               {index < steps.length - 1 && (
                 <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-0.5 bg-border" />
               )}
-              
+
               <div className="relative inline-flex">
                 <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary">
                   <item.icon className="h-10 w-10 text-primary-foreground" aria-hidden="true" />
@@ -53,7 +53,7 @@ export function HowItWorks() {
                   {item.step}
                 </div>
               </div>
-              
+
               <h3 className="mt-8 text-2xl font-semibold text-foreground lg:text-3xl">
                 {item.title}
               </h3>
