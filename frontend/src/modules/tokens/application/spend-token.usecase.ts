@@ -24,6 +24,7 @@ import { LedgerEntryType } from "@prisma/client";
 import { withSerializableRetry } from "@/lib/with-retry";
 import { TokenPolicy, type TokenAction } from "../domain/token-policy";
 import { EventBus } from "@/src/core/events/event-bus";
+import { TokenService } from "./TokenService";
 
 export interface SpendTokenInput {
     userId: string;
