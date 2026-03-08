@@ -32,8 +32,23 @@ export function startCronJobs(): void {
         timezone: "Europe/Istanbul",
     });
 
+    // ── Data retention cleanup: daily at 03:00 ──────────────────────
+    cron.schedule("0 3 * * *", async () => {
+        console.log(`[Cron] Running data cleanup at ${new Date().toISOString()}`);
+        try {
+            const { runDataCleanup } = await import("./data-cleanup");
+            const result = await runDataCleanup();
+            console.log(`[Cron] Cleanup complete:`, result);
+        } catch (error) {
+            console.error("[Cron] Cleanup failed:", error);
+        }
+    }, {
+        timezone: "Europe/Istanbul",
+    });
+
     isRunning = true;
     console.log("[Cron] Scheduled: expire-listings (*/15 * * * *)");
+    console.log("[Cron] Scheduled: data-cleanup (0 3 * * *)");
 }
 
 /**

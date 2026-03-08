@@ -11,7 +11,7 @@ export async function GET(req: Request) {
         if (guard) return guard;
 
         const user = await prisma.user.findUnique({
-            where: { email: session.user.email }
+            where: { email: session!.user.email! }
         });
         if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 

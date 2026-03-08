@@ -52,17 +52,43 @@ export default async function PseoLandingPage({ params: rawParams }: { params: {
     if (!page) notFound();
 
     // 2. Fetch Aggregated Listings via Ranking Engine
-    // In production, we'd pass page.searchParams to your RankingService
-    // const listings = await getRankedListings(page.searchParams as any);
-    const listingsCount = 24; // Mock for now
+    // Parse saved filters (usually stored as JSON object in DB)
+    const filters = typeof page.searchParams === 'string'
+        ? JSON.parse(page.searchParams)
+        : (page.searchParams || {});
+
+    // Query matching active listings to get real stats
+    const stats = await prisma.guideListing.findMany({
+        where: {
+            active: true,
+            approvalStatus: 'APPROVED',
+            // Spreads any saved filters (e.g., city: "İstanbul", departureCityId: "...")
+            ...(typeof filters === 'object' ? filters : {})
+        },
+        select: {
+            price: true,
+            guide: {
+                select: { trustScore: true }
+            }
+        }
+    });
+
+    const listingsCount = stats.length;
+    let minPrice = 0;
+    let avgScore = 4.8; // Fallback for zero listings to prevent ranking drops
+
+    if (listingsCount > 0) {
+        minPrice = Math.min(...stats.map(s => s.price));
+        // Normalize trustScore (0-100) to a 5-star scale for schema markup
+        const totalScore = stats.reduce((acc, curr) => acc + (curr.guide?.trustScore || 80), 0);
+        const rawAvg = totalScore / listingsCount;
+        avgScore = Math.max(1.0, Math.min(5.0, (rawAvg / 20))); // 100 -> 5.0, 80 -> 4.0
+    }
 
     // 3. Generate JSON-LD Rich Snippets
     const breadcrumbs = PseoSchemaGenerator.generateBreadcrumbs(slug, page.h1Title);
     const faqs = PseoSchemaGenerator.generateFaqSchema(page.pageType as any, page.targetKeyword);
-    const rating = PseoSchemaGenerator.generateCategoryRating(145, 4.8); // Aggregate stats
-
-    // 4. Track View (Fire and forget)
-    // prisma.seoLandingPage.update({ where: { id: page.id }, data: { viewCount: { increment: 1 } } });
+    const rating = PseoSchemaGenerator.generateCategoryRating(listingsCount || 1, avgScore, minPrice); // Aggregate stats
 
     return (
         <main className="min-h-screen bg-neutral-50 pb-20">

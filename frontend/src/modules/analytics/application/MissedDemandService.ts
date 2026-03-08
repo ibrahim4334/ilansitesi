@@ -28,7 +28,7 @@ export class MissedDemandService {
 
         // 2. Find their active service cities
         const activeListings = await prisma.guideListing.findMany({
-            where: { guideId, status: "PUBLISHED" },
+            where: { guideId, approvalStatus: "APPROVED", active: true },
             select: { city: true }
         });
         const activeCities = activeListings.map(l => l.city);

@@ -214,7 +214,7 @@ export async function resolveTicket(
             where: { userId: ticket.userId },
             data: {
                 probationUntil: reEvalDate,
-                probationBaseline: ticket.signals,
+                probationBaseline: (ticket.signals ?? {}) as any,
             },
         });
     }

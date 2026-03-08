@@ -22,6 +22,7 @@ export class TokenPolicy {
     static isActionAllowed(role: string, action: TokenAction): boolean {
         const config = getRoleConfig(role);
         const map: Record<TokenAction, boolean> = {
+            LISTING_CREATE: true, // All roles can create listings (gated by package limits)
             OFFER_SEND: config.canSendOffer,
             DEMAND_UNLOCK: config.canUnlockDemand,
             BOOST: config.canBoostListing,

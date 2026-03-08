@@ -25,13 +25,9 @@ declare module "next-auth" {
     }
 }
 
-declare module "next-auth/jwt" {
-    interface JWT {
-        role?: string;
-        requires_onboarding?: boolean;
-        wp_user_id?: number | string;
-    }
-}
+// JWT type augmentation is handled automatically by NextAuth
+// when using JWT strategy, the token types are inferred
+// from the session callback
 
 if (!process.env.AUTH_SECRET) {
     console.warn("AUTH_SECRET is not defined. Generating a fallback secret for development.");

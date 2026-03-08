@@ -37,9 +37,9 @@ export default function ListingsPage() {
     const listings = listingsArray.map((l: any) => ({
         id: l.id,
         title: l.title,
-        status: l.approvalStatus === 'PENDING' ? 'pending'
+        status: (l.approvalStatus === 'PENDING' ? 'pending'
             : l.approvalStatus === 'REJECTED' ? 'rejected'
-                : (l.active ? 'active' : 'draft'),
+                : (l.active ? 'active' : 'draft')) as "active" | "rejected" | "pending" | "expired" | "draft",
         views: l.views || 0,
         rating: l.rating,
         reviewCount: l.reviewCount,

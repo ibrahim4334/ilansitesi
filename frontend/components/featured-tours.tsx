@@ -29,7 +29,7 @@ export async function FeaturedTours() {
       package: "AGENCY"
     },
     isFeatured: true,
-    posterImages: [tour.thumbnail]
+    posterImages: [tour.thumbnail].filter((x): x is string => !!x)
   }));
 
   return (

@@ -89,7 +89,7 @@ export default function ChatsPage() {
                     {selectedThreadId ? (
                         <ChatWindow
                             threadId={selectedThreadId}
-                            currentUserRole={session.user.role}
+                            currentUserRole={session.user.role ?? "USER"}
                         />
                     ) : (
                         <div className="h-full border rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 p-8 text-center shadow-sm">

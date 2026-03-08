@@ -383,9 +383,9 @@ export default function NewListingPage() {
                                                 }`}
                                         >
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={bg.url} alt={bg.name} className="w-full h-full object-cover" />
+                                            <img src={bg.url} alt={bg.label} className="w-full h-full object-cover" />
                                             <div className="absolute inset-x-0 bottom-0 bg-black/60 p-1.5 text-center">
-                                                <span className="text-[10px] text-white font-medium truncate block">{bg.name}</span>
+                                                <span className="text-[10px] text-white font-medium truncate block">{bg.label}</span>
                                             </div>
                                             {formData.image === bg.url && (
                                                 <div className="absolute top-1 right-1 bg-blue-600 rounded-full p-0.5 shadow-sm">

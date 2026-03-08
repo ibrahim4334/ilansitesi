@@ -1,0 +1,88 @@
+﻿.next/dev/types/validator.ts(531,31): error TS2344: Type 'typeof import("D:/Yeni klas\u00F6r/Yeni klas\u00F6r (3)/umre/kurulum/umrebuldum/frontend/app/api/admin/listings/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/admin/listings/[id]">'.
+  Types of property 'PUT' are incompatible.
+    Type '(req: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<unknown>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+app/api/admin/listings/[id]/route.ts(30,17): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/api/guide/diyanet/apply/route.ts(56,28): error TS2551: Property 'isIdentityVerifiedEligible' does not exist on type 'typeof PackageSystem'. Did you mean 'isIdentityVerificationEligible'?
+app/api/guide/my-listings/route.ts(14,22): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+app/api/guide/my-listings/route.ts(14,29): error TS18047: 'session' is possibly 'null'.
+app/api/guide/republish/route.ts(89,17): error TS2353: Object literal may only specify known properties, and 'expiresAt' does not exist in type '(Without<GuideListingUpdateInput, GuideListingUncheckedUpdateInput> & GuideListingUncheckedUpdateInput) | (Without<...> & GuideListingUpdateInput)'.
+app/api/guide/spotlight/route.ts(28,13): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/api/guide/topup/route.ts(17,18): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+app/api/guide/topup/route.ts(17,25): error TS18047: 'session' is possibly 'null'.
+app/api/listings/route.ts(10,10): error TS2300: Duplicate identifier 'safeErrorMessage'.
+app/api/listings/route.ts(11,10): error TS2300: Duplicate identifier 'safeErrorMessage'.
+app/api/listings/route.ts(13,22): error TS2305: Module '"@/src/modules/tokens"' has no exported member 'TOKEN_COSTS'.
+app/api/listings/route.ts(295,17): error TS2353: Object literal may only specify known properties, and 'amount' does not exist in type 'SpendTokenInput'.
+app/dashboard/chats/page.tsx(92,29): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/dashboard/listings/new/page.tsx(386,71): error TS2339: Property 'name' does not exist on type '{ id: string; label: string; url: string; }'.
+app/dashboard/listings/new/page.tsx(388,121): error TS2339: Property 'name' does not exist on type '{ id: string; label: string; url: string; }'.
+app/dashboard/listings/page.tsx(222,34): error TS2322: Type '{ id: any; title: any; status: string; views: any; rating: any; reviewCount: any; price: string; approvalStatus: any; active: any; isFeatured: any; rejectionReason: any; thumbnail: any; }[]' is not assignable to type 'Listing[]'.
+  Type '{ id: any; title: any; status: string; views: any; rating: any; reviewCount: any; price: string; approvalStatus: any; active: any; isFeatured: any; rejectionReason: any; thumbnail: any; }' is not assignable to type 'Listing'.
+    Types of property 'status' are incompatible.
+      Type 'string' is not assignable to type '"active" | "rejected" | "pending" | "expired" | "draft"'.
+app/tours/[slug]/page.tsx(143,17): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/tours/[slug]/page.tsx(144,17): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/tours/[slug]/page.tsx(145,17): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+components/featured-tours.tsx(57,40): error TS2322: Type '{ id: string; title: string; city: string; departureCity: string; startDate: string; endDate: string; totalDays: number; price: number; guide: { fullName: string; city: string | undefined; isIdentityVerified: boolean; trustScore: number; package: string; }; isFeatured: boolean; posterImages: (string | undefined)[]; }' is not assignable to type '{ id: string; title: string; city: string; departureCity: string; airline?: string | undefined; startDate: string; endDate: string; totalDays: number; price: number; pricing?: { double: number; triple: number; quad: number; currency: string; } | undefined; ... 5 more ...; image?: string | undefined; }'.
+  Types of property 'posterImages' are incompatible.
+    Type '(string | undefined)[]' is not assignable to type 'string[]'.
+      Type 'string | undefined' is not assignable to type 'string'.
+        Type 'undefined' is not assignable to type 'string'.
+lib/auth.ts(28,16): error TS2664: Invalid module name in augmentation, module 'next-auth/jwt' cannot be found.
+lib/chat-rate-limit.ts(67,13): error TS2353: Object literal may only specify known properties, and 'deletedAt' does not exist in type 'MessageWhereInput'.
+lib/expiration-service.ts(25,43): error TS2339: Property 'listing' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+lib/expiration-service.ts(40,42): error TS2339: Property 'listing' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+lib/expiration-service.ts(50,42): error TS2339: Property 'demand' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+lib/expiration-service.ts(63,41): error TS2339: Property 'demand' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+lib/expiration-service.ts(82,37): error TS2339: Property 'listing' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/core/guards/package-limit.guard.ts(22,38): error TS2339: Property 'listing' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/core/guards/package-limit.guard.ts(79,30): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type 'TokenTransactionWhereInput'.
+src/core/guards/package-limit.guard.ts(83,30): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type 'TokenTransactionWhereInput'.
+src/core/guards/package-limit.guard.ts(124,40): error TS2339: Property 'listing' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/core/guards/token.guard.ts(40,11): error TS2741: Property 'LISTING_CREATE' is missing in type '{ OFFER_SEND: boolean; DEMAND_UNLOCK: boolean; BOOST: boolean; SPOTLIGHT: boolean; REPUBLISH: boolean; REFRESH: boolean; }' but required in type 'Record<"OFFER_SEND" | "DEMAND_UNLOCK" | "BOOST" | "REPUBLISH" | "LISTING_CREATE" | "SPOTLIGHT" | "REFRESH", boolean>'.
+src/core/guards/token.guard.ts(80,17): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type 'TokenTransactionWhereInput'.
+src/modules/analytics/application/AgencyAnalyticsService.ts(20,33): error TS2353: Object literal may only specify known properties, and 'packageType' does not exist in type 'GuideListingSelect<DefaultArgs>'.
+src/modules/analytics/application/AgencyAnalyticsService.ts(24,34): error TS2339: Property 'packageType' does not exist on type '{ id: string; image: string | null; createdAt: Date; updatedAt: Date; city: string; title: string; guideId: string; description: string; departureCityId: string | null; departureCityOld: string | null; ... 24 more ...; consentTimestamp: Date | null; }'.
+src/modules/analytics/application/AgencyAnalyticsService.ts(83,31): error TS2353: Object literal may only specify known properties, and 'status' does not exist in type 'GuideListingWhereInput'.
+src/modules/analytics/application/MissedDemandService.ts(31,31): error TS2353: Object literal may only specify known properties, and 'status' does not exist in type 'GuideListingWhereInput'.
+src/modules/fraud/application/enforcement.middleware.ts(68,9): error TS2739: Type 'Promise<VelocityCheckResult>' is missing the following properties from type 'VelocityCheckResult': allowed, response, currentCount, limit, windowSeconds
+src/modules/fraud/application/enforcement.middleware.ts(70,13): error TS18048: 'velocityResult' is possibly 'undefined'.
+src/modules/fraud/application/enforcement.middleware.ts(75,47): error TS18048: 'velocityResult' is possibly 'undefined'.
+src/modules/fraud/application/enforcement.middleware.ts(79,40): error TS18048: 'velocityResult' is possibly 'undefined'.
+src/modules/fraud/application/enforcement.middleware.ts(80,28): error TS18048: 'velocityResult' is possibly 'undefined'.
+src/modules/fraud/application/enforcement.middleware.ts(81,36): error TS18048: 'velocityResult' is possibly 'undefined'.
+src/modules/fraud/application/enforcement.middleware.ts(86,13): error TS18048: 'velocityResult' is possibly 'undefined'.
+src/modules/fraud/application/enforcement.middleware.ts(88,101): error TS18048: 'velocityResult' is possibly 'undefined'.
+src/modules/fraud/application/enforcement.middleware.ts(88,132): error TS18048: 'velocityResult' is possibly 'undefined'.
+src/modules/fraud/application/escalation.service.ts(217,17): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+  Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/modules/fraud/application/risk-scoring.engine.ts(18,5): error TS2305: Module '"../domain/risk-tiers"' has no exported member 'DIYANET_URS_BONUS'.
+src/modules/fraud/application/risk-scoring.engine.ts(100,14): error TS2339: Property 'isDiyanetVerified' does not exist on type '{ riskScore: { id: string; updatedAt: Date; userId: string; signals: JsonValue; tier: string; urs: number; behaviorScore: number; transactionScore: number; networkScore: number; ... 4 more ...; escalationCount: number; } | null; reviewsReceived: { ...; }[]; reviewsGiven: { ...; }[]; } & { ...; }'.
+src/modules/fraud/application/risk-scoring.engine.ts(329,25): error TS2322: Type 'string[]' is not assignable to type 'string'.
+src/modules/fraud/application/risk-scoring.engine.ts(336,25): error TS2322: Type 'string[]' is not assignable to type 'string'.
+src/modules/matching/application/LeadMatchingService.ts(64,85): error TS2345: Argument of type 'JsonValue' is not assignable to parameter of type 'string[]'.
+  Type 'null' is not assignable to type 'string[]'.
+src/modules/matching/application/LeadMatchingService.ts(105,17): error TS2353: Object literal may only specify known properties, and 'status' does not exist in type 'GuideListingWhereInput'.
+src/modules/matching/application/LeadMatchingService.ts(124,17): error TS2353: Object literal may only specify known properties, and 'slaMetrics' does not exist in type 'UserInclude<DefaultArgs>'.
+src/modules/matching/application/LeadMatchingService.ts(130,32): error TS2339: Property 'performanceTier' does not exist on type '{ id: string; email: string | null; name: string | null; emailVerified: Date | null; image: string | null; passwordHash: string | null; role: string | null; previousRole: string | null; ... 23 more ...; mutedUntil: Date | null; }'.
+src/modules/matching/application/LeadMatchingService.ts(131,36): error TS2339: Property 'slaMetrics' does not exist on type '{ id: string; email: string | null; name: string | null; emailVerified: Date | null; image: string | null; passwordHash: string | null; role: string | null; previousRole: string | null; ... 23 more ...; mutedUntil: Date | null; }'.
+src/modules/matching/application/LeadMatchingService.ts(131,80): error TS2339: Property 'slaMetrics' does not exist on type '{ id: string; email: string | null; name: string | null; emailVerified: Date | null; image: string | null; passwordHash: string | null; role: string | null; previousRole: string | null; ... 23 more ...; mutedUntil: Date | null; }'.
+src/modules/rankings/application/BoostGuardrailService.ts(2,30): error TS2307: Cannot find module '../tokens/TokenService' or its corresponding type declarations.
+src/modules/rankings/application/RankingService.ts(59,15): error TS2353: Object literal may only specify known properties, and 'packageType' does not exist in type 'GuideProfileSelect<DefaultArgs>'.
+src/modules/reviews/__tests__/domain.test.ts(43,11): error TS2339: Property 'toThrowError' does not exist on type 'JestMatchers<() => void>'.
+src/modules/reviews/__tests__/domain.test.ts(49,11): error TS2339: Property 'toThrowError' does not exist on type 'JestMatchers<() => void>'.
+src/modules/tokens/application/spotlight.service.ts(160,9): error TS2353: Object literal may only specify known properties, and 'idempotencyKey' does not exist in type 'SpendTokenInput'.
+src/modules/tokens/domain/token-policy.ts(24,15): error TS2741: Property 'LISTING_CREATE' is missing in type '{ OFFER_SEND: boolean; DEMAND_UNLOCK: boolean; BOOST: boolean; SPOTLIGHT: boolean; REPUBLISH: boolean; REFRESH: boolean; }' but required in type 'Record<"OFFER_SEND" | "DEMAND_UNLOCK" | "BOOST" | "REPUBLISH" | "LISTING_CREATE" | "SPOTLIGHT" | "REFRESH", boolean>'.
+src/modules/tokens/infrastructure/token.repository.ts(38,30): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type 'TokenTransactionWhereInput'.

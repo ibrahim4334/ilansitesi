@@ -1,0 +1,26 @@
+﻿app/api/admin/listings/[id]/route.ts(33,17): error TS2353: Object literal may only specify known properties, and 'targetType' does not exist in type '(Without<AdminAuditLogCreateInput, AdminAuditLogUncheckedCreateInput> & AdminAuditLogUncheckedCreateInput) | (Without<...> & AdminAuditLogCreateInput)'.
+app/dashboard/chats/page.tsx(92,29): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/dashboard/listings/new/page.tsx(386,71): error TS2339: Property 'name' does not exist on type '{ id: string; label: string; url: string; }'.
+app/dashboard/listings/new/page.tsx(388,121): error TS2339: Property 'name' does not exist on type '{ id: string; label: string; url: string; }'.
+app/dashboard/listings/page.tsx(222,34): error TS2322: Type '{ id: any; title: any; status: string; views: any; rating: any; reviewCount: any; price: string; approvalStatus: any; active: any; isFeatured: any; rejectionReason: any; thumbnail: any; }[]' is not assignable to type 'Listing[]'.
+  Type '{ id: any; title: any; status: string; views: any; rating: any; reviewCount: any; price: string; approvalStatus: any; active: any; isFeatured: any; rejectionReason: any; thumbnail: any; }' is not assignable to type 'Listing'.
+    Types of property 'status' are incompatible.
+      Type 'string' is not assignable to type '"active" | "rejected" | "pending" | "expired" | "draft"'.
+app/tours/[slug]/page.tsx(143,17): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/tours/[slug]/page.tsx(144,17): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/tours/[slug]/page.tsx(145,17): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+components/featured-tours.tsx(57,40): error TS2322: Type '{ id: string; title: string; city: string; departureCity: string; startDate: string; endDate: string; totalDays: number; price: number; guide: { fullName: string; city: string | undefined; isIdentityVerified: boolean; trustScore: number; package: string; }; isFeatured: boolean; posterImages: (string | undefined)[]; }' is not assignable to type '{ id: string; title: string; city: string; departureCity: string; airline?: string | undefined; startDate: string; endDate: string; totalDays: number; price: number; pricing?: { double: number; triple: number; quad: number; currency: string; } | undefined; ... 5 more ...; image?: string | undefined; }'.
+  Types of property 'posterImages' are incompatible.
+    Type '(string | undefined)[]' is not assignable to type 'string[]'.
+      Type 'string | undefined' is not assignable to type 'string'.
+        Type 'undefined' is not assignable to type 'string'.
+lib/expiration-service.ts(81,13): error TS2353: Object literal may only specify known properties, and 'featuredUntil' does not exist in type 'GuideListingWhereInput'.
+lib/expiration-service.ts(85,13): error TS2353: Object literal may only specify known properties, and 'featuredUntil' does not exist in type '(Without<GuideListingUpdateManyMutationInput, GuideListingUncheckedUpdateManyInput> & GuideListingUncheckedUpdateManyInput) | (Without<...> & GuideListingUpdateManyMutationInput)'.
+src/modules/analytics/application/MissedDemandService.ts(31,31): error TS2353: Object literal may only specify known properties, and 'status' does not exist in type 'GuideListingWhereInput'.
+src/modules/rankings/application/RankingService.ts(59,15): error TS2353: Object literal may only specify known properties, and 'packageType' does not exist in type 'GuideProfileSelect<DefaultArgs>'.
+src/modules/reviews/__tests__/domain.test.ts(43,11): error TS2339: Property 'toThrowError' does not exist on type 'JestMatchers<() => void>'.
+src/modules/reviews/__tests__/domain.test.ts(49,11): error TS2339: Property 'toThrowError' does not exist on type 'JestMatchers<() => void>'.

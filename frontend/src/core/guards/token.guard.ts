@@ -38,6 +38,7 @@ export async function requireTokens(
     // ── 1. Role permission ──────────────────────────────────────────
     const roleConfig = getRoleConfig(role);
     const actionPermissionMap: Record<TokenAction, boolean> = {
+        LISTING_CREATE: true,
         OFFER_SEND: roleConfig.canSendOffer,
         DEMAND_UNLOCK: roleConfig.canUnlockDemand,
         BOOST: roleConfig.canBoostListing,
@@ -77,7 +78,7 @@ export async function requireTokens(
         const todayCount = await prisma.tokenTransaction.count({
             where: {
                 userId,
-                type: action,
+                reasonCode: { contains: action },
                 createdAt: { gte: startOfDay },
             },
         });

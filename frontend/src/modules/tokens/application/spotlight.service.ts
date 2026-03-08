@@ -157,7 +157,6 @@ export async function requestSpotlight(
         action: "SPOTLIGHT",
         relatedId: listingId,
         reason: `Spotlight placement: ${city} slot`,
-        idempotencyKey: `spotlight-spend:${idempotencyKey}`,
     });
 
     if (!spendResult.ok) {

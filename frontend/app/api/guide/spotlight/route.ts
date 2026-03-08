@@ -25,7 +25,7 @@ export async function POST(req: Request) {
             .digest('hex');
 
         const result = await requestSpotlight(
-            session!.user.id,
+            session!.user.id!,
             listingId,
             city,
             idempotencyKey

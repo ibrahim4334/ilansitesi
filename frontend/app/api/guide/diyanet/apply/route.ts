@@ -53,7 +53,7 @@ export async function POST(req: Request) {
         }
 
         // Diyanet eligibility check
-        if (!PackageSystem.isIdentityVerifiedEligible(user.packageType)) {
+        if (!PackageSystem.isIdentityVerificationEligible(user.packageType)) {
             return NextResponse.json({
                 error: "Mevcut paketiniz Diyanet rozeti başvurusunu desteklemiyor",
             }, { status: 403 });

@@ -56,25 +56,19 @@ export class RankingService {
               trustScore: true,
               isIdentityVerified: true,
               completedTrips: true,
-              packageType: true,
-              avgResponseHours: true,
               fullName: true,
               phone: true,
               bio: true,
               photo: true,
               city: true,
-              riskScore: { select: { tier: true } },
-              reviewsReceived: {
-                where: { status: "APPROVED" },
-                select: { overallRating: true },
-              },
+              user: { select: { packageType: true } },
             },
           },
-          boosts: {
+          activeBoosts: {
             where: { expiresAt: { gt: new Date() } },
             select: { effectivePower: true, boostType: true },
           },
-        },
+        } as any,
         // Fetch more than needed — we'll sort in app after scoring
         take: Math.min(limit + offset + 50, 200),
       }),

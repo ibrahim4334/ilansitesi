@@ -8,9 +8,9 @@ import { rateLimit } from "@/lib/rate-limit";
 import { Prisma } from "@prisma/client";
 import { getRoleConfig } from "@/lib/role-config";
 import { safeErrorMessage } from "@/lib/safe-error";
-import { safeErrorMessage } from "@/lib/safe-error";
 import { calculateListingScore } from "@/lib/listing-ranking";
-import { spendToken, TOKEN_COSTS } from "@/src/modules/tokens";
+import { spendToken } from "@/src/modules/tokens";
+import { TOKEN_COSTS } from "@/lib/package-system";
 
 
 export async function GET(req: Request) {
@@ -46,11 +46,60 @@ export async function GET(req: Request) {
 
         let listings = await prisma.guideListing.findMany({
             where,
-            include: {
-                guide: { include: { user: true } },
-                departureCity: true,
-                airline: true,
-                tourDays: { orderBy: { day: 'asc' } }
+            select: {
+                // ── Core listing fields ──────────────────────────
+                id: true,
+                guideId: true,
+                title: true,
+                description: true,
+                city: true,
+                departureCityId: true,
+                departureCityOld: true,
+                meetingCity: true,
+                extraServices: true,
+                hotelName: true,
+                airlineId: true,
+                airlineOld: true,
+                pricingDouble: true,
+                pricingTriple: true,
+                pricingQuad: true,
+                pricingCurrency: true,
+                price: true,
+                quota: true,
+                filled: true,
+                active: true,
+                isFeatured: true,
+                startDate: true,
+                departureDateEnd: true,
+                endDate: true,
+                totalDays: true,
+                approvalStatus: true,
+                urgencyTag: true,
+                legalConsent: true,
+                consentTimestamp: true,
+                image: true,
+                createdAt: true,
+                updatedAt: true,
+                // ── Relations (only needed fields) ───────────────
+                departureCity: { select: { name: true } },
+                airline: { select: { name: true } },
+                tourDays: {
+                    orderBy: { day: 'asc' as const },
+                    select: { day: true, city: true, title: true, description: true },
+                },
+                guide: {
+                    select: {
+                        fullName: true,
+                        city: true,
+                        bio: true,
+                        photo: true,
+                        trustScore: true,
+                        completedTrips: true,
+                        package: true,
+                        // Only select isIdentityVerified from User — NOT all columns
+                        user: { select: { isIdentityVerified: true } },
+                    },
+                },
             },
             orderBy: [
                 { isFeatured: 'desc' },
@@ -292,9 +341,9 @@ export async function POST(req: Request) {
         try {
             await spendToken({
                 userId: user.id,
-                amount: TOKEN_COSTS.LISTING_CREATE,
-                type: 'LISTING_CREATE',
-                referenceId: `listing-create-${Date.now()}` // Will be updated to actual listing ID down below if preferred, or keep as timestamp
+                action: 'LISTING_CREATE',
+                relatedId: `listing-create-${Date.now()}`,
+                reason: 'Yeni ilan oluşturma',
             });
         } catch (error: any) {
             if (error.message.includes('Insufficient tickets') || error.message.includes('Insufficient balance')) {

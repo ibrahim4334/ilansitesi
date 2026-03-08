@@ -35,7 +35,7 @@ export class TokenRepository {
         startOfDay.setHours(0, 0, 0, 0);
 
         return prisma.tokenTransaction.count({
-            where: { userId, type, createdAt: { gte: startOfDay } },
+            where: { userId, reasonCode: { contains: type }, createdAt: { gte: startOfDay } },
         });
     }
 

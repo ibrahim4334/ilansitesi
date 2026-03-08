@@ -4,8 +4,9 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-guards";
 import { safeErrorMessage } from "@/lib/safe-error";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const session = await auth();
         const guard = requireAdmin(session);
         if (guard) return guard;
@@ -14,7 +15,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         const { title, price, quota, active, approvalStatus } = body;
 
         const updated = await prisma.guideListing.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 title,
                 price: price !== undefined ? Number(price) : undefined,
@@ -27,11 +28,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         // Add an audit log entry
         await prisma.adminAuditLog.create({
             data: {
-                adminId: session!.user.id,
+                adminId: session!.user.id ?? "",
                 action: "UPDATE_LISTING",
-                targetType: "LISTING",
-                targetId: params.id,
-                details: `Admin updated listing: ${title}, Price: ${price}, Active: ${active}, Status: ${approvalStatus}`,
+                targetId: id,
+                reason: `Admin updated listing: ${title}, Price: ${price}, Active: ${active}, Status: ${approvalStatus}`,
             }
         });
 

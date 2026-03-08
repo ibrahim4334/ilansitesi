@@ -1,0 +1,674 @@
+﻿
+> my-v0-project@0.1.0 build
+> next build
+
+node.exe : [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data
+, please update: `npm i baseline-browser-mapping@latest -D`
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([baseline-brows...ping@latest -D`:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   Ôû▓ Next.js 16.0.10 (Turbopack)
+   - Environments: .env.local, .env
+
+ ÔÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/me
+ssages/middleware-to-proxy
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please up
+date: `npm i baseline-browser-mapping@latest -D`
+ Ô£ô Compiled successfully in 88s
+   Running TypeScript ...
+   Collecting page data using 3 workers ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please up
+date: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please up
+date: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please up
+date: `npm i baseline-browser-mapping@latest -D`
+CRITICAL: STRIPE_SECRET_KEY is not defined. Payments will fail.
+   Generating static pages using 3 workers (0/101) ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please up
+date: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please up
+date: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please up
+date: `npm i baseline-browser-mapping@latest -D`
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/analytics couldn't be rendered statically beca
+use it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/analytics couldn't be rendered statically because it used `headers`. See more info her
+e: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /admin/dashboard couldn't be rendered statically because 
+it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /admin/dashboard couldn't be rendered statically because it used `headers`. See more info here: h
+ttps://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages using 3 workers (25/101) 
+Auth failed in RootLayout: Error: Dynamic server usage: Route /cookies couldn't be rendered statically because it used 
+`headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /cookies couldn't be rendered statically because it used `headers`. See more info here: https://n
+extjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/billing couldn't be rendered statically becaus
+e it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/billing couldn't be rendered statically because it used `headers`. See more info here:
+ https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/chats couldn't be rendered statically because 
+it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/chats couldn't be rendered statically because it used `headers`. See more info here: h
+ttps://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/campaigns couldn't be rendered statically beca
+use it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/campaigns couldn't be rendered statically because it used `headers`. See more info her
+e: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/credits couldn't be rendered statically becaus
+e it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/credits couldn't be rendered statically because it used `headers`. See more info here:
+ https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/listings/new couldn't be rendered statically b
+ecause it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/listings/new couldn't be rendered statically because it used `headers`. See more info 
+here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /about couldn't be rendered statically because it used `h
+eaders`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /about couldn't be rendered statically because it used `headers`. See more info here: https://nex
+tjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /_not-found couldn't be rendered statically because it us
+ed `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /_not-found couldn't be rendered statically because it used `headers`. See more info here: https:
+//nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/listings couldn't be rendered statically becau
+se it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/listings couldn't be rendered statically because it used `headers`. See more info here
+: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /admin/messages couldn't be rendered statically because i
+t used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /admin/messages couldn't be rendered statically because it used `headers`. See more info here: ht
+tps://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/market couldn't be rendered statically because
+ it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/market couldn't be rendered statically because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages using 3 workers (50/101) 
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/messages couldn't be rendered statically becau
+se it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/messages couldn't be rendered statically because it used `headers`. See more info here
+: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard couldn't be rendered statically because it use
+d `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard couldn't be rendered statically because it used `headers`. See more info here: https:/
+/nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/posters couldn't be rendered statically becaus
+e it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/posters couldn't be rendered statically because it used `headers`. See more info here:
+ https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/profile couldn't be rendered statically becaus
+e it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/profile couldn't be rendered statically because it used `headers`. See more info here:
+ https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/requests/new couldn't be rendered statically b
+ecause it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/requests/new couldn't be rendered statically because it used `headers`. See more info 
+here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/requests couldn't be rendered statically becau
+se it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/requests couldn't be rendered statically because it used `headers`. See more info here
+: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /dashboard/settings couldn't be rendered statically becau
+se it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /dashboard/settings couldn't be rendered statically because it used `headers`. See more info here
+: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /guide/onboarding couldn't be rendered statically because
+ it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /guide/onboarding couldn't be rendered statically because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /guide/profile couldn't be rendered statically because it
+ used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /guide/profile couldn't be rendered statically because it used `headers`. See more info here: htt
+ps://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /faq couldn't be rendered statically because it used `hea
+ders`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /faq couldn't be rendered statically because it used `headers`. See more info here: https://nextj
+s.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /help couldn't be rendered statically because it used `he
+aders`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /help couldn't be rendered statically because it used `headers`. See more info here: https://next
+js.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /listing-terms couldn't be rendered statically because it
+ used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /listing-terms couldn't be rendered statically because it used `headers`. See more info here: htt
+ps://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /login couldn't be rendered statically because it used `h
+eaders`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /login couldn't be rendered statically because it used `headers`. See more info here: https://nex
+tjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /kvkk couldn't be rendered statically because it used `he
+aders`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /kvkk couldn't be rendered statically because it used `headers`. See more info here: https://next
+js.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /onboarding couldn't be rendered statically because it us
+ed `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /onboarding couldn't be rendered statically because it used `headers`. See more info here: https:
+//nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages using 3 workers (75/101) 
+Auth failed in RootLayout: Error: Dynamic server usage: Route / couldn't be rendered statically because it used `header
+s`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route / couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.o
+rg/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /privacy couldn't be rendered statically because it used 
+`headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /privacy couldn't be rendered statically because it used `headers`. See more info here: https://n
+extjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /refund-policy couldn't be rendered statically because it
+ used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /refund-policy couldn't be rendered statically because it used `headers`. See more info here: htt
+ps://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /org/onboarding couldn't be rendered statically because i
+t used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /org/onboarding couldn't be rendered statically because it used `headers`. See more info here: ht
+tps://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /request couldn't be rendered statically because it used 
+`headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /request couldn't be rendered statically because it used `headers`. See more info here: https://n
+extjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /reset-password couldn't be rendered statically because i
+t used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /reset-password couldn't be rendered statically because it used `headers`. See more info here: ht
+tps://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /terms couldn't be rendered statically because it used `h
+eaders`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /terms couldn't be rendered statically because it used `headers`. See more info here: https://nex
+tjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /tours couldn't be rendered statically because it used `h
+eaders`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /tours couldn't be rendered statically because it used `headers`. See more info here: https://nex
+tjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+CRITICAL: STRIPE_SECRET_KEY is not defined. Payments will fail.
+Auth failed in RootLayout: Error: Dynamic server usage: Route /auth/verify couldn't be rendered statically because it u
+sed `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /auth/verify couldn't be rendered statically because it used `headers`. See more info here: https
+://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /contact couldn't be rendered statically because it used 
+`headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /contact couldn't be rendered statically because it used `headers`. See more info here: https://n
+extjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Auth failed in RootLayout: Error: Dynamic server usage: Route /consent couldn't be rendered statically because it used 
+`headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._.js:12:4
+1062)
+    at <unknown> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\_7f308e5a._
+.js:415:57734)
+    at m (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\.next\server\chunks\ssr\[root-of-the-server
+]__e3c74b13._.js:1:18006)
+    at stringify (<anonymous>) {
+  description: "Route /consent couldn't be rendered statically because it used `headers`. See more info here: https://n
+extjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+ Ô£ô Generating static pages using 3 workers (101/101) in 7.1s
+   Finalizing page optimization ...
+
+Route (app)
+Ôöî ãÆ /
+Ôö£ ãÆ /_not-found
+Ôö£ ãÆ /[slug]
+Ôö£ ãÆ /about
+Ôö£ ãÆ /admin/dashboard
+Ôö£ ãÆ /admin/messages
+Ôö£ ãÆ /api/admin/approve-listing
+Ôö£ ãÆ /api/admin/audit-logs
+Ôö£ ãÆ /api/admin/ban
+Ôö£ ãÆ /api/admin/conversations
+Ôö£ ãÆ /api/admin/conversations/[id]
+Ôö£ ãÆ /api/admin/credits
+Ôö£ ãÆ /api/admin/diyanet
+Ôö£ ãÆ /api/admin/fraud
+Ôö£ ãÆ /api/admin/kyc/[id]
+Ôö£ ãÆ /api/admin/listings
+Ôö£ ãÆ /api/admin/listings/[id]
+Ôö£ ãÆ /api/admin/mute
+Ôö£ ãÆ /api/admin/pending-listings
+Ôö£ ãÆ /api/admin/refund
+Ôö£ ãÆ /api/admin/reject-listing
+Ôö£ ãÆ /api/admin/requests
+Ôö£ ãÆ /api/admin/reviews
+Ôö£ ãÆ /api/admin/reviews/[id]
+Ôö£ ãÆ /api/airlines
+Ôö£ ãÆ /api/auth/[...nextauth]
+Ôö£ ãÆ /api/auth/register
+Ôö£ ãÆ /api/auth/reset-password
+Ôö£ ãÆ /api/auth/verify
+Ôö£ ãÆ /api/billing/checkout
+Ôö£ ãÆ /api/chat/conversations
+Ôö£ ãÆ /api/chat/message
+Ôö£ ãÆ /api/chat/messages
+Ôö£ ãÆ /api/chat/messages/[conversationId]
+Ôö£ ãÆ /api/chat/thread
+Ôö£ ãÆ /api/chat/threads
+Ôö£ ãÆ /api/choose-role
+Ôö£ ãÆ /api/cities
+Ôö£ ãÆ /api/complete-profile
+Ôö£ ãÆ /api/cron/cleanup
+Ôö£ ãÆ /api/cron/expire-listings
+Ôö£ ãÆ /api/cron/reconcile-payments
+Ôö£ ãÆ /api/dev-login-link
+Ôö£ ãÆ /api/guide/auto-replenish
+Ôö£ ãÆ /api/guide/complete-trip
+Ôö£ ãÆ /api/guide/credits
+Ôö£ ãÆ /api/guide/diyanet/apply
+Ôö£ ãÆ /api/guide/feature
+Ôö£ ãÆ /api/guide/listing
+Ôö£ ãÆ /api/guide/my-listings
+Ôö£ ãÆ /api/guide/offer
+Ôö£ ãÆ /api/guide/offers
+Ôö£ ãÆ /api/guide/profile
+Ôö£ ãÆ /api/guide/republish
+Ôö£ ãÆ /api/guide/spotlight
+Ôö£ ãÆ /api/guide/topup
+Ôö£ ãÆ /api/guides/[id]/reviews
+Ôö£ ãÆ /api/listings
+Ôö£ ãÆ /api/listings/[id]
+Ôö£ ãÆ /api/listings/join
+Ôö£ ãÆ /api/listings/pdf
+Ôö£ ãÆ /api/onboarding/claim-tokens
+Ôö£ ãÆ /api/requests
+Ôö£ ãÆ /api/requests/[id]
+Ôö£ ãÆ /api/requests/favorite
+Ôö£ ãÆ /api/requests/interest
+Ôö£ ãÆ /api/reviews
+Ôö£ ãÆ /api/set-role
+Ôö£ ãÆ /api/stats
+Ôö£ ãÆ /api/stripe/webhook
+Ôö£ ãÆ /api/upload
+Ôö£ ãÆ /api/user/change-password
+Ôö£ ãÆ /api/user/request-close
+Ôö£ ãÆ /api/user/requests
+Ôö£ ãÆ /api/user/settings
+Ôö£ ãÆ /auth/verify
+Ôö£ ãÆ /consent
+Ôö£ ãÆ /contact
+Ôö£ ãÆ /cookies
+Ôö£ ãÆ /dashboard
+Ôö£ ãÆ /dashboard/analytics
+Ôö£ ãÆ /dashboard/billing
+Ôö£ ãÆ /dashboard/campaigns
+Ôö£ ãÆ /dashboard/chats
+Ôö£ ãÆ /dashboard/credits
+Ôö£ ãÆ /dashboard/listings
+Ôö£ ãÆ /dashboard/listings/new
+Ôö£ ãÆ /dashboard/market
+Ôö£ ãÆ /dashboard/messages
+Ôö£ ãÆ /dashboard/posters
+Ôö£ ãÆ /dashboard/profile
+Ôö£ ãÆ /dashboard/requests
+Ôö£ ãÆ /dashboard/requests/[id]
+Ôö£ ãÆ /dashboard/requests/[id]/edit
+Ôö£ ãÆ /dashboard/requests/new
+Ôö£ ãÆ /dashboard/settings
+Ôö£ ãÆ /faq
+Ôö£ ãÆ /guide/onboarding
+Ôö£ ãÆ /guide/profile
+Ôö£ ãÆ /help
+Ôö£ ãÆ /kvkk
+Ôö£ ãÆ /listing-terms
+Ôö£ ãÆ /listings/[id]
+Ôö£ ãÆ /login
+Ôö£ ãÆ /onboarding
+Ôö£ ãÆ /org/onboarding
+Ôö£ ãÆ /organizers/[id]
+Ôö£ ãÆ /privacy
+Ôö£ ãÆ /refund-policy
+Ôö£ ãÆ /request
+Ôö£ ãÆ /reset-password
+Ôö£ Ôùï /sitemap.xml
+Ôö£ ãÆ /terms
+Ôö£ ãÆ /tours
+Ôöö ãÆ /tours/[slug]
+
+
+ãÆ Proxy (Middleware)
+
+Ôùï  (Static)   prerendered as static content
+ãÆ  (Dynamic)  server-rendered on demand
+

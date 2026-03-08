@@ -40,13 +40,13 @@ describe("ReviewPolicy", () => {
     it("should throw on invalid tag", () => {
         expect(() =>
             ReviewPolicy.validateTags(["Hacker tag"], [])
-        ).toThrowError(/Invalid positive tags: Hacker tag/);
+        ).toThrow(/Invalid positive tags: Hacker tag/);
     });
 
     it("should throw on out of bounds rating", () => {
         expect(() =>
             ReviewPolicy.validateRatings(0, 5, 5, 5)
-        ).toThrowError(/Rating must be an integer between 1 and 5/);
+        ).toThrow(/Rating must be an integer between 1 and 5/);
     });
 
     it("should identify extreme ratings", () => {

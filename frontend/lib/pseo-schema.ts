@@ -34,9 +34,10 @@ export const PseoSchemaGenerator = {
     },
 
     // 2. AggregateRating for Category Pages (e.g., "Mekke Turları")
-    generateCategoryRating(reviewCount: number, averageRating: number) {
+    generateCategoryRating(reviewCount: number, averageRating: number, minPrice?: number) {
         if (reviewCount === 0) return null;
-        return {
+
+        const schema: any = {
             "@context": "https://schema.org",
             "@type": "Product",
             "name": "Umre Turları",
@@ -48,6 +49,17 @@ export const PseoSchemaGenerator = {
                 "worstRating": "1"
             }
         };
+
+        if (minPrice && minPrice > 0) {
+            schema.offers = {
+                "@type": "AggregateOffer",
+                "priceCurrency": "SAR",
+                "lowPrice": minPrice.toString(),
+                "offerCount": reviewCount.toString() // Approximating offer count with review count for simplicity if needed
+            };
+        }
+
+        return schema;
     },
 
     // 3. Product/Offer Schema for Individual Listings

@@ -17,11 +17,11 @@ export class AgencyAnalyticsService {
         // A single guide might have multiple listings, but for FREE it's just 1.
         const listings = await prisma.guideListing.findMany({
             where: { guideId },
-            select: { id: true, packageType: true }
+            select: { id: true, guide: { select: { user: { select: { packageType: true } } } } }
         });
 
         const listingIds = listings.map(l => l.id);
-        const pkg = listings[0]?.packageType || "FREE";
+        const pkg = listings[0]?.guide?.user?.packageType || "FREE";
 
         // Aggregate core numbers
         const impressions = await prisma.listingImpression.count({
@@ -80,7 +80,7 @@ export class AgencyAnalyticsService {
     static async getLocalRankingStatus(guideId: string) {
         // Find their active listing and city
         const activeListing = await prisma.guideListing.findFirst({
-            where: { guideId, status: "PUBLISHED" },
+            where: { guideId, approvalStatus: "APPROVED", active: true },
             include: { guide: true }
         });
 

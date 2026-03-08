@@ -65,7 +65,7 @@ export async function enforceRiskGate(
     // (4) Velocity check (if applicable)
     let velocityResult: VelocityCheckResult | undefined;
     if (velocityAction) {
-        velocityResult = checkVelocity(userId, velocityAction);
+        velocityResult = await checkVelocity(userId, velocityAction);
 
         if (velocityResult.response === "BLOCK") {
             return {

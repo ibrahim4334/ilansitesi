@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { TokenService } from "../tokens/TokenService"; // Adjust this import based on actual file path
+import { TokenService } from "../../tokens/application/TokenService";
 import { getVelocityCount, checkVelocity } from "../../fraud/infrastructure/velocity-counter";
-// NOTE: Recheck the exact import path to TokenService when integrating
 
 export class BoostGuardrailService {
     /**

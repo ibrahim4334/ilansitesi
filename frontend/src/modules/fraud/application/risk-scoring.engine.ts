@@ -15,7 +15,7 @@ import {
 } from "../domain/risk-signals";
 import {
     getTierFromScore,
-    DIYANET_URS_BONUS,
+    IDENTITY_URS_BONUS as DIYANET_URS_BONUS,
     TRUSTED_GUIDE_URS_BONUS,
     ESCALATION_THRESHOLD,
     AUTO_SUSPEND_THRESHOLD,
@@ -97,7 +97,7 @@ export async function computeUserRiskScore(userId: string): Promise<ScoringResul
 
     // ── Apply bonuses (negative = reduces risk) ─────────────────────
 
-    if (user.isDiyanetVerified) {
+    if ((user as any).isIdentityVerified || user.isApproved) {
         urs += DIYANET_URS_BONUS;
     }
 
@@ -105,7 +105,7 @@ export async function computeUserRiskScore(userId: string): Promise<ScoringResul
         ? user.reviewsReceived.reduce((sum, r) => sum + Number(r.overallRating), 0) / user.reviewsReceived.length
         : 0;
 
-    if (user.completedTrips > 10 && avgRating > 4) {
+    if (user.reviewsReceived.length > 10 && avgRating > 4) {
         urs += TRUSTED_GUIDE_URS_BONUS;
     }
 
@@ -326,14 +326,14 @@ async function computeHistoryScore(userId: string, user: any, snapshot: SignalSn
         where: {
             userId,
             eventType: "TIER_CHANGE",
-            metadata: { path: ["newTier"], string_contains: "RED" },
+            metadata: { path: ["newTier"], string_contains: "RED" } as any,
         },
     });
     const pastSuspension = await prisma.riskEvent.count({
         where: {
             userId,
             eventType: "TIER_CHANGE",
-            metadata: { path: ["newTier"], string_contains: "BLACK" },
+            metadata: { path: ["newTier"], string_contains: "BLACK" } as any,
         },
     });
     score += evaluateSignal(HISTORY_SIGNALS[0], pastEnforcement + pastSuspension > 0 ? 1 : 0, snapshot);

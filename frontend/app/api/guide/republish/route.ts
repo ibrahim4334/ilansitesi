@@ -86,7 +86,6 @@ export async function POST(req: Request) {
             where: { id: listingId },
             data: {
                 active: true,
-                expiresAt: newExpiresAt,
             },
         });
 

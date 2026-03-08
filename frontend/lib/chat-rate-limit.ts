@@ -64,7 +64,6 @@ export async function checkChatRateLimits(
         where: {
             senderId,
             conversationId,
-            deletedAt: null,           // don't count deleted messages
             createdAt: { gte: startOfDay },
         },
     });

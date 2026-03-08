@@ -1,0 +1,57 @@
+﻿node.exe : Error: Cannot find module '@playwright/test'
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Error: Cannot f...laywright/test':String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Require stack:
+- D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\playwright.config.ts
+- C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_modules\playwright\lib\transform\transform.js
+- C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_modules\playwright\lib\common\configLoader.js
+- C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_modules\playwright\lib\program.js
+- C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_modules\playwright\cli.js
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1456:15)
+    at Module.resolveFilename [as _resolveFilename] (C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_m
+odules\playwright\lib\transform\transform.js:247:36)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1242:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1556:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (D:\Yeni klas├Âr\Yeni klas├Âr (3)\umre\kurulum\umrebuldum\frontend\playwright.config.ts:1:1)
+    at Module._compile (node:internal/modules/cjs/loader:1812:14)
+    at Module.newCompile2 (C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_modules\playwright\lib\thir
+d_party\pirates.js:46:29)
+    at Object.<anonymous> (node:internal/modules/cjs/loader:1943:10)
+    at Object.newLoader2 [as .ts] (C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_modules\playwright\
+lib\third_party\pirates.js:52:22)
+    at Module.load (node:internal/modules/cjs/loader:1533:32)
+    at Module._load (node:internal/modules/cjs/loader:1335:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1556:12)
+    at require (node:internal/modules/helpers:152:16)
+    at requireOrImport (C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_modules\playwright\lib\transfo
+rm\transform.js:225:18)
+    at loadUserConfig (C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_modules\playwright\lib\common\c
+onfigLoader.js:107:89)
+    at loadConfig (C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_modules\playwright\lib\common\confi
+gLoader.js:119:28)
+    at loadConfigFromFile (C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_modules\playwright\lib\comm
+on\configLoader.js:331:10)
+    at runTests (C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_modules\playwright\lib\program.js:197
+:18)
+    at i.<anonymous> (C:\Users\ASUS\AppData\Local\npm-cache\_npx\e41f203b7505f1fb\node_modules\playwright\lib\program.j
+s:70:7) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'D:\\Yeni klas├Âr\\Yeni klas├Âr (3)\\umre\\kurulum\\umrebuldum\\frontend\\playwright.config.ts',
+    'C:\\Users\\ASUS\\AppData\\Local\\npm-cache\\_npx\\e41f203b7505f1fb\\node_modules\\playwright\\lib\\transform\\tran
+sform.js',
+    'C:\\Users\\ASUS\\AppData\\Local\\npm-cache\\_npx\\e41f203b7505f1fb\\node_modules\\playwright\\lib\\common\\configL
+oader.js',
+    'C:\\Users\\ASUS\\AppData\\Local\\npm-cache\\_npx\\e41f203b7505f1fb\\node_modules\\playwright\\lib\\program.js',
+    'C:\\Users\\ASUS\\AppData\\Local\\npm-cache\\_npx\\e41f203b7505f1fb\\node_modules\\playwright\\cli.js'
+  ]
+}

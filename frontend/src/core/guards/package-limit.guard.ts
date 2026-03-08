@@ -19,8 +19,8 @@ export async function checkListingLimit(
     userId: string,
     packageType: string,
 ): Promise<PackageGuardResult> {
-    const activeCount = await prisma.listing.count({
-        where: { ownerId: userId, status: "ACTIVE", deletedAt: null },
+    const activeCount = await prisma.guideListing.count({
+        where: { guideId: userId, active: true, deletedAt: null },
     });
     const limits = PackageSystem.getLimits(packageType);
 
@@ -76,11 +76,11 @@ export async function checkDailyCap(
     } else if (action === "boosts" || action === "spotlights") {
         const type = action === "boosts" ? "BOOST" : "SPOTLIGHT";
         todayCount = await prisma.tokenTransaction.count({
-            where: { userId, type, createdAt: { gte: startOfDay } },
+            where: { userId, reasonCode: { contains: type }, createdAt: { gte: startOfDay } },
         });
     } else if (action === "unlocks") {
         todayCount = await prisma.tokenTransaction.count({
-            where: { userId, type: "DEMAND_UNLOCK", createdAt: { gte: startOfDay } },
+            where: { userId, reasonCode: { contains: "DEMAND_UNLOCK" }, createdAt: { gte: startOfDay } },
         });
     }
 
@@ -121,11 +121,10 @@ export async function checkBoostLimit(
         };
     }
 
-    const activeBoosted = await prisma.listing.count({
+    const activeBoosted = await prisma.activeBoost.count({
         where: {
-            ownerId: userId,
-            isFeatured: true,
-            featuredUntil: { gt: new Date() },
+            userId,
+            expiresAt: { gt: new Date() },
         },
     });
 

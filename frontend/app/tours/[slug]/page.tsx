@@ -140,9 +140,9 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
 
               {/* Emergency Info */}
               <EmergencyInfo
-                guideName={tour.guide_name}
-                guidePhone={tour.guide_phone}
-                agencyName={tour.agency_name}
+                guideName={tour.guide_name ?? ""}
+                guidePhone={tour.guide_phone ?? ""}
+                agencyName={tour.agency_name ?? ""}
               />
             </div>
           </div>
